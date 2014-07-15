@@ -25,11 +25,11 @@ class Machine:
         print('Connecting to',self.host)
         subprocess.call(['./transfer_git.sh',self.host])
     def execute(self,command):
-        ssh_command = ['ssh','-i',daala_root+'/tools/daala.pem','-o',' StrictHostKeyChecking=no',command]
+        ssh_command = ['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no',command]
     def upload(self,filename):
         basename = os.path.basename(filename)
         print('Uploading',basename)
-        subprocess.call(['scp','-i',daala_root+'/tools/daala.pem','-o',' StrictHostKeyChecking=no',filename,'ec2-user@'+self.host+':/home/ec2-user/video/'+basename])
+        subprocess.call(['scp','-i','daala.pem','-o',' StrictHostKeyChecking=no',filename,'ec2-user@'+self.host+':/home/ec2-user/video/'+basename])
 
 class Slot:
     def __init__(self, machine=None):
@@ -44,9 +44,9 @@ class Slot:
         env['x'] = str(work.quality)
         print('Encoding',work.filename,'with quality',work.quality)
         if self.machine is None:
-            self.p = subprocess.Popen([daala_root+'/tools/metrics_gather.sh',work.filename], env=env, stdout=subprocess.PIPE)
+            self.p = subprocess.Popen(['metrics_gather.sh',work.filename], env=env, stdout=subprocess.PIPE)
         else:
-            self.p = subprocess.Popen(['ssh','-i',daala_root+'/tools/daala.pem','-o',' StrictHostKeyChecking=no','ec2-user@'+self.machine.host,'DAALA_ROOT=/home/ec2-user/daala/ x='+str(work.quality)+' /home/ec2-user/daala/tools/metrics_gather.sh /home/ec2-user/video/'+os.path.basename(work.filename)], env=env, stdout=subprocess.PIPE)
+            self.p = subprocess.Popen(['ssh','-i',daala_root+'/tools/daala.pem','-o',' StrictHostKeyChecking=no','ec2-user@'+self.machine.host,'DAALA_ROOT=/home/ec2-user/daala/ x='+str(work.quality)+' /home/ec2-user/rd_tool/metrics_gather.sh /home/ec2-user/video/'+os.path.basename(work.filename)], env=env, stdout=subprocess.PIPE)
     def busy(self):
         if self.p is None:
             return False
@@ -82,9 +82,11 @@ class Work:
             self.metric["fastssim"][0] = split[30]
             self.metric["fastssim"][1] = split[32]
             self.metric["fastssim"][2] = split[34]
+            self.failed = False
         except IndexError:
             print('Decoding result data failed! Result was:')
             print(split)
+            self.failed = True
         
 quality_daala = [1,2,3,4,5,6,7,9,11,13,16,20,25,30,37,45,55,67,81,99,122,148,181,221,270,330,400,500]
 
@@ -166,13 +168,14 @@ work_done.sort(key=lambda work: work.quality)
 f = open(args.file+'-daala.out','w')
 for work in work_done:
     work.parse()
-    f.write(str(work.quality)+' ')
-    f.write(str(work.pixels)+' ')
-    f.write(str(work.size)+' ')
-    f.write(str(work.metric['psnr'][0])+' ')
-    f.write(str(work.metric['psnrhvs'][0])+' ')
-    f.write(str(work.metric['ssim'][0])+' ')
-    f.write(str(work.metric['fastssim'][0])+' ')
-    f.write('\n')
+    if not work.failed:
+        f.write(str(work.quality)+' ')
+        f.write(str(work.pixels)+' ')
+        f.write(str(work.size)+' ')
+        f.write(str(work.metric['psnr'][0])+' ')
+        f.write(str(work.metric['psnrhvs'][0])+' ')
+        f.write(str(work.metric['ssim'][0])+' ')
+        f.write(str(work.metric['fastssim'][0])+' ')
+        f.write('\n')
 f.close()
 
