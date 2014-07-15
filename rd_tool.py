@@ -142,7 +142,7 @@ for quality in quality_daala:
     work_items.append(work)
     
 if len(free_slots) < 1:
-    print('No slots available for work!')
+    print('No slots available for work! Use either --amazon or --local')
     sys.exit(1)
 
 while(1):
