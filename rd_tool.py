@@ -11,6 +11,7 @@ import time
 import multiprocessing
 import boto.ec2.autoscale
 from pprint import pprint
+import json
 
 if 'DAALA_ROOT' not in os.environ:
     print("Please specify the DAALA_ROOT environment variable to use this tool.")
@@ -39,14 +40,17 @@ class Slot:
     def execute(self, work):
         self.work = work
         output_name = work.filename+'.'+str(work.quality)+'.ogv'
+        input_path = '/home/ec2-user/sets/'+self.work.set+'/'+self.work.filename
         env = {}
         env['DAALA_ROOT'] = daala_root
         env['x'] = str(work.quality)
         print('Encoding',work.filename,'with quality',work.quality)
         if self.machine is None:
+            print('No support for local execution.')
+            sys.exit(1)
             self.p = subprocess.Popen(['metrics_gather.sh',work.filename], env=env, stdout=subprocess.PIPE)
         else:
-            self.p = subprocess.Popen(['ssh','-i',daala_root+'/tools/daala.pem','-o',' StrictHostKeyChecking=no','ec2-user@'+self.machine.host,'DAALA_ROOT=/home/ec2-user/daala/ x='+str(work.quality)+' /home/ec2-user/rd_tool/metrics_gather.sh /home/ec2-user/video/'+os.path.basename(work.filename)], env=env, stdout=subprocess.PIPE)
+            self.p = subprocess.Popen(['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no','ec2-user@'+self.machine.host,'DAALA_ROOT=/home/ec2-user/daala/ x='+str(work.quality)+' /home/ec2-user/rd_tool/metrics_gather.sh '+input_path], env=env, stdout=subprocess.PIPE)
     def busy(self):
         if self.p is None:
             return False
@@ -57,6 +61,11 @@ class Slot:
     def gather(self):
         (stdout, stderr) = self.p.communicate()
         self.work.raw = stdout
+        self.work.parse()
+        if self.work.failed == True:
+            print('Failure in machine',self.machine.host)
+            print('Script cannot continue.')
+            sys.exit(1)
 
 class Work:
     def parse(self):
@@ -90,7 +99,7 @@ class Work:
         
 quality_daala = [1,2,3,4,5,6,7,9,11,13,16,20,25,30,37,45,55,67,81,99,122,148,181,221,270,330,400,500]
 
-free_slots = [Slot(),Slot(),Slot(),Slot()]
+free_slots = []
 taken_slots = []
 
 work_items = []
@@ -98,13 +107,19 @@ work_done = []
 
 machines = []
 
+video_sets_f = open('sets.json','r')
+video_sets = json.load(video_sets_f)
+
 parser = argparse.ArgumentParser(description='Collect RD curve data.')
-parser.add_argument('file', metavar='*.y4m')
-parser.add_argument('--amazon',action='store_true')
-parser.add_argument('--local')
+parser.add_argument('set',metavar='Video set name')
 args = parser.parse_args()
 
-if args.amazon:
+if args.set not in video_sets:
+    print('Specified invalid set. Available sets are:')
+    for video_set in video_sets:
+        print(video_set)
+
+if 1:
     print('Launching instances...')
     autoscale = boto.ec2.autoscale.AutoScaleConnection();
     ec2 = boto.ec2.connect_to_region('us-west-2');
@@ -131,18 +146,19 @@ if args.amazon:
         machines.append(Machine(instance.ip_address))
     for machine in machines:
         machine.setup()
-        machine.upload(args.file)
         for i in range(0,32):
             free_slots.append(Slot(machine))
 
-for quality in quality_daala:
-    work = Work()
-    work.quality = quality
-    work.filename = args.file
-    work_items.append(work)
+for filename in video_sets[args.set]:
+    for quality in quality_daala:
+        work = Work()
+        work.quality = quality
+        work.set = args.set
+        work.filename = filename 
+        work_items.append(work)
     
 if len(free_slots) < 1:
-    print('No slots available for work! Use either --amazon or --local')
+    print('All AWS machines are down.')
     sys.exit(1)
 
 while(1):
@@ -165,10 +181,10 @@ while(1):
     
 work_done.sort(key=lambda work: work.quality)
     
-f = open(args.file+'-daala.out','w')
 for work in work_done:
     work.parse()
     if not work.failed:
+        f = open(work.filename+'-daala.out','a')
         f.write(str(work.quality)+' ')
         f.write(str(work.pixels)+' ')
         f.write(str(work.size)+' ')
@@ -177,5 +193,5 @@ for work in work_done:
         f.write(str(work.metric['ssim'][0])+' ')
         f.write(str(work.metric['fastssim'][0])+' ')
         f.write('\n')
-f.close()
+        f.close()
 
