@@ -99,7 +99,7 @@ work_done = []
 machines = []
 
 parser = argparse.ArgumentParser(description='Collect RD curve data.')
-parser.add_argument('file')
+parser.add_argument('file', metavar='*.y4m')
 parser.add_argument('--amazon',action='store_true')
 parser.add_argument('--local')
 args = parser.parse_args()
