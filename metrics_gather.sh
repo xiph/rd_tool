@@ -31,6 +31,11 @@ WIDTH=$(head -1 $FILE | cut -d\  -f 2 | tr -d 'W')
 HEIGHT=$(head -1 $FILE | cut -d\  -f 3 | tr -d 'H')
 
 OD_LOG_MODULES='encoder:10' OD_DUMP_IMAGES_SUFFIX=$BASENAME $ENCODER_EXAMPLE -k 256 -v $x $FILE -o $BASENAME.ogv 2> $BASENAME-enc.out
+if [ ! -f $BASENAME.ogv ]
+then
+echo Failed to produce $BASENAME.ogv
+exit 1
+fi
   SIZE=$(stat -c %s $BASENAME.ogv)
   $DUMP_PSNR $FILE 00000000out-$BASENAME.y4m > $BASENAME-psnr.out 2> /dev/null
   FRAMES=$(cat $BASENAME-psnr.out | grep ^0 | wc -l)

@@ -146,7 +146,7 @@ if 1:
         machines.append(Machine(instance.ip_address))
     for machine in machines:
         machine.setup()
-        for i in range(0,32):
+        for i in range(0,16):
             free_slots.append(Slot(machine))
 
 for filename in video_sets[args.set]:
