@@ -142,6 +142,12 @@ if 1:
             instance.update()
             if instance.state == 'running':
                 break
+    for instance_id in instance_ids:
+        print('Waiting for instance',instance_id,'to report green...')
+        while 1:
+            status = ec2.get_all_instance_status([instance_id])[0]
+            if status.instance_status.status == 'ok':
+                break
     for instance in instances:
         machines.append(Machine(instance.ip_address))
     for machine in machines:
