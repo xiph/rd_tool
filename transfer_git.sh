@@ -36,4 +36,4 @@ $SSH ec2-user@$1 "cd daala; git reset --hard; git checkout $branch" > /dev/null
 
 echo Building...
 
-$SSH ec2-user@$1 "cd daala ; ./autogen.sh ; PKG_CONFIG_PATH=/usr/local/lib/pkgconfig ./configure --disable-player --disable-dump-images --enable-logging --enable-dump-recons ; make -j4 ; make tools -j4" > /dev/null
+$SSH ec2-user@$1 "cd daala ; ./autogen.sh ; PKG_CONFIG_PATH=/usr/local/lib/pkgconfig ./configure --disable-player --disable-dump-images --enable-logging --enable-dump-recons ; make -j16 ; make tools -j16" > /dev/null
