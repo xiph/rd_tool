@@ -53,7 +53,7 @@ class Slot:
             sys.exit(1)
             self.p = subprocess.Popen(['metrics_gather.sh',work.filename], env=env, stdout=subprocess.PIPE)
         else:
-            self.p = subprocess.Popen(['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no','ec2-user@'+self.machine.host,'DAALA_ROOT=/home/ec2-user/daala/ x="'+str(work.quality)+'" /home/ec2-user/rd_tool/metrics_gather.sh '+shellquote(input_path)], env=env, stdout=subprocess.PIPE)
+            self.p = subprocess.Popen(['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no','ec2-user@'+self.machine.host,'DAALA_ROOT=/home/ec2-user/daala/ x="'+str(work.quality)+'" CODEC="'+args.codec+'" /home/ec2-user/rd_tool/metrics_gather.sh '+shellquote(input_path)], env=env, stdout=subprocess.PIPE)
     def busy(self):
         if self.p is None:
             return False
@@ -100,7 +100,17 @@ class Work:
             print(split)
             self.failed = True
         
-quality_daala = [1,2,3,4,5,6,7,9,11,13,16,20,25,30,37,45,55,67,81,99,122,148,181,221,270,330,400,500]
+quality = {
+"daala": [1,2,3,4,5,6,7,9,11,13,16,20,25,30,37,45,55,67,81,99,122,148,181,221,270,330,400,500],
+"x264":
+range(1,52),
+"x265":
+range(1,52),
+"vp8":
+range(1,64),
+"vp9":
+range(1,64)
+}
 
 free_slots = []
 taken_slots = []
@@ -115,12 +125,20 @@ video_sets = json.load(video_sets_f)
 
 parser = argparse.ArgumentParser(description='Collect RD curve data.')
 parser.add_argument('set',metavar='Video set name')
+parser.add_argument('-codec',default='daala')
 args = parser.parse_args()
+
+if args.codec not in quality:
+    print('Invalid codec. Valid codecs are:')
+    for q in quality:
+        print(q)
+        sys.exit(1)
 
 if args.set not in video_sets:
     print('Specified invalid set. Available sets are:')
     for video_set in video_sets:
         print(video_set)
+        sys.exit(1)
 
 if 1:
     print('Launching instances...')
@@ -155,13 +173,13 @@ if 1:
         machines.append(Machine(instance.ip_address))
     for machine in machines:
         machine.setup()
-        for i in range(0,16):
+        for i in range(0,32):
             free_slots.append(Slot(machine))
 
 for filename in video_sets[args.set]:
-    for quality in quality_daala:
+    for q in quality[args.codec]:
         work = Work()
-        work.quality = quality
+        work.quality = q
         work.set = args.set
         work.filename = filename 
         work_items.append(work)
@@ -186,14 +204,14 @@ while(1):
             work = work_items.pop()
             threading.Thread(slot.execute(work))
             taken_slots.append(slot)
-    time.sleep(1)   
+    time.sleep(0.1)   
     
 work_done.sort(key=lambda work: work.quality)
     
 for work in work_done:
     work.parse()
     if not work.failed:
-        f = open(work.filename+'-daala.out','a')
+        f = open(work.filename+'-'+args.codec+'.out','a')
         f.write(str(work.quality)+' ')
         f.write(str(work.pixels)+' ')
         f.write(str(work.size)+' ')
