@@ -65,10 +65,6 @@ class Slot:
         (stdout, stderr) = self.p.communicate()
         self.work.raw = stdout
         self.work.parse()
-        if self.work.failed == True:
-            print('Failure in machine',self.machine.host)
-            print('Script cannot continue.')
-            sys.exit(1)
 
 class Work:
     def parse(self):
@@ -192,7 +188,11 @@ while(1):
     for slot in taken_slots:
         if slot.busy() == False:
             slot.gather()
-            work_done.append(slot.work)
+            if slot.work.failed == False:
+              work_done.append(slot.work)
+            else:
+              print('Retrying work...')
+              work_items.append(slot.work)
             taken_slots.remove(slot)
             free_slots.append(slot)
     if len(work_items) == 0:
