@@ -24,7 +24,9 @@ class Machine:
         self.host = host
     def setup(self):
         print('Connecting to',self.host)
-        subprocess.call(['./transfer_git.sh',self.host])
+        if subprocess.call(['./transfer_git.sh',self.host]) != 0:
+          print('Couldn\'t set up machine '+self.host)
+          sys.exit(1)
     def execute(self,command):
         ssh_command = ['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no',command]
     def upload(self,filename):

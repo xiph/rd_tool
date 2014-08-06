@@ -13,6 +13,13 @@ fi
 echo Testing server...
 $SSH ec2-user@$1 "echo Available"
 
+echo "Checking for other users..."
+if $SSH ec2-user@$1 "pgrep encoder"
+then
+  echo "The server is already running encoder_example processes."
+  exit 1
+fi
+
 echo Cleaning server...
 $SSH ec2-user@$1 "rm -rf *.png"
 
