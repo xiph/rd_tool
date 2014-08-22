@@ -214,7 +214,7 @@ work_done.sort(key=lambda work: work.quality)
 for work in work_done:
     work.parse()
     if not work.failed:
-        f = open(args.prefix+'/'+work.filename+'-'+args.codec+'.out','a')
+        f = open((args.prefix+'/'+work.filename+'-'+args.codec+'.out').encode('utf-8'),'a')
         f.write(str(work.quality)+' ')
         f.write(str(work.pixels)+' ')
         f.write(str(work.size)+' ')
