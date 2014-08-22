@@ -55,7 +55,7 @@ class Slot:
             sys.exit(1)
             self.p = subprocess.Popen(['metrics_gather.sh',work.filename], env=env, stdout=subprocess.PIPE)
         else:
-            self.p = subprocess.Popen(['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no','ec2-user@'+self.machine.host,'DAALA_ROOT=/home/ec2-user/daala/ x="'+str(work.quality)+'" CODEC="'+args.codec+'" /home/ec2-user/rd_tool/metrics_gather.sh '+shellquote(input_path)], env=env, stdout=subprocess.PIPE)
+            self.p = subprocess.Popen(['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no','ec2-user@'+self.machine.host,('DAALA_ROOT=/home/ec2-user/daala/ x="'+str(work.quality)+'" CODEC="'+args.codec+'" /home/ec2-user/rd_tool/metrics_gather.sh '+shellquote(input_path)).encode("utf-8")], env=env, stdout=subprocess.PIPE)
     def busy(self):
         if self.p is None:
             return False
