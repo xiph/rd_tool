@@ -165,7 +165,11 @@ if 1:
     for instance_id in instance_ids:
         print('Waiting for instance',instance_id,'to report green...')
         while 1:
-            status = ec2.get_all_instance_status([instance_id])[0]
+            statuses = ec2.get_all_instance_status([instance_id])
+            if len(statuses) < 1:
+                time.sleep(1)
+                continue
+            status = statuses[0]
             if status.instance_status.status == 'ok':
                 break
     for instance in instances:
