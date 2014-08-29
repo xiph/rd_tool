@@ -8,6 +8,16 @@
       "sintel_trailer_2k_short.y4m",
       "soccer_short.y4m"
     ],
+  "video-hd-1":
+    [
+      "crowd_run_1080p50_2s.y4m",
+      "ducks_take_off_1080p50_2s.y4m",
+      "old_town_cross_1080p50_2s.y4m",
+      "park_joy_1080p50_2s.y4m",
+      "pedestrian_area_1080p25_2s.y4m",
+      "sintel_trailer_2k_1080p24_2s.y4m",
+      "station2_1080p25_2s.y4m"
+    ],
   "subset1":
     [
       "08-2011._Panthera_tigris_tigris_-_Texas_Park_-_Lanzarote_-TP04.y4m",
