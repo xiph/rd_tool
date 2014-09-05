@@ -52,19 +52,24 @@ daala)
   mv "00000000out-$BASENAME.y4m" "$BASENAME.y4m"
   ;;
 x264)
-  QSTR="--preset placebo --crf=\$x"
+  QSTR="--preset placebo --min-keyint 256 --keyint 256 --no-scenecut --crf=\$x"
   $X264 --dump-yuv $BASENAME.yuv $(echo $QSTR | sed 's/\$x/'$x'/g') -o $BASENAME.x264 $FILE 2> $BASENAME-enc.out > /dev/null
   $YUV2YUV4MPEG $BASENAME -w$WIDTH -h$HEIGHT -an0 -ad0 -c420mpeg2
   SIZE=$(stat -c %s $BASENAME.x264)
   ;;
 x265)
-  QSTR="--crf=\$x"
+  QSTR="--preset placebo --min-keyint 256 --keyint 256 --no-scenecut --crf=\$x"
   $X265 -r $BASENAME.y4m $(echo $QSTR | sed 's/\$x/'$x'/g') -o $BASENAME.x265 $FILE 2> $BASENAME-enc.out > /dev/null
   SIZE=$(stat -c %s $BASENAME.x265)
   ;;
-vp8|vp9)
-  QSTR="-y --min-q=\$x --max-q=\$x"
-  $VPXENC --codec=$CODEC --good --cpu-used=0 $(echo $QSTR | sed 's/\$x/'$x'/g') -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out
+vp8)
+  QSTR="--target-bitrate=100M --cq-level=\$x"
+  $VPXENC --codec=$CODEC --best --cpu-used=0 --kf-min-dist=256 --kf-max-dist=256 $(echo $QSTR | sed 's/\$x/'$x'/g') -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out
+  $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
+  SIZE=$(stat -c %s $BASENAME.vpx)
+vp9)
+  QSTR="--target-bitrate=100M --cq-level=\$x"
+  $VPXENC --codec=$CODEC --best --end-usage=q --cpu-used=0 --kf-min-dist=256 --kf-max-dist=256 $(echo $QSTR | sed 's/\$x/'$x'/g') -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out
   $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
