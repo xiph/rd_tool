@@ -152,7 +152,7 @@ if 1:
         print('Number of instances online:',len(group.instances))
         if num_instances >= 2:
             break
-        time.sleep(1)
+        time.sleep(3)
     instance_ids = [i.instance_id for i in group.instances]
     print(instance_ids)
     instances = ec2.get_only_instances(instance_ids)
@@ -162,16 +162,18 @@ if 1:
             instance.update()
             if instance.state == 'running':
                 break
+            time.sleep(3)
     for instance_id in instance_ids:
         print('Waiting for instance',instance_id,'to report green...')
         while 1:
             statuses = ec2.get_all_instance_status([instance_id])
             if len(statuses) < 1:
-                time.sleep(1)
+                time.sleep(3)
                 continue
             status = statuses[0]
             if status.instance_status.status == 'ok':
                 break
+            time.sleep(3)
     for instance in instances:
         machines.append(Machine(instance.ip_address))
     for machine in machines:
