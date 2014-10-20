@@ -104,6 +104,8 @@ quality = {
 range(1,52,5),
 "x265":
 range(5,52,5),
+"x265-rt":
+range(5,52,5),
 "vp8":
 range(1,64),
 "vp9":
@@ -131,13 +133,13 @@ if args.codec not in quality:
     print('Invalid codec. Valid codecs are:')
     for q in quality:
         print(q)
-        sys.exit(1)
+    sys.exit(1)
 
 if args.set not in video_sets:
-    print('Specified invalid set. Available sets are:')
+    print('Specified invalid set '+args.set+'. Available sets are:')
     for video_set in video_sets:
         print(video_set)
-        sys.exit(1)
+    sys.exit(1)
 
 if 1:
     print('Launching instances...')
