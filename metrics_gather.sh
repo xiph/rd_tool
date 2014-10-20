@@ -62,6 +62,11 @@ x265)
   $X265 -r $BASENAME.y4m $(echo $QSTR | sed 's/\$x/'$x'/g') -o $BASENAME.x265 $FILE 2> $BASENAME-enc.out > /dev/null
   SIZE=$(stat -c %s $BASENAME.x265)
   ;;
+x265-rt)
+  QSTR="--preset slow --tune zerolatency --threads 1 --min-keyint 256 --keyint 256 --no-scenecut --crf=\$x"
+  $X265 -r $BASENAME.y4m $(echo $QSTR | sed 's/\$x/'$x'/g') -o $BASENAME.x265 $FILE 2> $BASENAME-enc.out > /dev/null
+  SIZE=$(stat -c %s $BASENAME.x265)
+  ;;
 vp8)
   QSTR="--target-bitrate=100M --cq-level=\$x"
   $VPXENC --codec=$CODEC --best --cpu-used=0 --kf-min-dist=256 --kf-max-dist=256 $(echo $QSTR | sed 's/\$x/'$x'/g') -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out
