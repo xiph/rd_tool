@@ -107,9 +107,9 @@ range(5,52,5),
 "x265-rt":
 range(5,52,5),
 "vp8":
-range(1,64),
+range(1,64,4),
 "vp9":
-range(1,64)
+range(1,64,4)
 }
 
 free_slots = []

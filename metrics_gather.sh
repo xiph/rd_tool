@@ -63,8 +63,8 @@ x265)
   SIZE=$(stat -c %s $BASENAME.x265)
   ;;
 x265-rt)
-  QSTR="--preset slow --bframes=0 --threads 1 --min-keyint 256 --keyint 256 --no-scenecut --crf=\$x"
-  $X265 -r $BASENAME.y4m $(echo $QSTR | sed 's/\$x/'$x'/g') -o $BASENAME.x265 $FILE 2> $BASENAME-enc.out > /dev/null
+  QSTR="--preset slow --tune zerolatency --threads 1 --min-keyint 256 --keyint 256 --no-scenecut --crf=\$x"
+  $X265 -r $BASENAME.y4m $(echo $QSTR | sed 's/\$x/'$x'/g') --csv $BASENAME.csv -o $BASENAME.x265 $FILE 2> $BASENAME-enc.out > /dev/null
   SIZE=$(stat -c %s $BASENAME.x265)
   ;;
 vp8)
