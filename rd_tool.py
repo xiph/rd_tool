@@ -129,6 +129,8 @@ parser.add_argument('-codec',default='daala')
 parser.add_argument('-prefix',default='.')
 args = parser.parse_args()
 
+num_instances_to_use = 4
+
 if args.codec not in quality:
     print('Invalid codec. Valid codecs are:')
     for q in quality:
@@ -145,14 +147,14 @@ if 1:
     print('Launching instances...')
     autoscale = boto.ec2.autoscale.AutoScaleConnection();
     ec2 = boto.ec2.connect_to_region('us-west-2');
-    autoscale.set_desired_capacity('Daala',2)
+    autoscale.set_desired_capacity('Daala',num_instances_to_use)
     print('Connecting to Amazon instances..')
     group = None
     while 1:
         group = autoscale.get_all_groups(names=['Daala'])[0]
         num_instances = len(group.instances)
         print('Number of instances online:',len(group.instances))
-        if num_instances >= 2:
+        if num_instances >= num_instances_to_use:
             break
         time.sleep(3)
     instance_ids = [i.instance_id for i in group.instances]
