@@ -14,7 +14,7 @@ from pprint import pprint
 import json
 
 if 'DAALA_ROOT' not in os.environ:
-    print("Please specify the DAALA_ROOT environment variable to use this tool.")
+    print(time.strftime("%Y-%m-%d %H:%M:%S"),"Please specify the DAALA_ROOT environment variable to use this tool.")
     sys.exit(1)
 
 daala_root = os.environ['DAALA_ROOT']
@@ -23,15 +23,15 @@ class Machine:
     def __init__(self,host):
         self.host = host
     def setup(self):
-        print('Connecting to',self.host)
+        print(time.strftime("%Y-%m-%d %H:%M:%S"),'Connecting to',self.host)
         if subprocess.call(['./transfer_git.sh',self.host]) != 0:
-          print('Couldn\'t set up machine '+self.host)
+          print(time.strftime("%Y-%m-%d %H:%M:%S"),'Couldn\'t set up machine '+self.host)
           sys.exit(1)
     def execute(self,command):
         ssh_command = ['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no',command]
     def upload(self,filename):
         basename = os.path.basename(filename)
-        print('Uploading',basename)
+        print(time.strftime("%Y-%m-%d %H:%M:%S"),'Uploading',basename)
         subprocess.call(['scp','-i','daala.pem','-o',' StrictHostKeyChecking=no',filename,'ec2-user@'+self.host+':/home/ec2-user/video/'+basename])
 
 def shellquote(s):
@@ -49,9 +49,9 @@ class Slot:
         env = {}
         env['DAALA_ROOT'] = daala_root
         env['x'] = str(work.quality)
-        print('Encoding',work.filename,'with quality',work.quality)
+        print(time.strftime("%Y-%m-%d %H:%M:%S"),'Encoding',work.filename,'with quality',work.quality)
         if self.machine is None:
-            print('No support for local execution.')
+            print(time.strftime("%Y-%m-%d %H:%M:%S"),'No support for local execution.')
             sys.exit(1)
             self.p = subprocess.Popen(['metrics_gather.sh',work.filename], env=env, stdout=subprocess.PIPE)
         else:
@@ -94,8 +94,8 @@ class Work:
             self.metric["fastssim"][2] = split[34]
             self.failed = False
         except IndexError:
-            print('Decoding result data failed! Result was:')
-            print(split)
+            print(time.strftime("%Y-%m-%d %H:%M:%S"),'Decoding result data failed! Result was:')
+            print(time.strftime("%Y-%m-%d %H:%M:%S"),split)
             self.failed = True
         
 quality = {
@@ -132,43 +132,43 @@ args = parser.parse_args()
 num_instances_to_use = 4
 
 if args.codec not in quality:
-    print('Invalid codec. Valid codecs are:')
+    print(time.strftime("%Y-%m-%d %H:%M:%S"),'Invalid codec. Valid codecs are:')
     for q in quality:
-        print(q)
+        print(time.strftime("%Y-%m-%d %H:%M:%S"),q)
     sys.exit(1)
 
 if args.set not in video_sets:
-    print('Specified invalid set '+args.set+'. Available sets are:')
+    print(time.strftime("%Y-%m-%d %H:%M:%S"),'Specified invalid set '+args.set+'. Available sets are:')
     for video_set in video_sets:
-        print(video_set)
+        print(time.strftime("%Y-%m-%d %H:%M:%S"),video_set)
     sys.exit(1)
 
 if 1:
-    print('Launching instances...')
+    print(time.strftime("%Y-%m-%d %H:%M:%S"),'Launching instances...')
     autoscale = boto.ec2.autoscale.AutoScaleConnection();
     ec2 = boto.ec2.connect_to_region('us-west-2');
     autoscale.set_desired_capacity('Daala',num_instances_to_use)
-    print('Connecting to Amazon instances..')
+    print(time.strftime("%Y-%m-%d %H:%M:%S"),'Connecting to Amazon instances..')
     group = None
     while 1:
         group = autoscale.get_all_groups(names=['Daala'])[0]
         num_instances = len(group.instances)
-        print('Number of instances online:',len(group.instances))
+        print(time.strftime("%Y-%m-%d %H:%M:%S"),'Number of instances online:',len(group.instances))
         if num_instances >= num_instances_to_use:
             break
         time.sleep(3)
     instance_ids = [i.instance_id for i in group.instances]
-    print(instance_ids)
+    print(time.strftime("%Y-%m-%d %H:%M:%S"),instance_ids)
     instances = ec2.get_only_instances(instance_ids)
     for instance in instances:
-        print('Waiting for instance',instance.id,'to boot...')
+        print(time.strftime("%Y-%m-%d %H:%M:%S"),'Waiting for instance',instance.id,'to boot...')
         while 1:
             instance.update()
             if instance.state == 'running':
                 break
             time.sleep(3)
     for instance_id in instance_ids:
-        print('Waiting for instance',instance_id,'to report green...')
+        print(time.strftime("%Y-%m-%d %H:%M:%S"),'Waiting for instance',instance_id,'to report green...')
         while 1:
             statuses = ec2.get_all_instance_status([instance_id])
             if len(statuses) < 1:
@@ -194,7 +194,7 @@ for q in sorted(quality[args.codec], reverse = True):
         work_items.append(work)
     
 if len(free_slots) < 1:
-    print('All AWS machines are down.')
+    print(time.strftime("%Y-%m-%d %H:%M:%S"),'All AWS machines are down.')
     sys.exit(1)
 
 while(1):
@@ -204,7 +204,7 @@ while(1):
             if slot.work.failed == False:
               work_done.append(slot.work)
             else:
-              print('Retrying work...')
+              print(time.strftime("%Y-%m-%d %H:%M:%S"),'Retrying work...')
               work_items.append(slot.work)
             taken_slots.remove(slot)
             free_slots.append(slot)
