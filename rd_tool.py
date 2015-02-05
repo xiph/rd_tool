@@ -185,8 +185,8 @@ if 1:
         for i in range(0,32):
             free_slots.append(Slot(machine))
 
-for filename in video_sets[args.set]:
-    for q in quality[args.codec]:
+for q in sorted(quality[args.codec], reverse = True):
+    for filename in video_sets[args.set]:
         work = Work()
         work.quality = q
         work.set = args.set
