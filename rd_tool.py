@@ -97,7 +97,7 @@ class Work:
             print(time.strftime("%Y-%m-%d %H:%M:%S"),'Decoding result data failed! Result was:')
             print(time.strftime("%Y-%m-%d %H:%M:%S"),split)
             self.failed = True
-        
+
 quality = {
 "daala": [1,3,5,7,11,16,25,37,55,81,122,181,270],
 "x264":
@@ -190,9 +190,9 @@ for q in sorted(quality[args.codec], reverse = True):
         work = Work()
         work.quality = q
         work.set = args.set
-        work.filename = filename 
+        work.filename = filename
         work_items.append(work)
-    
+
 if len(free_slots) < 1:
     print(time.strftime("%Y-%m-%d %H:%M:%S"),'All AWS machines are down.')
     sys.exit(1)
@@ -217,10 +217,10 @@ while(1):
             work = work_items.pop()
             threading.Thread(slot.execute(work))
             taken_slots.append(slot)
-    time.sleep(0.1)   
-    
+    time.sleep(0.1)
+
 work_done.sort(key=lambda work: work.quality)
-    
+
 for work in work_done:
     work.parse()
     if not work.failed:
