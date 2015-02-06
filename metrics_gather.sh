@@ -93,4 +93,3 @@ esac
   echo "$PSNRHVS"
   echo "$SSIM"
   echo "$FASTSSIM"
-
