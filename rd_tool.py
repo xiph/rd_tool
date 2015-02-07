@@ -7,36 +7,44 @@ import os
 import sys
 import threading
 import subprocess
-import time
+from time import sleep
+from datetime import datetime
 import multiprocessing
 import boto.ec2.autoscale
 from pprint import pprint
 import json
 
+#our timestamping function, accurate to milliseconds
+#(remove [:-3] to display microseconds)
+def GetTime():
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+  
 if 'DAALA_ROOT' not in os.environ:
-    print(time.strftime("%Y-%m-%d %H:%M:%S"),"Please specify the DAALA_ROOT environment variable to use this tool.")
+    print(GetTime(),"Please specify the DAALA_ROOT environment variable to use this tool.")
     sys.exit(1)
 
 daala_root = os.environ['DAALA_ROOT']
 
+#the AWS instances
 class Machine:
     def __init__(self,host):
         self.host = host
     def setup(self):
-        print(time.strftime("%Y-%m-%d %H:%M:%S"),'Connecting to',self.host)
+        print(GetTime(),'Connecting to',self.host)
         if subprocess.call(['./transfer_git.sh',self.host]) != 0:
-          print(time.strftime("%Y-%m-%d %H:%M:%S"),'Couldn\'t set up machine '+self.host)
+          print(GetTime(),'Couldn\'t set up machine '+self.host)
           sys.exit(1)
     def execute(self,command):
         ssh_command = ['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no',command]
     def upload(self,filename):
         basename = os.path.basename(filename)
-        print(time.strftime("%Y-%m-%d %H:%M:%S"),'Uploading',basename)
+        print(GetTime(),'Uploading',basename)
         subprocess.call(['scp','-i','daala.pem','-o',' StrictHostKeyChecking=no',filename,'ec2-user@'+self.host+':/home/ec2-user/video/'+basename])
 
 def shellquote(s):
     return "'" + s.replace("'", "'\"'\"'") + "'"
 
+#the job slots we can fill
 class Slot:
     def __init__(self, machine=None):
         self.name='localhost'
@@ -49,9 +57,9 @@ class Slot:
         env = {}
         env['DAALA_ROOT'] = daala_root
         env['x'] = str(work.quality)
-        print(time.strftime("%Y-%m-%d %H:%M:%S"),'Encoding',work.filename,'with quality',work.quality)
+        print(GetTime(),'Encoding',work.filename,'with quality',work.quality)
         if self.machine is None:
-            print(time.strftime("%Y-%m-%d %H:%M:%S"),'No support for local execution.')
+            print(GetTime(),'No support for local execution.')
             sys.exit(1)
             self.p = subprocess.Popen(['metrics_gather.sh',work.filename], env=env, stdout=subprocess.PIPE)
         else:
@@ -94,10 +102,11 @@ class Work:
             self.metric["fastssim"][2] = split[34]
             self.failed = False
         except IndexError:
-            print(time.strftime("%Y-%m-%d %H:%M:%S"),'Decoding result data failed! Result was:')
-            print(time.strftime("%Y-%m-%d %H:%M:%S"),split)
+            print(GetTime(),'Decoding result data failed! Result was:')
+            print(GetTime(),split)
             self.failed = True
 
+#set up Codec:QualityRange dictionary
 quality = {
 "daala": [1,3,5,7,11,16,25,37,55,81,122,181,270],
 "x264":
@@ -112,6 +121,7 @@ range(1,64,4),
 range(1,64,4)
 }
 
+#declare the lists we will need
 free_slots = []
 taken_slots = []
 
@@ -120,6 +130,7 @@ work_done = []
 
 machines = []
 
+#load all the different sets and  their filenames
 video_sets_f = open('sets.json','r')
 video_sets = json.load(video_sets_f)
 
@@ -129,46 +140,52 @@ parser.add_argument('-codec',default='daala')
 parser.add_argument('-prefix',default='.')
 args = parser.parse_args()
 
+#how many AWS machines do we want to spin up?
 num_instances_to_use = 4
 
+#check we have the codec in our codec-qualities dictionary
 if args.codec not in quality:
-    print(time.strftime("%Y-%m-%d %H:%M:%S"),'Invalid codec. Valid codecs are:')
+    print(GetTime(),'Invalid codec. Valid codecs are:')
     for q in quality:
-        print(time.strftime("%Y-%m-%d %H:%M:%S"),q)
+        print(GetTime(),q)
     sys.exit(1)
 
+#check we have the set name in our sets-filenames dictionary
 if args.set not in video_sets:
-    print(time.strftime("%Y-%m-%d %H:%M:%S"),'Specified invalid set '+args.set+'. Available sets are:')
+    print(GetTime(),'Specified invalid set '+args.set+'. Available sets are:')
     for video_set in video_sets:
-        print(time.strftime("%Y-%m-%d %H:%M:%S"),video_set)
+        print(GetTime(),video_set)
     sys.exit(1)
+
+print(GetTime(),'Launching instances...')
+ec2 = boto.ec2.connect_to_region('us-west-2');
+autoscale = boto.ec2.autoscale.AutoScaleConnection();
+autoscale.set_desired_capacity('Daala',num_instances_to_use)
+
+print(GetTime(),'Connecting to Amazon instances...')
+group = None
+while 1:
+    group = autoscale.get_all_groups(names=['Daala'])[0]
+    num_instances = len(group.instances)
+    print(GetTime(),'Number of instances online:',len(group.instances))
+    if num_instances >= num_instances_to_use:
+        break
+    time.sleep(3)	
+
+instance_ids = [i.instance_id for i in group.instances]
+print(GetTime(),"These instances are online:",instance_ids)
 
 if 1:
-    print(time.strftime("%Y-%m-%d %H:%M:%S"),'Launching instances...')
-    autoscale = boto.ec2.autoscale.AutoScaleConnection();
-    ec2 = boto.ec2.connect_to_region('us-west-2');
-    autoscale.set_desired_capacity('Daala',num_instances_to_use)
-    print(time.strftime("%Y-%m-%d %H:%M:%S"),'Connecting to Amazon instances..')
-    group = None
-    while 1:
-        group = autoscale.get_all_groups(names=['Daala'])[0]
-        num_instances = len(group.instances)
-        print(time.strftime("%Y-%m-%d %H:%M:%S"),'Number of instances online:',len(group.instances))
-        if num_instances >= num_instances_to_use:
-            break
-        time.sleep(3)
-    instance_ids = [i.instance_id for i in group.instances]
-    print(time.strftime("%Y-%m-%d %H:%M:%S"),instance_ids)
     instances = ec2.get_only_instances(instance_ids)
     for instance in instances:
-        print(time.strftime("%Y-%m-%d %H:%M:%S"),'Waiting for instance',instance.id,'to boot...')
         while 1:
             instance.update()
             if instance.state == 'running':
+                print(GetTime(),instance.id,"is already running!")
                 break
+            print(GetTime(),'Waiting for instance',instance.id,'to boot...')
             time.sleep(3)
     for instance_id in instance_ids:
-        print(time.strftime("%Y-%m-%d %H:%M:%S"),'Waiting for instance',instance_id,'to report green...')
         while 1:
             statuses = ec2.get_all_instance_status([instance_id])
             if len(statuses) < 1:
@@ -176,15 +193,22 @@ if 1:
                 continue
             status = statuses[0]
             if status.instance_status.status == 'ok':
+                print(GetTime(),instance.id,"reported OK!")
                 break
+            print(GetTime(),'Waiting for instance',instance_id,'to report OK...')
             time.sleep(3)
+
+    #make a list of our instances' IP addresses
     for instance in instances:
         machines.append(Machine(instance.ip_address))
+
+    #set up our instances and their free job slots
     for machine in machines:
         machine.setup()
         for i in range(0,32):
             free_slots.append(Slot(machine))
 
+#make a list of the bits of work we need to do
 for q in sorted(quality[args.codec], reverse = True):
     for filename in video_sets[args.set]:
         work = Work()
@@ -194,7 +218,7 @@ for q in sorted(quality[args.codec], reverse = True):
         work_items.append(work)
 
 if len(free_slots) < 1:
-    print(time.strftime("%Y-%m-%d %H:%M:%S"),'All AWS machines are down.')
+    print(GetTime(),'All AWS machines are down.')
     sys.exit(1)
 
 while(1):
@@ -204,12 +228,15 @@ while(1):
             if slot.work.failed == False:
               work_done.append(slot.work)
             else:
-              print(time.strftime("%Y-%m-%d %H:%M:%S"),'Retrying work...')
+              print(GetTime(),'Retrying work...')
               work_items.append(slot.work)
             taken_slots.remove(slot)
             free_slots.append(slot)
+
+    #have we finished all the work?
     if len(work_items) == 0:
         if len(taken_slots) == 0:
+            print(GetTime(),'All work finished')
             break
     else:
         if len(free_slots) != 0:
@@ -221,6 +248,7 @@ while(1):
 
 work_done.sort(key=lambda work: work.quality)
 
+print(GetTime(),'Logging results...')
 for work in work_done:
     work.parse()
     if not work.failed:
@@ -237,3 +265,4 @@ for work in work_done:
 
 subprocess.call('OUTPUT='+args.prefix+'/'+'total '+daala_root+'/tools/rd_average.sh '+args.prefix+'/*.out',shell=True);
 
+print(GetTime(),'Done!')
