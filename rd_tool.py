@@ -141,6 +141,7 @@ parser.add_argument('-prefix',default='.')
 args = parser.parse_args()
 
 #check we have the codec in our codec-qualities dictionary
+#check we have the codec in our codec-qualities dictionary
 if args.codec not in quality:
     print(GetTime(),'Invalid codec. Valid codecs are:')
     for q in quality:
@@ -194,6 +195,7 @@ if 1:
             if instance.state == 'running':
                 print(GetTime(),instance.id,'is running!')
                 break
+            print(GetTime(),'Waiting for instance',instance.id,'to boot...')
             time.sleep(3)
     for instance_id in instance_ids:
         print(GetTime(),'Waiting for instance',instance_id,'to report OK...')
@@ -206,6 +208,7 @@ if 1:
             if status.instance_status.status == 'ok':
                 print(GetTime(),instance.id,'reported OK!')
                 break
+            print(GetTime(),'Waiting for instance',instance_id,'to report OK...')
             time.sleep(3)
 
     #make a list of our instances' IP addresses
