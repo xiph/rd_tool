@@ -178,14 +178,15 @@ print(GetTime(),"These instances are online:",instance_ids)
 if 1:
     instances = ec2.get_only_instances(instance_ids)
     for instance in instances:
+        print(GetTime(),'Waiting for instance',instance.id,'to boot...')
         while 1:
             instance.update()
             if instance.state == 'running':
-                print(GetTime(),instance.id,"is already running!")
+                print(GetTime(),instance.id,'is running!')
                 break
-            print(GetTime(),'Waiting for instance',instance.id,'to boot...')
             time.sleep(3)
     for instance_id in instance_ids:
+        print(GetTime(),'Waiting for instance',instance_id,'to report OK...')
         while 1:
             statuses = ec2.get_all_instance_status([instance_id])
             if len(statuses) < 1:
@@ -193,9 +194,8 @@ if 1:
                 continue
             status = statuses[0]
             if status.instance_status.status == 'ok':
-                print(GetTime(),instance.id,"reported OK!")
+                print(GetTime(),instance.id,'reported OK!')
                 break
-            print(GetTime(),'Waiting for instance',instance_id,'to report OK...')
             time.sleep(3)
 
     #make a list of our instances' IP addresses
