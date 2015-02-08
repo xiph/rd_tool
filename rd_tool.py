@@ -195,7 +195,6 @@ if 1:
             if instance.state == 'running':
                 print(GetTime(),instance.id,'is running!')
                 break
-            print(GetTime(),'Waiting for instance',instance.id,'to boot...')
             time.sleep(3)
     for instance_id in instance_ids:
         print(GetTime(),'Waiting for instance',instance_id,'to report OK...')
@@ -208,7 +207,6 @@ if 1:
             if status.instance_status.status == 'ok':
                 print(GetTime(),instance.id,'reported OK!')
                 break
-            print(GetTime(),'Waiting for instance',instance_id,'to report OK...')
             time.sleep(3)
 
     #make a list of our instances' IP addresses
