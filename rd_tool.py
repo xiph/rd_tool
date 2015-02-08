@@ -244,7 +244,7 @@ while(1):
             work = work_items.pop()
             threading.Thread(slot.execute(work))
             taken_slots.append(slot)
-    time.sleep(0.1)
+    time.sleep(0.02)
 
 work_done.sort(key=lambda work: work.quality)
 
