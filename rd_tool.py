@@ -263,6 +263,6 @@ for work in work_done:
         f.write('\n')
         f.close()
 
-subprocess.call('OUTPUT='+args.prefix+'/'+'total '+daala_root+'/tools/rd_average.sh '+args.prefix+'/*.out',shell=True);
+subprocess.call('OUTPUT="'+args.prefix+'/'+'total" "'+daala_root+'/tools/rd_average.sh" "'+args.prefix+'/*.out"',shell=True);
 
 print(GetTime(),'Done!')
