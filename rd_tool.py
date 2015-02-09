@@ -18,7 +18,7 @@ import json
 #(remove [:-3] to display microseconds)
 def GetTime():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-  
+
 if 'DAALA_ROOT' not in os.environ:
     print(GetTime(),"Please specify the DAALA_ROOT environment variable to use this tool.")
     sys.exit(1)
@@ -170,7 +170,7 @@ while 1:
     print(GetTime(),'Number of instances online:',len(group.instances))
     if num_instances >= num_instances_to_use:
         break
-    time.sleep(3)	
+    time.sleep(3)
 
 instance_ids = [i.instance_id for i in group.instances]
 print(GetTime(),"These instances are online:",instance_ids)
@@ -221,22 +221,29 @@ if len(free_slots) < 1:
     print(GetTime(),'All AWS machines are down.')
     sys.exit(1)
 
+retries = 0
+max_retries = 10
+
 while(1):
     for slot in taken_slots:
         if slot.busy() == False:
             slot.gather()
             if slot.work.failed == False:
               work_done.append(slot.work)
+			elif retries >= max_retries:
+			  print(GetTime(),'Max number of failed retries reached!')
+			  break
             else:
-              print(GetTime(),'Retrying work...')
+			  retries = retries + 1
+              print(GetTime(),'Retrying work...',retries,'of',max_retries,'retries.')
               work_items.append(slot.work)
             taken_slots.remove(slot)
             free_slots.append(slot)
 
     #have we finished all the work?
-    if len(work_items) == 0:
+    if len(work_items) == 0 or retries >= max_retries:
         if len(taken_slots) == 0:
-            print(GetTime(),'All work finished')
+            print(GetTime(),'All work finished.')
             break
     else:
         if len(free_slots) != 0:
