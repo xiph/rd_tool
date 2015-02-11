@@ -130,7 +130,7 @@ work_done = []
 
 machines = []
 
-#load all the different sets and  their filenames
+#load all the different sets and their filenames
 video_sets_f = open('sets.json','r')
 video_sets = json.load(video_sets_f)
 
@@ -139,9 +139,6 @@ parser.add_argument('set',metavar='Video set name')
 parser.add_argument('-codec',default='daala')
 parser.add_argument('-prefix',default='.')
 args = parser.parse_args()
-
-#how many AWS machines do we want to spin up?
-num_instances_to_use = 4
 
 #check we have the codec in our codec-qualities dictionary
 if args.codec not in quality:
@@ -157,6 +154,19 @@ if args.set not in video_sets:
         print(GetTime(),video_set)
     sys.exit(1)
 
+#how many AWS instances do we want to spin up?
+#The assumption is each machine can deal with 32 threads,
+#so up to 32 jobs, use 1 machine, then up to 64 use 2, etc...
+num_instances_to_use = (31 + len(video_sets[args.set]) * len(quality[args.codec])) / 32
+
+#...but lock AWS to a max number of instances
+max_num_instances_to_use = 8
+
+if num_instances_to_use > max_num_instances_to_use:
+	print(GetTime(),'Ideally, we should use',num_instances_to_use,'AWS instances, but the max is',max_num_instances_to_use,'.')
+	num_instances_to_use = max_num_instances_to_use
+
+#awaken the AWS instances
 print(GetTime(),'Launching instances...')
 ec2 = boto.ec2.connect_to_region('us-west-2');
 autoscale = boto.ec2.autoscale.AutoScaleConnection();
