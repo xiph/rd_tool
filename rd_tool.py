@@ -170,7 +170,7 @@ while 1:
     print(GetTime(),'Number of instances online:',len(group.instances))
     if num_instances >= num_instances_to_use:
         break
-    time.sleep(3)	
+    sleep(3)	
 
 instance_ids = [i.instance_id for i in group.instances]
 print(GetTime(),"These instances are online:",instance_ids)
@@ -184,19 +184,19 @@ if 1:
             if instance.state == 'running':
                 print(GetTime(),instance.id,'is running!')
                 break
-            time.sleep(3)
+            sleep(3)
     for instance_id in instance_ids:
         print(GetTime(),'Waiting for instance',instance_id,'to report OK...')
         while 1:
             statuses = ec2.get_all_instance_status([instance_id])
             if len(statuses) < 1:
-                time.sleep(3)
+                sleep(3)
                 continue
             status = statuses[0]
             if status.instance_status.status == 'ok':
                 print(GetTime(),instance.id,'reported OK!')
                 break
-            time.sleep(3)
+            sleep(3)
 
     #make a list of our instances' IP addresses
     for instance in instances:
@@ -244,7 +244,7 @@ while(1):
             work = work_items.pop()
             threading.Thread(slot.execute(work))
             taken_slots.append(slot)
-    time.sleep(0.1)
+    sleep(0.1)
 
 work_done.sort(key=lambda work: work.quality)
 
