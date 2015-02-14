@@ -167,10 +167,14 @@ if num_instances_to_use > max_num_instances_to_use:
   num_instances_to_use = max_num_instances_to_use
 
 #awaken the AWS instances
-print(GetTime(),'Launching instances...')
-ec2 = boto.ec2.connect_to_region('us-west-2');
-autoscale = boto.ec2.autoscale.AutoScaleConnection();
-autoscale.set_desired_capacity('Daala',num_instances_to_use)
+group = autoscale.get_all_groups(names=['Daala'])[0]
+num_instances = len(group.instances)
+print(GetTime(),'Number of instances online:',len(group.instances))
+if num_instances < num_instances_to_use:
+    print(GetTime(),'Launching instances...')
+    ec2 = boto.ec2.connect_to_region('us-west-2');
+    autoscale = boto.ec2.autoscale.AutoScaleConnection();
+    autoscale.set_desired_capacity('Daala',num_instances_to_use)
 
 print(GetTime(),'Connecting to Amazon instances...')
 group = None
