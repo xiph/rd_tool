@@ -163,8 +163,8 @@ num_instances_to_use = (31 + len(video_sets[args.set]) * len(quality[args.codec]
 max_num_instances_to_use = 8
 
 if num_instances_to_use > max_num_instances_to_use:
-	print(GetTime(),'Ideally, we should use',num_instances_to_use,'AWS instances, but the max is',max_num_instances_to_use,'.')
-	num_instances_to_use = max_num_instances_to_use
+  print(GetTime(),'Ideally, we should use',num_instances_to_use,'AWS instances, but the max is',max_num_instances_to_use,'.')
+  num_instances_to_use = max_num_instances_to_use
 
 #awaken the AWS instances
 print(GetTime(),'Launching instances...')
@@ -180,7 +180,7 @@ while 1:
     print(GetTime(),'Number of instances online:',len(group.instances))
     if num_instances >= num_instances_to_use:
         break
-    sleep(3)	
+    sleep(3)  
 
 instance_ids = [i.instance_id for i in group.instances]
 print(GetTime(),"These instances are online:",instance_ids)
@@ -239,14 +239,14 @@ while(1):
         if slot.busy() == False:
             slot.gather()
             if slot.work.failed == False:
-              work_done.append(slot.work)
-			elif retries >= max_retries:
-			  print(GetTime(),'Max number of failed retries reached!')
-			  break
+                work_done.append(slot.work)
+            elif retries >= max_retries:
+                print(GetTime(),'Max number of failed retries reached!')
+                break
             else:
-			  retries = retries + 1
-              print(GetTime(),'Retrying work...',retries,'of',max_retries,'retries.')
-              work_items.append(slot.work)
+                retries = retries + 1
+                print(GetTime(),'Retrying work...',retries,'of',max_retries,'retries.')
+                work_items.append(slot.work)
             taken_slots.remove(slot)
             free_slots.append(slot)
 
