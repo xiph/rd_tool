@@ -58,7 +58,9 @@ class Slot:
         env = {}
         env['DAALA_ROOT'] = daala_root
         env['x'] = str(work.quality)
-        print(GetTime(),'Encoding',work.filename,'with quality',work.quality)
+        
+        print(GetTime(),'Encoding',work.filename,'with quality',work.quality,'...')
+        
         if self.machine is None:
             print(GetTime(),'No support for local execution.')
             sys.exit(1)
@@ -69,6 +71,7 @@ class Slot:
                 ('DAALA_ROOT=/home/ec2-user/daala/ x="'+str(work.quality)+'" CODEC="'+args.codec+
                     '" /home/ec2-user/rd_tool/metrics_gather.sh '+shellquote(input_path)
                 ).encode("utf-8")], env=env, stdout=subprocess.PIPE)
+        print(GetTime(),'Finished',work.filename,'with quality',work.quality,'.')
     def busy(self):
         if self.p is None:
             return False
