@@ -162,10 +162,12 @@ if args.set not in video_sets:
         print(GetTime(),video_set)
     sys.exit(1)
 
+total_num_of_jobs = len(video_sets[args.set]) * len(quality[args.codec])
+
 #how many AWS instances do we want to spin up?
 #The assumption is each machine can deal with 32 threads,
 #so up to 32 jobs, use 1 machine, then up to 64 use 2, etc...
-num_instances_to_use = (31 + len(video_sets[args.set]) * len(quality[args.codec])) / 32
+num_instances_to_use = (31 + total_num_of_jobs) / 32
 
 #...but lock AWS to a max number of instances
 max_num_instances_to_use = 8
@@ -255,6 +257,7 @@ while(1):
             slot.gather()
             if slot.work.failed == False:
                 work_done.append(slot.work)
+                print(GetTime(),len(work_done),'out of',total_num_of_jobs,'finished.')
             elif retries >= max_retries:
                 print(GetTime(),'Max number of failed retries reached!')
                 break
