@@ -39,7 +39,8 @@ class Machine:
     def upload(self,filename):
         basename = os.path.basename(filename)
         print(GetTime(),'Uploading',basename)
-        subprocess.call(['scp','-i','daala.pem','-o',' StrictHostKeyChecking=no',filename,'ec2-user@'+self.host+':/home/ec2-user/video/'+basename])
+        subprocess.call(['scp','-i','daala.pem','-o',' StrictHostKeyChecking=no',filename,
+            'ec2-user@'+self.host+':/home/ec2-user/video/'+basename])
 
 def shellquote(s):
     return "'" + s.replace("'", "'\"'\"'") + "'"
@@ -57,13 +58,19 @@ class Slot:
         env = {}
         env['DAALA_ROOT'] = daala_root
         env['x'] = str(work.quality)
-        print(GetTime(),'Encoding',work.filename,'with quality',work.quality)
+        
+        print(GetTime(),'Encoding',work.filename,'with quality',work.quality,'...')
+        
         if self.machine is None:
             print(GetTime(),'No support for local execution.')
             sys.exit(1)
             self.p = subprocess.Popen(['metrics_gather.sh',work.filename], env=env, stdout=subprocess.PIPE)
         else:
-            self.p = subprocess.Popen(['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no','ec2-user@'+self.machine.host,('DAALA_ROOT=/home/ec2-user/daala/ x="'+str(work.quality)+'" CODEC="'+args.codec+'" /home/ec2-user/rd_tool/metrics_gather.sh '+shellquote(input_path)).encode("utf-8")], env=env, stdout=subprocess.PIPE)
+            self.p = subprocess.Popen(['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no',
+                'ec2-user@'+self.machine.host,
+                ('DAALA_ROOT=/home/ec2-user/daala/ x="'+str(work.quality)+'" CODEC="'+args.codec+
+                    '" /home/ec2-user/rd_tool/metrics_gather.sh '+shellquote(input_path)
+                ).encode("utf-8")], env=env, stdout=subprocess.PIPE)
     def busy(self):
         if self.p is None:
             return False
@@ -154,16 +161,19 @@ if args.set not in video_sets:
         print(GetTime(),video_set)
     sys.exit(1)
 
+total_num_of_jobs = len(video_sets[args.set]) * len(quality[args.codec])
+
 #how many AWS instances do we want to spin up?
 #The assumption is each machine can deal with 32 threads,
 #so up to 32 jobs, use 1 machine, then up to 64 use 2, etc...
-num_instances_to_use = (31 + len(video_sets[args.set]) * len(quality[args.codec])) / 32
+num_instances_to_use = (31 + total_num_of_jobs) / 32
 
 #...but lock AWS to a max number of instances
 max_num_instances_to_use = 8
 
 if num_instances_to_use > max_num_instances_to_use:
-  print(GetTime(),'Ideally, we should use',num_instances_to_use,'AWS instances, but the max is',max_num_instances_to_use,'.')
+  print(GetTime(),'Ideally, we should use',num_instances_to_use,
+    'AWS instances, but the max is',max_num_instances_to_use,'.')
   num_instances_to_use = max_num_instances_to_use
 
 #awaken the AWS instances
@@ -246,6 +256,7 @@ while(1):
             slot.gather()
             if slot.work.failed == False:
                 work_done.append(slot.work)
+                print(GetTime(),len(work_done),'out of',total_num_of_jobs,'finished.')
             elif retries >= max_retries:
                 print(GetTime(),'Max number of failed retries reached!')
                 break
@@ -286,6 +297,7 @@ for work in work_done:
         f.write('\n')
         f.close()
 
-subprocess.call('OUTPUT="'+args.prefix+'/'+'total" "'+daala_root+'/tools/rd_average.sh" "'+args.prefix+'/*.out"',shell=True);
+subprocess.call('OUTPUT="'+args.prefix+'/'+'total" "'+daala_root+'/tools/rd_average.sh" "'+args.prefix+'/*.out"',
+    shell=True);
 
 print(GetTime(),'Done!')
