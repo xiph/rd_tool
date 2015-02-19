@@ -71,7 +71,6 @@ class Slot:
                 ('DAALA_ROOT=/home/ec2-user/daala/ x="'+str(work.quality)+'" CODEC="'+args.codec+
                     '" /home/ec2-user/rd_tool/metrics_gather.sh '+shellquote(input_path)
                 ).encode("utf-8")], env=env, stdout=subprocess.PIPE)
-        print(GetTime(),'Finished',work.filename,'with quality',work.quality,'.')
     def busy(self):
         if self.p is None:
             return False
