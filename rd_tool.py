@@ -261,7 +261,6 @@ while(1):
                 work_done.append(slot.work)
                 print(GetTime(),len(work_done),'out of',total_num_of_jobs,'finished.')
             elif retries >= max_retries:
-                print(GetTime(),'Max number of failed retries reached!')
                 break
             else:
                 retries = retries + 1
@@ -271,10 +270,13 @@ while(1):
             free_slots.append(slot)
 
     #have we finished all the work?
-    if len(work_items) == 0 or retries >= max_retries:
+    if len(work_items) == 0:
         if len(taken_slots) == 0:
             print(GetTime(),'All work finished.')
             break
+	elif retries >= max_retries:
+        print(GetTime(),'Max number of failed retries reached!')
+        break
     else:
         if len(free_slots) != 0:
             slot = free_slots.pop()
