@@ -163,6 +163,9 @@ if args.set not in video_sets:
 
 total_num_of_jobs = len(video_sets[args.set]) * len(quality[args.codec])
 
+#a logging message just to get the regex progress bar on the AWCY site started...
+print(GetTime(),'0 out of',total_num_of_jobs,'finished.')
+
 #how many AWS instances do we want to spin up?
 #The assumption is each machine can deal with 32 threads,
 #so up to 32 jobs, use 1 machine, then up to 64 use 2, etc...
