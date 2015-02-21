@@ -69,27 +69,31 @@ x265-rt)
   ;;
 vp8)
   QSTR="--target-bitrate=100M --cq-level=\$x"
-  $VPXENC --codec=$CODEC --best --cpu-used=0 --kf-min-dist=256 --kf-max-dist=256 $(echo $QSTR | sed 's/\$x/'$x'/g') -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out
+  $VPXENC --codec=$CODEC --best --cpu-used=0 --kf-min-dist=256 --kf-max-dist=256 $(echo $QSTR | sed 's/\$x/'$x'/g') -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
   $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
 vp9)
   QSTR="--target-bitrate=100M --cq-level=\$x"
-  $VPXENC --codec=$CODEC --best --end-usage=q --cpu-used=0 --kf-min-dist=256 --kf-max-dist=256 $(echo $QSTR | sed 's/\$x/'$x'/g') -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out
+  $VPXENC --codec=$CODEC --best --end-usage=q --cpu-used=0 --kf-min-dist=256 --kf-max-dist=256 $(echo $QSTR | sed 's/\$x/'$x'/g') -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
   $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
 esac
-  "$DUMP_PSNR" "$FILE" "$BASENAME.y4m" > "$BASENAME-psnr.out" 2> /dev/null
-  FRAMES=$(cat "$BASENAME-psnr.out" | grep ^0 | wc -l)
-  PIXELS=$(($WIDTH*$HEIGHT*$FRAMES))
-  PSNR=$(cat "$BASENAME-psnr.out" | grep Total)
-  PSNRHVS=$("$DUMP_PSNRHVS" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
-  SSIM=$("$DUMP_SSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
-  FASTSSIM=$("$DUMP_FASTSSIM" -c "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
-  rm -f "$BASENAME.y4m" "$BASENAME.ogv" "$BASENAME.x264" "$BASENAME.x265" "$BASENAME.vpx" "$BASENAME-enc.out" "$BASENAME-psnr.out" 2> /dev/null
-  echo "$x" "$PIXELS" "$SIZE"
-  echo "$PSNR"
-  echo "$PSNRHVS"
-  echo "$SSIM"
-  echo "$FASTSSIM"
+
+"$DUMP_PSNR" "$FILE" "$BASENAME.y4m" > "$BASENAME-psnr.out" 2> /dev/null
+
+FRAMES=$(cat "$BASENAME-psnr.out" | grep ^0 | wc -l)
+PIXELS=$(($WIDTH*$HEIGHT*$FRAMES))
+PSNR=$(cat "$BASENAME-psnr.out" | grep Total)
+PSNRHVS=$("$DUMP_PSNRHVS" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
+SSIM=$("$DUMP_SSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
+FASTSSIM=$("$DUMP_FASTSSIM" -c "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
+
+rm -f "$BASENAME.y4m" "$BASENAME.ogv" "$BASENAME.x264" "$BASENAME.x265" "$BASENAME.vpx" "$BASENAME-enc.out" "$BASENAME-psnr.out" 2> /dev/null
+
+echo "$x" "$PIXELS" "$SIZE"
+echo "$PSNR"
+echo "$PSNRHVS"
+echo "$SSIM"
+echo "$FASTSSIM"
