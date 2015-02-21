@@ -274,7 +274,7 @@ while(1):
         if len(taken_slots) == 0:
             print(GetTime(),'All work finished.')
             break
-	elif retries >= max_retries:
+    elif retries >= max_retries:
         print(GetTime(),'Max number of failed retries reached!')
         break
     else:
