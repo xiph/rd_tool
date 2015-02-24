@@ -234,7 +234,11 @@ if 1:
     #set up our instances and their free job slots
     for machine in machines:
         machine.setup()
-        for i in range(0,32):
+
+    #by doing the machines in the inner loop,
+    #we end up with heavy jobs split across machines better
+    for i in range(0,32):
+        for machine in machines:
             free_slots.append(Slot(machine))
 
 #make a list of the bits of work we need to do
