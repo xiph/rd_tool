@@ -115,7 +115,7 @@ class Work:
 
 #set up Codec:QualityRange dictionary
 quality = {
-"daala": [3,5,7,11,16,25,37,55,81,122,181,270],
+"daala": [3,5,7,11,16,25,37,55,81,122,181,270,400],
 "x264":
 range(1,52,5),
 "x265":
