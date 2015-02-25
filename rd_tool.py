@@ -115,7 +115,7 @@ class Work:
 
 #set up Codec:QualityRange dictionary
 quality = {
-"daala": [3,5,7,11,16,25,37,55,81,122,181,270],
+"daala": [3,5,7,11,16,25,37,55,81,122,181,270,400],
 "x264":
 range(1,52,5),
 "x265":
@@ -234,7 +234,11 @@ if 1:
     #set up our instances and their free job slots
     for machine in machines:
         machine.setup()
-        for i in range(0,32):
+
+    #by doing the machines in the inner loop,
+    #we end up with heavy jobs split across machines better
+    for i in range(0,32):
+        for machine in machines:
             free_slots.append(Slot(machine))
 
 #make a list of the bits of work we need to do
