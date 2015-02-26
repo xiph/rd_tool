@@ -57,7 +57,7 @@ class Slot:
         env = {}
         env['DAALA_ROOT'] = daala_root
         env['x'] = str(work.quality)
-        print(GetTime(),'Encoding',work.filename,'with quality',work.quality)
+        print(GetTime(),'Encoding',work.filename,'with quality',work.quality,'on',self.machine,'...')
         if self.machine is None:
             print(GetTime(),'No support for local execution.')
             sys.exit(1)
