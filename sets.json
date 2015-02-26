@@ -11,34 +11,34 @@
     ],
   "video-hd-1":
     [
+      "sintel_trailer_2k_1080p24_2s.y4m",
+      "pedestrian_area_1080p25_2s.y4m",
+      "station2_1080p25_2s.y4m",
       "crowd_run_1080p50_2s.y4m",
       "ducks_take_off_1080p50_2s.y4m",
       "old_town_cross_1080p50_2s.y4m",
-      "park_joy_1080p50_2s.y4m",
-      "pedestrian_area_1080p25_2s.y4m",
-      "sintel_trailer_2k_1080p24_2s.y4m",
-      "station2_1080p25_2s.y4m"
+      "park_joy_1080p50_2s.y4m"
     ],
   "ntt-short-1":
     [
-      "BasketballDrill_832x480_50_1s.y4m",
-      "BasketballDrive_1920x1080_50_1s.y4m",
       "BasketballPass_416x240_50_1s.y4m",
       "BlowingBubbles_416x240_50_1s.y4m",
-      "BQMall_832x480_60_1s.y4m",
       "BQSquare_416x240_60_1s.y4m",
-      "BQTerrace_1920x1080_60_1s.y4m",
-      "Cactus_1920x1080_50_1s.y4m",
-      "ChinaSpeed_1024x768_30_2s.y4m",
+      "BasketballDrill_832x480_50_1s.y4m",
+      "PartyScene_832x480_50_1s.y4m",
+      "BQMall_832x480_60_1s.y4m",
       "Flowervase_832x480_30_2s.y4m",
+      "Keiba_832x480_30_2s.y4m",
+      "Mobisode2_832x480_30_2s.y4m",
+      "ChinaSpeed_1024x768_30_2s.y4m",
       "FourPeople_1280x720_60_1s.y4m",
       "Johnny_1280x720_60_1s.y4m",
-      "Keiba_832x480_30_2s.y4m",
-      "Kimono1_1920x1080_24_2s.y4m",
       "KristenAndSara_1280x720_60_1s.y4m",
-      "Mobisode2_832x480_30_2s.y4m",
+      "Kimono1_1920x1080_24_2s.y4m",
       "ParkScene_1920x1080_24_2s.y4m",
-      "PartyScene_832x480_50_1s.y4m"
+      "BasketballDrive_1920x1080_50_1s.y4m",
+      "Cactus_1920x1080_50_1s.y4m",
+      "BQTerrace_1920x1080_60_1s.y4m"
     ],
   "subset1":
     [
