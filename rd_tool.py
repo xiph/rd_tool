@@ -103,7 +103,7 @@ class Work:
             self.failed = False
         except IndexError:
             print(GetTime(),'Decoding result data failed! Result was:')
-            print(GetTime(),split)
+            print(GetTime(),self.raw.decode('utf-8'))
             self.failed = True
 
 #set up Codec:QualityRange dictionary
