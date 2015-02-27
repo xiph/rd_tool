@@ -58,9 +58,7 @@ class Slot:
         env = {}
         env['DAALA_ROOT'] = daala_root
         env['x'] = str(work.quality)
-        
-        print(GetTime(),'Encoding',work.filename,'with quality',work.quality,'...')
-        
+        print(GetTime(),'Encoding',work.filename,'with quality',work.quality,'on',self.machine,'...')
         if self.machine is None:
             print(GetTime(),'No support for local execution.')
             sys.exit(1)
@@ -110,7 +108,7 @@ class Work:
             self.failed = False
         except IndexError:
             print(GetTime(),'Decoding result data failed! Result was:')
-            print(GetTime(),split)
+            print(GetTime(),self.raw.decode('utf-8'))
             self.failed = True
 
 #set up Codec:QualityRange dictionary
@@ -241,9 +239,12 @@ if 1:
         for machine in machines:
             free_slots.append(Slot(machine))
 
-#make a list of the bits of work we need to do
-for q in sorted(quality[args.codec], reverse = True):
-    for filename in video_sets[args.set]:
+#Make a list of the bits of work we need to do.
+#We pack the stack ordered by filesize ASC, quality ASC (aka. -v DESC)
+#so we pop the hardest encodes first,
+#for more efficient use of the AWS machines' time.
+for filename in video_sets[args.set]:
+    for q in sorted(quality[args.codec], reverse = True):
         work = Work()
         work.quality = q
         work.set = args.set
