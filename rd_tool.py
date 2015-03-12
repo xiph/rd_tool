@@ -58,7 +58,7 @@ class Slot:
         env = {}
         env['DAALA_ROOT'] = daala_root
         env['x'] = str(work.quality)
-        print(GetTime(),'Encoding',work.filename,'with quality',work.quality,'on',self.machine,'...')
+        print(GetTime(),'Encoding',work.filename,'with quality',work.quality,'on',self.machine.host)
         if self.machine is None:
             print(GetTime(),'No support for local execution.')
             sys.exit(1)
@@ -190,7 +190,7 @@ print(GetTime(),'Number of instances online:',len(group.instances))
 if num_instances < num_instances_to_use:
     print(GetTime(),'Launching instances...')
     autoscale.set_desired_capacity('Daala',num_instances_to_use)
-    
+
     #tell us status every few seconds
     group = None
     while num_instances < num_instances_to_use:
