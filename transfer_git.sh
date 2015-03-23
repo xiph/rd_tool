@@ -38,7 +38,7 @@ rsync -r -e "$SSH" $DAALA_ROOT/.git/ ec2-user@$1:/home/ec2-user/daala/.git/
 
 echo Checking out branch $branch remotely...
 
-$SSH ec2-user@$1 "cd daala; git reset --hard; git checkout $branch" > /dev/null
+$SSH ec2-user@$1 "cd daala; git reset --hard; git checkout \"$branch\"" > /dev/null
 
 echo Building...
 
