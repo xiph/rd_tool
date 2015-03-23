@@ -58,7 +58,7 @@ class Slot:
         env = {}
         env['DAALA_ROOT'] = daala_root
         env['x'] = str(work.quality)
-        print(GetTime(),'Encoding',work.filename,'with quality',work.quality,'on',self.machine,'...')
+        print(GetTime(),'Encoding',work.filename,'with quality',work.quality,'on',self.machine.host)
         if self.machine is None:
             print(GetTime(),'No support for local execution.')
             sys.exit(1)
@@ -177,28 +177,29 @@ if num_instances_to_use > max_num_instances_to_use:
     'AWS instances, but the max is',max_num_instances_to_use,'.')
   num_instances_to_use = max_num_instances_to_use
 
-#awaken the AWS instances
-
+#connect to AWS
 ec2 = boto.ec2.connect_to_region('us-west-2');
 autoscale = boto.ec2.autoscale.AutoScaleConnection();
 
+#how many machines are currently running?
 group = autoscale.get_all_groups(names=['Daala'])[0]
 num_instances = len(group.instances)
 print(GetTime(),'Number of instances online:',len(group.instances))
+
+#switch on more machines if we need them
 if num_instances < num_instances_to_use:
     print(GetTime(),'Launching instances...')
     autoscale.set_desired_capacity('Daala',num_instances_to_use)
 
-print(GetTime(),'Connecting to Amazon instances...')
-group = None
-while 1:
-    group = autoscale.get_all_groups(names=['Daala'])[0]
-    num_instances = len(group.instances)
-    print(GetTime(),'Number of instances online:',len(group.instances))
-    if num_instances >= num_instances_to_use:
-        break
-    sleep(3)  
+    #tell us status every few seconds
+    group = None
+    while num_instances < num_instances_to_use:
+        group = autoscale.get_all_groups(names=['Daala'])[0]
+        num_instances = len(group.instances)
+        print(GetTime(),'Number of instances online:',len(group.instances))
+        sleep(3)
 
+#grab instance IDs
 instance_ids = [i.instance_id for i in group.instances]
 print(GetTime(),"These instances are online:",instance_ids)
 
