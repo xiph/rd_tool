@@ -15,8 +15,8 @@ $SSH ec2-user@$1 "echo Available"
 echo "Checking for other users..."
 if $SSH ec2-user@$1 "pgrep encoder"
 then
-  echo "The server is already running encoder_example processes."
-  exit 1
+  echo "The server is already running encoder_example processes. Killing."
+  $SSH ec2-user@$1 "killall -9 encoder_example"
 fi
 
 echo Cleaning server...
