@@ -26,20 +26,12 @@ $SSH ec2-user@$1 "rm -rf *.png"
 
 #ssh-keyscan -H $1 >> ~/.ssh/known_hosts
 
-branch=`git --git-dir $DAALA_ROOT/.git rev-parse --abbrev-ref HEAD`
-
 echo Uploading tools...
 
 rsync -r -e "$SSH" ./ ec2-user@$1:/home/ec2-user/rd_tool/
 
-echo Uploading local git repository...
+rsync -r -e "$SSH" ../daalatool/ ec2-user@$1:/home/ec2-user/daalatool
 
-rsync -r -e "$SSH" $DAALA_ROOT/.git/ ec2-user@$1:/home/ec2-user/daala/.git/
+echo Uploading local build...
 
-echo Checking out branch $branch remotely...
-
-$SSH ec2-user@$1 "cd daala; git reset --hard; git checkout \"$branch\"" > /dev/null
-
-echo Building...
-
-$SSH ec2-user@$1 "cd daala ; ./autogen.sh ; PKG_CONFIG_PATH=/usr/local/lib/pkgconfig ./configure --disable-player --disable-dump-images --enable-logging --enable-dump-recons ; make -j16 ; make tools -j16" > /dev/null
+rsync -r -e "$SSH" $DAALA_ROOT/ ec2-user@$1:/home/ec2-user/daala/

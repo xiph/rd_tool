@@ -6,30 +6,27 @@ export X264=/home/ec2-user/x264/x264
 export X265=/home/ec2-user/x265/build/linux/x265
 export VPXENC=/home/ec2-user/libvpx/vpxenc
 export VPXDEC=/home/ec2-user/libvpx/vpxdec
-export YUV2YUV4MPEG=$DAALA_ROOT/tools/yuv2yuv4mpeg
-
-if [ -z "$ENCODER_EXAMPLE" ]; then
-  export ENCODER_EXAMPLE="$DAALA_ROOT/examples/encoder_example"
-fi
+export ENCODER_EXAMPLE=/home/ec2-user/daala/examples/encoder_example
+export YUV2YUV4MPEG=$DAALATOOL_ROOT/tools/yuv2yuv4mpeg
 
 if [ -z "$DUMP_VIDEO" ]; then
   export DUMP_VIDEO="$DAALA_ROOT/examples/dump_video"
 fi
 
 if [ -z "$DUMP_PSNR" ]; then
-  export DUMP_PSNR="$DAALA_ROOT/tools/dump_psnr"
+  export DUMP_PSNR="$DAALATOOL_ROOT/tools/dump_psnr"
 fi
 
 if [ -z "$DUMP_PSNRHVS" ]; then
-  export DUMP_PSNRHVS="$DAALA_ROOT/tools/dump_psnrhvs"
+  export DUMP_PSNRHVS="$DAALATOOL_ROOT/tools/dump_psnrhvs"
 fi
 
 if [ -z "$DUMP_SSIM" ]; then
-  export DUMP_SSIM="$DAALA_ROOT/tools/dump_ssim"
+  export DUMP_SSIM="$DAALATOOL_ROOT/tools/dump_ssim"
 fi
 
 if [ -z "$DUMP_FASTSSIM" ]; then
-  export DUMP_FASTSSIM="$DAALA_ROOT/tools/dump_fastssim"
+  export DUMP_FASTSSIM="$DAALATOOL_ROOT/tools/dump_fastssim"
 fi
 
 if [ -z "$CODEC" ]; then
