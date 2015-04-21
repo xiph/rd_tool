@@ -298,7 +298,7 @@ while(1):
             break
     elif retries >= max_retries:
         print(GetTime(),'Max number of failed retries reached!')
-        break
+        sys.exit(1)
     else:
         if len(free_slots) != 0:
             slot = free_slots.pop()
