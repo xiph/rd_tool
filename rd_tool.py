@@ -140,9 +140,10 @@ video_sets_f = open('sets.json','r')
 video_sets = json.load(video_sets_f)
 
 parser = argparse.ArgumentParser(description='Collect RD curve data.')
-parser.add_argument('set',metavar='Video set name')
+parser.add_argument('set',metavar='Video set name',nargs='+')
 parser.add_argument('-codec',default='daala')
 parser.add_argument('-prefix',default='.')
+parser.add_argument('-individual', action='store_true')
 args = parser.parse_args()
 
 #check we have the codec in our codec-qualities dictionary
@@ -153,13 +154,17 @@ if args.codec not in quality:
     sys.exit(1)
 
 #check we have the set name in our sets-filenames dictionary
-if args.set not in video_sets:
-    print(GetTime(),'Specified invalid set '+args.set+'. Available sets are:')
-    for video_set in video_sets:
-        print(GetTime(),video_set)
-    sys.exit(1)
+if not args.individual:
+  if args.set[0] not in video_sets:
+      print(GetTime(),'Specified invalid set '+args.set+'. Available sets are:')
+      for video_set in video_sets:
+          print(GetTime(),video_set)
+      sys.exit(1)
 
-total_num_of_jobs = len(video_sets[args.set]) * len(quality[args.codec])
+if not args.individual:
+    total_num_of_jobs = len(video_sets[args.set]) * len(quality[args.codec])
+else:
+    total_num_of_jobs = len(quality[args.codec]) #FIXME
 
 #a logging message just to get the regex progress bar on the AWCY site started...
 print(GetTime(),'0 out of',total_num_of_jobs,'finished.')
@@ -244,13 +249,24 @@ if 1:
 #We pack the stack ordered by filesize ASC, quality ASC (aka. -v DESC)
 #so we pop the hardest encodes first,
 #for more efficient use of the AWS machines' time.
-for filename in video_sets[args.set]:
-    for q in sorted(quality[args.codec], reverse = True):
-        work = Work()
-        work.quality = q
-        work.set = args.set
-        work.filename = filename
-        work_items.append(work)
+
+if args.individual:
+    for filename in args.set:
+        for q in sorted(quality[args.codec], reverse = True):
+            work = Work()
+            work.version = 2
+            work.quality = q
+            work.set = args.set
+            work.filename = filename
+            work_items.append(work)
+else:
+    for filename in video_sets[args.set[0]]:
+        for q in sorted(quality[args.codec], reverse = True):
+            work = Work()
+            work.quality = q
+            work.set = args.set
+            work.filename = filename
+            work_items.append(work)
 
 if len(free_slots) < 1:
     print(GetTime(),'All AWS machines are down.')
