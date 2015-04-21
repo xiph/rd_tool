@@ -156,13 +156,13 @@ if args.codec not in quality:
 #check we have the set name in our sets-filenames dictionary
 if not args.individual:
   if args.set[0] not in video_sets:
-      print(GetTime(),'Specified invalid set '+args.set+'. Available sets are:')
+      print(GetTime(),'Specified invalid set '+args.set[0]+'. Available sets are:')
       for video_set in video_sets:
           print(GetTime(),video_set)
       sys.exit(1)
 
 if not args.individual:
-    total_num_of_jobs = len(video_sets[args.set]) * len(quality[args.codec])
+    total_num_of_jobs = len(video_sets[args.set[0]]) * len(quality[args.codec])
 else:
     total_num_of_jobs = len(quality[args.codec]) #FIXME
 
@@ -256,7 +256,6 @@ if args.individual:
             work = Work()
             work.version = 2
             work.quality = q
-            work.set = args.set
             work.filename = filename
             work_items.append(work)
 else:
@@ -264,7 +263,7 @@ else:
         for q in sorted(quality[args.codec], reverse = True):
             work = Work()
             work.quality = q
-            work.set = args.set
+            work.set = args.set[0]
             work.filename = filename
             work_items.append(work)
 
