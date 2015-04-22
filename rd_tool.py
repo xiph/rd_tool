@@ -54,7 +54,10 @@ class Slot:
     def execute(self, work):
         self.work = work
         output_name = work.filename+'.'+str(work.quality)+'.ogv'
-        input_path = '/home/ec2-user/sets/'+self.work.set+'/'+self.work.filename
+        if args.individual:
+            input_path = '/home/ec2-user/sets/'+self.work.filename
+        else:
+            input_path = '/home/ec2-user/sets/'+self.work.set+'/'+self.work.filename
         env = {}
         env['DAALA_ROOT'] = daala_root
         env['x'] = str(work.quality)
@@ -312,7 +315,10 @@ print(GetTime(),'Logging results...')
 for work in work_done:
     work.parse()
     if not work.failed:
-        f = open((args.prefix+'/'+work.filename+'-'+args.codec+'.out').encode('utf-8'),'a')
+        if args.individual:
+            f = open((args.prefix+'/'+work.filename+'.out').encode('utf-8'),'a')
+        else:
+            f = open((args.prefix+'/'+work.filename+'-'+args.codec+'.out').encode('utf-8'),'a')
         f.write(str(work.quality)+' ')
         f.write(str(work.pixels)+' ')
         f.write(str(work.size)+' ')
@@ -323,7 +329,8 @@ for work in work_done:
         f.write('\n')
         f.close()
 
-subprocess.call('OUTPUT="'+args.prefix+'/'+'total" "'+daala_root+'/tools/rd_average.sh" "'+args.prefix+'/*.out"',
-    shell=True);
+if not args.individual:
+  subprocess.call('OUTPUT="'+args.prefix+'/'+'total" "'+daala_root+'/tools/rd_average.sh" "'+args.prefix+'/*.out"',
+      shell=True);
 
 print(GetTime(),'Done!')
