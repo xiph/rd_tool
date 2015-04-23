@@ -284,6 +284,7 @@ while(1):
             if slot.work.failed == False:
                 work_done.append(slot.work)
                 if args.individual:
+                    work = slot.work
                     work.parse()
                     if not work.failed:
                         if args.individual:
