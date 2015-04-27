@@ -283,23 +283,6 @@ while(1):
             slot.gather()
             if slot.work.failed == False:
                 work_done.append(slot.work)
-                if args.individual:
-                    work = slot.work
-                    work.parse()
-                    if not work.failed:
-                        if args.individual:
-                            f = open((args.prefix+'/'+os.path.basename(work.filename)+'.out').encode('utf-8'),'a')
-                        else:
-                            f = open((args.prefix+'/'+work.filename+'-'+args.codec+'.out').encode('utf-8'),'a')
-                        f.write(str(work.quality)+' ')
-                        f.write(str(work.pixels)+' ')
-                        f.write(str(work.size)+' ')
-                        f.write(str(work.metric['psnr'][0])+' ')
-                        f.write(str(work.metric['psnrhvs'][0])+' ')
-                        f.write(str(work.metric['ssim'][0])+' ')
-                        f.write(str(work.metric['fastssim'][0])+' ')
-                        f.write('\n')
-                        f.close()
                 print(GetTime(),len(work_done),'out of',total_num_of_jobs,'finished.')
             elif retries >= max_retries:
                 break
@@ -327,26 +310,25 @@ while(1):
     sleep(0.02)
 
 
-if not args.individual:
-    work_done.sort(key=lambda work: work.quality)
+work_done.sort(key=lambda work: work.quality)
 
-    print(GetTime(),'Logging results...')
-    for work in work_done:
-        work.parse()
-        if not work.failed:
-            if args.individual:
-                f = open((args.prefix+'/'+os.path.basename(work.filename)+'.out').encode('utf-8'),'a')
-            else:
-                f = open((args.prefix+'/'+work.filename+'-'+args.codec+'.out').encode('utf-8'),'a')
-            f.write(str(work.quality)+' ')
-            f.write(str(work.pixels)+' ')
-            f.write(str(work.size)+' ')
-            f.write(str(work.metric['psnr'][0])+' ')
-            f.write(str(work.metric['psnrhvs'][0])+' ')
-            f.write(str(work.metric['ssim'][0])+' ')
-            f.write(str(work.metric['fastssim'][0])+' ')
-            f.write('\n')
-            f.close()
+print(GetTime(),'Logging results...')
+for work in work_done:
+    work.parse()
+    if not work.failed:
+        if args.individual:
+            f = open((args.prefix+'/'+os.path.basename(work.filename)+'.out').encode('utf-8'),'a')
+        else:
+            f = open((args.prefix+'/'+work.filename+'-'+args.codec+'.out').encode('utf-8'),'a')
+        f.write(str(work.quality)+' ')
+        f.write(str(work.pixels)+' ')
+        f.write(str(work.size)+' ')
+        f.write(str(work.metric['psnr'][0])+' ')
+        f.write(str(work.metric['psnrhvs'][0])+' ')
+        f.write(str(work.metric['ssim'][0])+' ')
+        f.write(str(work.metric['fastssim'][0])+' ')
+        f.write('\n')
+        f.close()
 
 if not args.individual:
   subprocess.call('OUTPUT="'+args.prefix+'/'+'total" "'+daala_root+'/tools/rd_average.sh" "'+args.prefix+'/*.out"',
