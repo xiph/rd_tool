@@ -25,6 +25,10 @@ if 'DAALA_ROOT' not in os.environ:
 
 daala_root = os.environ['DAALA_ROOT']
 
+extra_options = ''
+if 'EXTRA_OPTIONS' in os.environ:
+    extra_options = os.environ['EXTRA_OPTIONS']
+
 #the AWS instances
 class Machine:
     def __init__(self,host):
@@ -60,7 +64,7 @@ class Slot:
             input_path = '/home/ec2-user/sets/'+self.work.set+'/'+self.work.filename
         env = {}
         env['DAALA_ROOT'] = daala_root
-        env['EXTRA_OPTIONS'] = str(args.extra_options)
+        env['EXTRA_OPTIONS'] = str(extra_options)
         env['x'] = str(work.quality)
         print(GetTime(),'Encoding',work.filename,'with quality',work.quality,'on',self.machine.host)
         if self.machine is None:
