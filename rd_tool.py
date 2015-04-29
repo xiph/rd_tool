@@ -60,6 +60,8 @@ class Slot:
             input_path = '/home/ec2-user/sets/'+self.work.set+'/'+self.work.filename
         env = {}
         env['DAALA_ROOT'] = daala_root
+        if 
+        env['EXTRA_OPTIONS'] = str(args.extra_options)
         env['x'] = str(work.quality)
         print(GetTime(),'Encoding',work.filename,'with quality',work.quality,'on',self.machine.host)
         if self.machine is None:
@@ -147,6 +149,7 @@ parser.add_argument('set',metavar='Video set name',nargs='+')
 parser.add_argument('-codec',default='daala')
 parser.add_argument('-prefix',default='.')
 parser.add_argument('-individual', action='store_true')
+parser.add_argument('-extra-options', default='')
 args = parser.parse_args()
 
 #check we have the codec in our codec-qualities dictionary
