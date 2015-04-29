@@ -152,7 +152,6 @@ parser.add_argument('set',metavar='Video set name',nargs='+')
 parser.add_argument('-codec',default='daala')
 parser.add_argument('-prefix',default='.')
 parser.add_argument('-individual', action='store_true')
-parser.add_argument('-extra-options', default='')
 args = parser.parse_args()
 
 #check we have the codec in our codec-qualities dictionary
