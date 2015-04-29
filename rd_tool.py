@@ -60,7 +60,6 @@ class Slot:
             input_path = '/home/ec2-user/sets/'+self.work.set+'/'+self.work.filename
         env = {}
         env['DAALA_ROOT'] = daala_root
-        if 
         env['EXTRA_OPTIONS'] = str(args.extra_options)
         env['x'] = str(work.quality)
         print(GetTime(),'Encoding',work.filename,'with quality',work.quality,'on',self.machine.host)
