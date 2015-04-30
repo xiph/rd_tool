@@ -74,7 +74,7 @@ class Slot:
         else:
             self.p = subprocess.Popen(['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no',
                 'ec2-user@'+self.machine.host,
-                ('DAALA_ROOT=/home/ec2-user/daala/ x="'+str(work.quality)+'" CODEC="'+args.codec+
+                ('DAALA_ROOT=/home/ec2-user/daala/ x="'+str(work.quality)+'" CODEC="'+args.codec+'" EXTRA_OPTIONS="'+extra_options+
                     '" /home/ec2-user/rd_tool/metrics_gather.sh '+shellquote(input_path)
                 ).encode("utf-8")], env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     def busy(self):
