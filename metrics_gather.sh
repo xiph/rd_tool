@@ -53,8 +53,7 @@ daala)
     exit 1
   fi
   SIZE=$(stat -c %s "$BASENAME.ogv")
-  #mv "00000000out-$BASENAME.y4m" "$BASENAME.y4m"
-  $DUMP_VIDEO "$BASENAME.ogv" -o "$BASENAME.y4m"
+  mv "00000000out-$BASENAME.y4m" "$BASENAME.y4m"
   ;;
 x264)
   QSTR="--preset placebo --min-keyint 256 --keyint 256 --no-scenecut --crf=\$x"
