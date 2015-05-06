@@ -324,7 +324,7 @@ for work in work_done:
         if args.individual:
             f = open((args.prefix+'/'+os.path.basename(work.filename)+'.out').encode('utf-8'),'a')
         else:
-            f = open((args.prefix+'/'+work.filename+'-'+args.codec+'.out').encode('utf-8'),'a')
+            f = open((args.prefix+'/'+work.filename+'-daala.out').encode('utf-8'),'a')
         f.write(str(work.quality)+' ')
         f.write(str(work.pixels)+' ')
         f.write(str(work.size)+' ')
