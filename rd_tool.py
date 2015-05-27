@@ -129,9 +129,9 @@ range(5,52,5),
 "x265-rt":
 range(5,52,5),
 "vp8":
-range(1,64,4),
+range(4,64,4),
 "vp9":
-range(1,64,4)
+range(4,64,4)
 }
 
 #declare the lists we will need
