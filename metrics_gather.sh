@@ -72,7 +72,7 @@ x265-rt)
   SIZE=$(stat -c %s $BASENAME.x265)
   ;;
 vp8)
-  QSTR="--target-bitrate=100M --cq-level=\$x"
+  QSTR="--end-usage=cq --target-bitrate=100000 --cq-level=\$x"
   $VPXENC --codec=$CODEC --best --threads=1 --cpu-used=0 --kf-min-dist=256 --kf-max-dist=256 $(echo $QSTR | sed 's/\$x/'$x'/g') -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
   $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
