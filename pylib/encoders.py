@@ -26,6 +26,8 @@ class Encoder(object):
     binaries = []
     min_q = None
     max_q = None
+    extension = None
+    static_args = []
 
     def __init__(self, paths):
         self._paths = paths
@@ -40,6 +42,27 @@ class Encoder(object):
     def encode_and_dump(self, input_y4m, output_y4m, q, extra_options=[]):
         """Encode a raw file and dump the result to a raw file again.
         Returns a tuple with the path to the encoded intermediate file, and the command line used to run the encoder."""
+        encoder = self._path_to(self.binaries[0])
+        output_encoded = output_y4m + self.extension
+
+        basename = path.basename(output_y4m)
+        logfile = path.basename(output_y4m) + '-enc.out'
+        with open(logfile, 'wb') as enc_log:
+            encode_cmd = [encoder] + self.static_args + self.get_encoder_args(input_y4m, output_y4m, q, output_encoded) + extra_options
+            env = self.get_encoder_env(input_y4m, output_y4m, q)
+            check_call(
+                encode_cmd,
+                env=env,
+                stdout=enc_log,
+                stderr=subprocess.STDOUT,
+            )
+        _remove_file_if_exists(logfile)
+        return output_encoded, encode_cmd
+
+    def get_encoder_env(self, input_y4m, output_y4m, q):
+        return None
+
+    def get_encoder_args(self, input_y4m, output_y4m, q, output_encoded):
         raise NotImplementedError()
 
     def get_version(self):
@@ -56,29 +79,31 @@ class Daala(Encoder):
     binaries = ['daala']
     min_q = 1
     max_q = 511
+    extension = '.ogv'
+    static_args = ['--keyframe-rate=256']
 
     def encode_and_dump(self, input_y4m, output_y4m, q, extra_options=[]):
-        encoder_example = self._path_to('daala')
-        output_encoded = output_y4m + '.ogv'
+        output_encoded, encode_cmd = Encoder.encode_and_dump(self, input_y4m, output_y4m, q, extra_options)
+
+        # Move dumped y4m to correct location
         basename = path.basename(output_y4m)
-        env = {
-            'OD_LOG_MODULES': 'encoder:10',
-            'OD_DUMP_IMAGES_SUFFIX': basename,
-        }
-        with open(basename + '-enc.out', 'wb') as enc_log:
-            encode_cmd = [encoder_example, '--keyframe-rate=256', '--video-quality', str(q), '--output', output_encoded, input_y4m] + extra_options
-            check_call(
-                encode_cmd,
-                env=env,
-                stderr=enc_log
-            )
         try:
             dumped_file = '00000000out-' + basename + '.y4m'
             os.rename(dumped_file, output_y4m)
         except OSError as e:
             raise RuntimeError("Could not find {0}, is daala configured with --enable-dump-recons?".format(dumped_file), e)
-        _remove_file_if_exists(basename + '-enc.out')
+
         return output_encoded, encode_cmd
+
+    def get_encoder_env(self, input_y4m, output_y4m, q):
+        basename = path.basename(output_y4m)
+        return {
+            'OD_LOG_MODULES': 'encoder:10',
+            'OD_DUMP_IMAGES_SUFFIX': basename,
+        }
+
+    def get_encoder_args(self, input_y4m, output_y4m, q, output_encoded):
+        return ['--video-quality', str(q), '--output', output_encoded, input_y4m]
 
     def default_qualities(self):
         # 256, 128, 64, 32 will probably be hit by the binary search, but start
@@ -93,26 +118,27 @@ class X264(Encoder):
     min_q = 1
     max_q = 51
 
-    def encode_and_dump(self, input_y4m, output_y4m, q, extra_options=[]):
-        x264 = self._path_to('x264')
-        output_encoded = output_y4m + '.x264'
+    extension = '.x264'
+    static_args = ['--preset=placebo', '--min-keyint=256', '--keyint=256', '--no-scenecut']
 
-        logfile = path.basename(output_y4m) + '-enc.out'
+    def encode_and_dump(self, input_y4m, output_y4m, q, extra_options=[]):
+        output_encoded, encode_cmd = Encoder.encode_and_dump(self, input_y4m, output_y4m, q, extra_options)
+
+        # Need to convert the yuv dump to a y4m dump
+        yuv_tmp_base = self.yuv_tmp_name(output_y4m)
+        self.convert_yuv_dump_to_y4m(input_y4m, yuv_tmp_base)
+        _remove_file_if_exists(yuv_tmp_base + '.yuv')
+
+        return output_encoded, encode_cmd
+
+    def get_encoder_args(self, input_y4m, output_y4m, q, output_encoded):
+        yuv_name = self.yuv_tmp_name(output_y4m) + '.yuv'
+        return ['--crf', str(q), '--output', output_encoded, '--dump-yuv', yuv_name, input_y4m]
+
+    def yuv_tmp_name(self, output_y4m):
         yuv_tmp_base, y4m_ext = path.splitext(output_y4m)
         assert y4m_ext == '.y4m', 'yuv2yuv4mpeg only outputs to .y4m'
-
-        with open(logfile, 'wb') as enc_log:
-            encode_cmd = [x264, '--preset=placebo', '--min-keyint=256', '--keyint=256', '--no-scenecut', '--crf', str(q), '--output', output_encoded, '--dump-yuv', yuv_tmp_base + '.yuv', input_y4m] + extra_options
-            check_call(
-                encode_cmd,
-                stderr=enc_log
-            )
-
-        self.convert_yuv_dump_to_y4m(input_y4m, yuv_tmp_base)
-
-        _remove_file_if_exists(yuv_tmp_base + '.yuv')
-        _remove_file_if_exists(logfile)
-        return output_encoded, encode_cmd
+        return yuv_tmp_base
 
     def convert_yuv_dump_to_y4m(self, input_y4m, basename):
         """Converts basename.yuv to basename.y4m.
@@ -132,31 +158,18 @@ class X265(Encoder):
     binaries = ['x265']
     min_q = 5
     max_q = 51
+    extension = '.x265'
+    static_args = ['--preset=slow', '--frame-threads=1', '--min-keyint=256', '--keyint=256', '--no-scenecut']
 
-    args = ['--preset=slow', '--frame-threads=1', '--min-keyint=256', '--keyint=256', '--no-scenecut']
-
-    def encode_and_dump(self, input_y4m, output_y4m, q, extra_options=[]):
-        x265 = self._path_to('x265')
-        output_encoded = output_y4m + '.x265'
-
-        logfile = path.basename(output_y4m) + '-enc.out'
-        with open(logfile, 'wb') as enc_log:
-            encode_cmd = [x265] + self.args + ['--crf', str(q), '-r', output_y4m, '--output', output_encoded, input_y4m] + extra_options
-            check_call(
-                encode_cmd,
-                stdout=enc_log,
-                stderr=subprocess.STDOUT,
-            )
-
-        _remove_file_if_exists(logfile)
-        return output_encoded, encode_cmd
+    def get_encoder_args(self, input_y4m, output_y4m, q, output_encoded):
+        return ['--crf', str(q), '-r', output_y4m, '--output', output_encoded, input_y4m]
 
     def default_qualities(self):
         return list(range(5,52,5))
 
 
 class X265Realtime(X265):
-    args = X265.args + ['--tune=zerolatency', '--rc-lookahead=0', '--bframes=0']
+    static_args = X265.static_args + ['--tune=zerolatency', '--rc-lookahead=0', '--bframes=0']
 
     @classmethod
     def name(cls):
