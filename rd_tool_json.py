@@ -19,14 +19,21 @@ import time
 THIS_DIR = path.dirname(sys.argv[0])
 sys.path.append(path.join(THIS_DIR, 'pylib'))
 from executor import make_local_pool, run_in_thread, Task, LazyTask, TaskFailed
-from encoders import get_encoder, get_encoder_names
+from encoders import get_encoder, get_encoder_names, get_all_binaries
 
 REMOTE_DAALA_ROOT = '/home/ec2-user/daala/'
 REMOTE_SETS_DIR = '/home/ec2-user/sets/'
 
+DEFAULT_BIN_PATHS = {
+    'daala': path.join(REMOTE_DAALA_ROOT, 'examples', 'encoder_example'),
+    'x264': '/home/ec2-user/x264/x264',
+    'x265': '/home/ec2-user/x265/build/linux/x265',
+    'tools': REMOTE_DAALA_ROOT,
+}
+
 TARGET_BITS_PER_PIXEL = [0.05, 0.1]
 
-def make_report(run_id, set_name, sets_dir, daala_root, encoder, pool):
+def make_report(run_id, set_name, sets_dir, paths, encoder, pool):
     start_time = datetime.datetime.utcnow()
 
     set_files = get_sets()[set_name]
@@ -36,13 +43,17 @@ def make_report(run_id, set_name, sets_dir, daala_root, encoder, pool):
 
     file_paths = [path.join(sets_dir, set_name, file_name) for file_name in set_files]
 
+    # Record encoder version
+    version_task = Task(Task.MIN_PRIORITY, 'encoder_version.py', path_args_for_encoder(encoder, paths) + ['--codec', encoder.name()])
+    pool.enqueue_task(version_task)
+
     # Start jobs for each file
     file_jobs = {}
     for file_path in file_paths:
         file_jobs[path.basename(file_path)] = run_in_thread(make_report_for_file, [], {
             'run_id': run_id,
             'file_path': file_path,
-            'daala_root': daala_root,
+            'paths': paths,
             'encoder': encoder,
             'pool': pool,
         })
@@ -54,13 +65,15 @@ def make_report(run_id, set_name, sets_dir, daala_root, encoder, pool):
         file_reports[file_name] = result
 
     return {
+        'encoder': encoder.name(),
+        'versions': version_task.result(),
         'run_id': run_id,
         'set': set_name,
         'date': start_time.isoformat() + 'Z',
         'files': file_reports,
     }
 
-def make_report_for_file(run_id, file_path, daala_root, encoder, pool):
+def make_report_for_file(run_id, file_path, paths, encoder, pool):
     """Encode a file at several quality levels and return a report."""
     # Start by gathering information on the file
     file_info = pool.await_task(Task(Task.MAX_PRIORITY, 'y4m_info.py', [file_path]))
@@ -77,7 +90,7 @@ def make_report_for_file(run_id, file_path, daala_root, encoder, pool):
         task = Task(
             priority = estimate_priority(file_size, q),
             name = 'run_encoder.py',
-            arguments = ['--codec', encoder.name(), '--run-name', run_name, '--daala-root', daala_root, str(q), file_path]
+            arguments = path_args_for_encoder(encoder, paths) + ['--codec', encoder.name(), '--run-name', run_name, str(q), file_path]
         )
         encode_tasks.append(LazyTask(task, pool))
 
@@ -164,6 +177,9 @@ def estimate_priority(file_size, quality):
 def bytes_for_bpp(bpp, pixels):
     return (bpp * pixels) // 8
 
+def path_args_for_encoder(encoder, paths):
+    """Get path arguments we need to pass to encoder task"""
+    return ['--tools-root='+paths['tools']] + ['--{0}-path={1}'.format(bin_name, paths[bin_name]) for bin_name in encoder.binaries]
 
 class Counter:
     """Atomic counter for stats"""
@@ -196,11 +212,18 @@ def print_progress(delay):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--local', action='store_true', help='run locally')
     parser.add_argument('--run-id', default='unnamed_run', help='name to identify the run')
     parser.add_argument('--codec', default='daala', choices=get_encoder_names(), help='codec to use')
     parser.add_argument('--sets-dir', default=REMOTE_SETS_DIR, help='directory with files to encode, organized by set')
     parser.add_argument('--set', required=True, help='name of file set to encode')
     parser.add_argument('--daala-root', default=REMOTE_DAALA_ROOT, help='path to daala')
+
+    for bin_name in get_all_binaries():
+        parser.add_argument('--remote-{0}-path'.format(bin_name), help='path to {0} binary on the worker'.format(bin_name))
+
+    parser.add_argument('--tools-root', help='path to daala repo for tools')
+
     parser.add_argument('--progress-interval', type=int, default=30, help='how often to print progress report')
     parser.add_argument('--verbose', '-v', action='store_true', help='more verbose logging')
     parser.add_argument('--quiet', '-q', action='store_true', help='less verbose logging')
@@ -214,6 +237,24 @@ def main():
         loglevel = logging.INFO
 
     logging.basicConfig(format='%(asctime)s %(levelname)-8s %(name)s: %(message)s', level=loglevel)
+
+    if args.local:
+        # Use daala root as default for tools and encoder when running locally
+        DEFAULT_BIN_PATHS['daala'] = path.join(args.daala_root, 'examples', 'encoder_example')
+        DEFAULT_BIN_PATHS['tools'] = args.daala_root
+    else:
+        sys.stderr.write('Only local is currently supported!')
+        sys.exit(1)
+
+    # Read 
+    paths = {}
+    for bin_name in get_all_binaries():
+        bin_path = getattr(args, 'remote_{0}_path'.format(bin_name))
+        if bin_path:
+            paths[bin_name] = bin_path
+        else:
+            paths[bin_name] = DEFAULT_BIN_PATHS[bin_name]
+    paths['tools'] = args.tools_root if args.tools_root else DEFAULT_BIN_PATHS['tools']
 
     encoder = get_encoder(args.codec)
     pool = make_local_pool(THIS_DIR, num_threads=cpu_count())
@@ -234,7 +275,7 @@ def main():
         run_id = args.run_id,
         set_name = args.set,
         sets_dir = args.sets_dir,
-        daala_root = args.daala_root,
+        paths = paths,
         encoder = encoder,
         pool = pool,
     )

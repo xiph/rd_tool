@@ -17,6 +17,11 @@ def read_file(fileobj):
     frame_bytes = frame_size(width, height, params[b'C'])
     return (header, _iterate_over_frames(fileobj, frame_bytes))
 
+def read_header(fileobj):
+    """Parse the header of a file and return it as a dict"""
+    header, _ = read_file(fileobj)
+    return parse_header(header)
+
 
 def _iterate_over_frames(fileobj, frame_bytes):
     """Yield a (header, frame_data) pair for each frame encountered in the file"""
@@ -40,7 +45,7 @@ def parse_header(header):
     """
     if not header.startswith(b'YUV4MPEG2 '):
         raise ValueError('Not a valid y4m header')
-    params = dict((param[:1], param[1:]) for param in header.split(b' ')[1:])
+    params = dict((param[:1], param[1:].strip()) for param in header.split(b' ')[1:])
     return params
 
 

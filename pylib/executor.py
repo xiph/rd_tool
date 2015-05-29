@@ -82,6 +82,7 @@ class Task(namedtuple('Task', 'priority, name, arguments')):
     # We inherit a sort order from namedtuple
 
     MAX_PRIORITY = 0
+    MIN_PRIORITY = 10000
 
     def __init__(self, priority, name, arguments):
         super(Task, self).__init__(priority, name, arguments)

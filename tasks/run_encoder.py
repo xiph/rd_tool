@@ -14,7 +14,7 @@ from tempfile import mkdtemp
 import time
 
 sys.path.append(path.join(path.dirname(sys.argv[0]), '..', 'pylib'))
-from encoders import get_encoder
+from encoders import get_encoder, get_all_binaries
 from metrics import get_all_metrics
 
 
@@ -50,23 +50,35 @@ def main():
     parser.add_argument('--codec', default='daala')
     parser.add_argument('--keep-temp-files', action='store_true')
     parser.add_argument('--run-name', default='')
-    parser.add_argument('--daala-root', required=True)
+
+    for bin_name in get_all_binaries():
+        parser.add_argument('--{0}-path'.format(bin_name))
+
+    parser.add_argument('--tools-root', required=True)
     parser.add_argument('q', type=int)
     parser.add_argument('file')
 
     args = parser.parse_args()
 
-    # Resolve path before we chdir
+    # Resolve paths before we chdir
     file_path = path.abspath(args.file)
-    daala_root = path.abspath(args.daala_root)
+    tools_root = path.abspath(args.tools_root)
+
+    paths = {}
+    for bin_name in get_all_binaries():
+        bin_path = getattr(args, '{0}_path'.format(bin_name))
+        if bin_path:
+            paths[bin_name] = path.abspath(bin_path)
+    paths['tools'] = tools_root
+
 
     # Change to a temporary directory so intermediate files end up there
     temp_dir = mkdtemp(prefix='encode-', suffix=args.run_name)
     chdir(temp_dir)
 
-    encoder = get_encoder(args.codec, daala_root)
+    encoder = get_encoder(args.codec, paths)
 
-    metrics = get_all_metrics(daala_root)
+    metrics = get_all_metrics(tools_root)
 
     output = gather_metrics_from_encoder(encoder, metrics, file_path, args.q)
 
