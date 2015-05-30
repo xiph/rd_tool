@@ -176,7 +176,44 @@ class X265Realtime(X265):
         return 'x265-rt'
 
 
-all_encoders = [Daala, X264, X265, X265Realtime]
+class Vp8(Encoder):
+    binaries = ['vpxenc', 'vpxdec']
+    min_q = 4
+    max_q = 63
+    extension = '.vpx'
+    vpx_codec = 'vp8'
+    static_args = ['--end-usage=cq', '--target-bitrate=100000', '--best', '--threads=1', '--cpu-used=0', '--kf-min-dist=256', '--kf-max-dist=256']
+
+    def encode_and_dump(self, input_y4m, output_y4m, q, extra_options=[]):
+        output_encoded, encode_cmd = Encoder.encode_and_dump(self, input_y4m, output_y4m, q, extra_options)
+
+        # Need to decode the encoded file to get a y4m dump
+        self.decode_to_y4m(output_encoded, output_y4m)
+
+        return output_encoded, encode_cmd
+
+    def decode_to_y4m(self, output_encoded, output_y4m):
+        vpxdec = self._path_to('vpxdec')
+        check_call([vpxdec, '--codec={0}'.format(self.vpx_codec), '-o', output_y4m, output_encoded])
+
+    def get_encoder_args(self, input_y4m, output_y4m, q, output_encoded):
+        return ['--codec={0}'.format(self.vpx_codec), '--cq-level={0}'.format(q), '-o', output_encoded, input_y4m]
+
+    def get_version(self):
+        encoder_binary = self._path_to(self.binaries[0])
+        output, _ = subprocess.Popen([encoder_binary, '--help'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT).communicate()
+        return [line for line in output.splitlines() if line.startswith('    ' + self.vpx_codec)][0].strip()
+
+    def default_qualities(self):
+        return list(range(4, 64, 4))
+
+
+class Vp9(Vp8):
+    vpx_codec = 'vp9'
+    static_args = ['--end-usage=q', '--best', '--cpu-used=0', '--threads=1', '--kf-min-dist=256', '--kf-max-dist=256']
+
+
+all_encoders = [Daala, X264, X265, X265Realtime, Vp8, Vp9]
 
 def get_encoder_names():
     return [cls.name() for cls in all_encoders]
