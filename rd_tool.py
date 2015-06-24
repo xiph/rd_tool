@@ -25,6 +25,8 @@ if 'DAALA_ROOT' not in os.environ:
 
 daala_root = os.environ['DAALA_ROOT']
 
+aws_group_name = 'Daala'
+
 extra_options = ''
 if 'EXTRA_OPTIONS' in os.environ:
     extra_options = os.environ['EXTRA_OPTIONS']
@@ -195,19 +197,19 @@ ec2 = boto.ec2.connect_to_region('us-west-2');
 autoscale = boto.ec2.autoscale.AutoScaleConnection();
 
 #how many machines are currently running?
-group = autoscale.get_all_groups(names=['Daala'])[0]
+group = autoscale.get_all_groups(names=[aws_group_name])[0]
 num_instances = len(group.instances)
 print(GetTime(),'Number of instances online:',len(group.instances))
 
 #switch on more machines if we need them
 if num_instances < num_instances_to_use:
     print(GetTime(),'Launching instances...')
-    autoscale.set_desired_capacity('Daala',num_instances_to_use)
+    autoscale.set_desired_capacity(aws_group_name,num_instances_to_use)
 
     #tell us status every few seconds
     group = None
     while num_instances < num_instances_to_use:
-        group = autoscale.get_all_groups(names=['Daala'])[0]
+        group = autoscale.get_all_groups(names=[aws_group_name])[0]
         num_instances = len(group.instances)
         print(GetTime(),'Number of instances online:',len(group.instances))
         sleep(3)
