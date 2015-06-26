@@ -180,12 +180,12 @@ else:
 print(GetTime(),'0 out of',total_num_of_jobs,'finished.')
 
 #how many AWS instances do we want to spin up?
-#The assumption is each machine can deal with 32 threads,
-#so up to 32 jobs, use 1 machine, then up to 64 use 2, etc...
-num_instances_to_use = (31 + total_num_of_jobs) / 32
+#The assumption is each machine can deal with 18 threads,
+#so up to 18 jobs, use 1 machine, then up to 64 use 2, etc...
+num_instances_to_use = (31 + total_num_of_jobs) / 18
 
 #...but lock AWS to a max number of instances
-max_num_instances_to_use = 8
+max_num_instances_to_use = 16
 
 if num_instances_to_use > max_num_instances_to_use:
   print(GetTime(),'Ideally, we should use',num_instances_to_use,
