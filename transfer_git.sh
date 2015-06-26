@@ -12,6 +12,7 @@ fi
 
 echo Building...
 pushd $DAALA_ROOT
+gcc -print-prog-name=cc1
 ./autogen.sh; ./configure --enable-static --disable-shared --disable-player --disable-dump-images --enable-logging --enable-dump-recons ; make -j4
 popd
 
