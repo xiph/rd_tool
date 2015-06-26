@@ -9,6 +9,11 @@ if [ -z $DAALA_ROOT ]; then
   exit 1
 fi
 
+echo Building...
+pushd
+cd $DAALA_ROOT; ./autogen.sh; ./configure --disable-player --disable-dump-images --enable-logging --enable-dump-recons ; make -j4
+popd
+
 echo Testing server...
 $SSH ec2-user@$1 "echo Available"
 
