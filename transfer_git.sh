@@ -11,7 +11,7 @@ fi
 
 echo Building...
 pushd
-cd $DAALA_ROOT; ./autogen.sh; ./configure --disable-player --disable-dump-images --enable-logging --enable-dump-recons ; make -j4
+cd $DAALA_ROOT; ./autogen.sh; ./configure --enable-static --disable-shared --disable-player --disable-dump-images --enable-logging --enable-dump-recons ; make -j4
 popd
 
 echo Testing server...
