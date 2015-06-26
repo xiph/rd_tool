@@ -38,8 +38,6 @@ echo Uploading tools...
 
 rsync -r -e "$SSH" ./ ec2-user@$1:/home/ec2-user/rd_tool/
 
-rsync -r -e "$SSH" ../daalatool/ ec2-user@$1:/home/ec2-user/daalatool
-
 echo Uploading local build...
 
 rsync -r -e "$SSH" $DAALA_ROOT/ ec2-user@$1:/home/ec2-user/daala/
