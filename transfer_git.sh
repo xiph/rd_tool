@@ -3,6 +3,7 @@
 set -e
 
 SSH="ssh -i daala.pem -o StrictHostKeyChecking=no"
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
 
 if [ -z $DAALA_ROOT ]; then
   echo "Please set DAALA_ROOT to the location of your libvpx git clone"
