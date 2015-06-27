@@ -2,6 +2,7 @@
 
 set -e
 
+export DAALATOOL_ROOT=/home/ec2-user/daalatool/
 export X264=/home/ec2-user/x264/x264
 export X265=/home/ec2-user/x265/build/linux/x265
 export VPXENC=/home/ec2-user/libvpx/vpxenc
