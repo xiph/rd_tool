@@ -10,13 +10,6 @@ if [ -z $DAALA_ROOT ]; then
   exit 1
 fi
 
-echo Building...
-pushd $DAALA_ROOT
-gcc -print-prog-name=cc1
-gcc -print-search-dirs
-./autogen.sh; ./configure --enable-static --disable-shared --disable-player --disable-dump-images --enable-logging --enable-dump-recons ; make -j4
-popd
-
 echo Testing server...
 $SSH ec2-user@$1 "echo Available"
 
