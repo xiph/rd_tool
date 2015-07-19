@@ -84,7 +84,7 @@ vp9)
   SIZE=$(stat -c %s $BASENAME.vpx)
 thor)
   QSTR="-qp \$x"
-  $THORENC $QSTR -cf /home/ec2-user/thor/config_awcy.txt -if $FILE -of $BASENAME.vpx > $BASENAME-enc.out
+  $THORENC $QSTR -cf /home/ec2-user/thor/config_awcy.txt -if $FILE -of $BASENAME.vpx -rf $BASENAME.y4m > $BASENAME-enc.out
   SIZE=$(stat -c %s $BASENAME.thor)
   ;;
 esac
