@@ -133,7 +133,9 @@ range(5,52,5),
 "vp8":
 range(4,64,4),
 "vp9":
-range(4,64,4)
+range(4,64,4),
+"thor":
+range(1,40,4)
 }
 
 #declare the lists we will need

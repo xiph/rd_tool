@@ -8,6 +8,7 @@ export X264=/home/ec2-user/x264/x264
 export X265=/home/ec2-user/x265/build/linux/x265
 export VPXENC=/home/ec2-user/libvpx/vpxenc
 export VPXDEC=/home/ec2-user/libvpx/vpxdec
+export THORENC=/home/ec2-user/thor/build/Thorenc
 export ENCODER_EXAMPLE=/home/ec2-user/daala/examples/encoder_example
 export YUV2YUV4MPEG=$DAALATOOL_ROOT/tools/yuv2yuv4mpeg
 
@@ -81,6 +82,10 @@ vp9)
   $VPXENC --codec=$CODEC --best --cpu-used=0 --threads=1 --kf-min-dist=256 --kf-max-dist=256 $(echo $QSTR | sed 's/\$x/'$x'/g') -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
   $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
+thor)
+  QSTR="-qp \$x"
+  $THORENC $QSTR -cf /home/ec2-user/thor/config_awcy.txt -if $FILE -of $BASENAME.vpx 2> $BASENAME-enc.out
+  SIZE=$(stat -c %s $BASENAME.thor)
   ;;
 esac
 
@@ -93,7 +98,7 @@ PSNRHVS=$("$DUMP_PSNRHVS" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 SSIM=$("$DUMP_SSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 FASTSSIM=$("$DUMP_FASTSSIM" -c "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 
-rm -f "$BASENAME.y4m" "$BASENAME.ogv" "$BASENAME.x264" "$BASENAME.x265" "$BASENAME.vpx" "$BASENAME-enc.out" "$BASENAME-psnr.out" 2> /dev/null
+rm -f "$BASENAME.y4m" "$BASENAME.ogv" "$BASENAME.x264" "$BASENAME.x265" "$BASENAME.vpx" "$BASENAME-enc.out" "$BASENAME-psnr.out" "$BASENAME.thor" 2> /dev/null
 
 echo "$x" "$PIXELS" "$SIZE"
 echo "$PSNR"
