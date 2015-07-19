@@ -82,9 +82,10 @@ vp9)
   $VPXENC --codec=$CODEC --best --cpu-used=0 --threads=1 --kf-min-dist=256 --kf-max-dist=256 $(echo $QSTR | sed 's/\$x/'$x'/g') -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
   $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
+  ;;
 thor)
   QSTR="-qp \$x"
-  $THORENC $QSTR -cf /home/ec2-user/thor/config_awcy.txt -if $FILE -of $BASENAME.vpx -rf $BASENAME.y4m > $BASENAME-enc.out
+  $THORENC $(echo $QSTR | sed 's/\$x/'$x'/g') -cf /home/ec2-user/thor/config_awcy.txt -if $FILE -of $BASENAME.vpx -rf $BASENAME.y4m > $BASENAME-enc.out
   SIZE=$(stat -c %s $BASENAME.thor)
   ;;
 esac
