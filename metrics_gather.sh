@@ -46,7 +46,7 @@ HEIGHT="$(head -1 $FILE | cut -d\  -f 3 | tr -d 'H')"
 
 case $CODEC in
 daala)
-  OD_LOG_MODULES='encoder:10' OD_DUMP_IMAGES_SUFFIX="$BASENAME" "$ENCODER_EXAMPLE" -k 256 -v "$x" $EXTRA_OPTIONS "$FILE" -o "$BASENAME.ogv" 2> "$BASENAME-enc.out"
+  OD_LOG_MODULES='encoder:10' OD_DUMP_IMAGES_SUFFIX="$BASENAME" "$ENCODER_EXAMPLE" -k 256 -v "$x" $EXTRA_OPTIONS "$FILE" -o "$BASENAME.ogv" > /dev/null 2> "$BASENAME-enc.out"
   if [ ! -f "$BASENAME.ogv" ]
   then
     echo Failed to produce "$BASENAME.ogv"
