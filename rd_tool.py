@@ -61,9 +61,9 @@ class Slot:
         self.work = work
         output_name = work.filename+'.'+str(work.quality)+'.ogv'
         if args.individual:
-            input_path = '/home/ec2-user/sets/'+self.work.filename
+            input_path = '/mnt/media/'+self.work.filename
         else:
-            input_path = '/home/ec2-user/sets/'+self.work.set+'/'+self.work.filename
+            input_path = '/mnt/media/'+self.work.set+'/'+self.work.filename
         env = {}
         env['DAALA_ROOT'] = daala_root
         env['EXTRA_OPTIONS'] = str(extra_options)
