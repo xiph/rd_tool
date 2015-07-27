@@ -39,6 +39,27 @@
       "Cactus_1920x1080_50_1s.y4m",
       "BQTerrace_1920x1080_60_1s.y4m"
     ],
+  "ntt-short-1-64":
+    [
+      "BasketballPass_416x240_50_1s.y4m",
+      "BlowingBubbles_416x240_50_1s.y4m",
+      "BQSquare_416x240_60_1s.y4m",
+      "BasketballDrill_832x480_50_1s.y4m",
+      "PartyScene_832x480_50_1s.y4m",
+      "BQMall_832x480_60_1s.y4m",
+      "Flowervase_832x480_30_2s.y4m",
+      "Keiba_832x480_30_2s.y4m",
+      "Mobisode2_832x480_30_2s.y4m",
+      "ChinaSpeed_1024x768_30_2s.y4m",
+      "FourPeople_1280x720_60_1s.y4m",
+      "Johnny_1280x720_60_1s.y4m",
+      "KristenAndSara_1280x720_60_1s.y4m",
+      "Kimono1_1920x1080_24_2s.y4m",
+      "ParkScene_1920x1080_24_2s.y4m",
+      "BasketballDrive_1920x1080_50_1s.y4m",
+      "Cactus_1920x1080_50_1s.y4m",
+      "BQTerrace_1920x1080_60_1s.y4m"
+    ],
   "ntt-short-1-vc-720p30":
     [
       "FourPeople_1280x720_30_1s.y4m",
