@@ -52,7 +52,6 @@ def shellquote(s):
 #the job slots we can fill
 class Slot:
     def __init__(self, machine=None):
-        self.name='localhost'
         self.machine = machine
         self.p = None
     def execute(self, work):
