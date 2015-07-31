@@ -25,8 +25,6 @@ if 'DAALA_ROOT' not in os.environ:
 
 daala_root = os.environ['DAALA_ROOT']
 
-aws_group_name = 'Daala'
-
 extra_options = ''
 if 'EXTRA_OPTIONS' in os.environ:
     extra_options = os.environ['EXTRA_OPTIONS']
@@ -156,7 +154,10 @@ parser.add_argument('set',metavar='Video set name',nargs='+')
 parser.add_argument('-codec',default='daala')
 parser.add_argument('-prefix',default='.')
 parser.add_argument('-individual', action='store_true')
+parser.add_argument('-awsgroup', default='Daala')
 args = parser.parse_args()
+
+aws_group_name = args.awsgroup
 
 #check we have the codec in our codec-qualities dictionary
 if args.codec not in quality:
