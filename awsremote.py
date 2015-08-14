@@ -21,11 +21,6 @@ class Machine:
           sys.exit(1)
     def execute(self,command):
         ssh_command = ['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no',command]
-    def upload(self,filename):
-        basename = os.path.basename(filename)
-        print(GetTime(),'Uploading',basename)
-        subprocess.call(['scp','-i','daala.pem','-o',' StrictHostKeyChecking=no',filename,
-            'ec2-user@'+self.host+':/home/ec2-user/video/'+basename])
 
 def get_machines(num_instances_to_use, aws_group_name):
     machines = []
