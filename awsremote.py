@@ -3,13 +3,32 @@ from __future__ import print_function
 import boto.ec2.autoscale
 from time import sleep
 from datetime import datetime
+import subprocess
 
 #our timestamping function, accurate to milliseconds
 #(remove [:-3] to display microseconds)
 def GetTime():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+    
+#the AWS instances
+class Machine:
+    def __init__(self,host):
+        self.host = host
+    def setup(self):
+        print(GetTime(),'Connecting to',self.host)
+        if subprocess.call(['./transfer_git.sh',self.host]) != 0:
+          print(GetTime(),'Couldn\'t set up machine '+self.host)
+          sys.exit(1)
+    def execute(self,command):
+        ssh_command = ['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no',command]
+    def upload(self,filename):
+        basename = os.path.basename(filename)
+        print(GetTime(),'Uploading',basename)
+        subprocess.call(['scp','-i','daala.pem','-o',' StrictHostKeyChecking=no',filename,
+            'ec2-user@'+self.host+':/home/ec2-user/video/'+basename])
 
 def get_machines(num_instances_to_use, aws_group_name):
+    machines = []
     #connect to AWS
     ec2 = boto.ec2.connect_to_region('us-west-2');
     autoscale = boto.ec2.autoscale.AutoScaleConnection();
@@ -57,5 +76,7 @@ def get_machines(num_instances_to_use, aws_group_name):
                 print(GetTime(),instance.id,'reported OK!')
                 break
             sleep(3)
-    return instances
+    for instance in instances:
+        machines.append(Machine(instance.ip_address))
+    return machines
 

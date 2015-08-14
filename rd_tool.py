@@ -30,23 +30,6 @@ extra_options = ''
 if 'EXTRA_OPTIONS' in os.environ:
     extra_options = os.environ['EXTRA_OPTIONS']
 
-#the AWS instances
-class Machine:
-    def __init__(self,host):
-        self.host = host
-    def setup(self):
-        print(GetTime(),'Connecting to',self.host)
-        if subprocess.call(['./transfer_git.sh',self.host]) != 0:
-          print(GetTime(),'Couldn\'t set up machine '+self.host)
-          sys.exit(1)
-    def execute(self,command):
-        ssh_command = ['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no',command]
-    def upload(self,filename):
-        basename = os.path.basename(filename)
-        print(GetTime(),'Uploading',basename)
-        subprocess.call(['scp','-i','daala.pem','-o',' StrictHostKeyChecking=no',filename,
-            'ec2-user@'+self.host+':/home/ec2-user/video/'+basename])
-
 def shellquote(s):
     return "'" + s.replace("'", "'\"'\"'") + "'"
 
@@ -143,8 +126,6 @@ taken_slots = []
 work_items = []
 work_done = []
 
-machines = []
-
 #load all the different sets and their filenames
 video_sets_f = open('sets.json','r')
 video_sets = json.load(video_sets_f)
@@ -195,11 +176,7 @@ if num_instances_to_use > max_num_instances_to_use:
     'AWS instances, but the max is',max_num_instances_to_use,'.')
   num_instances_to_use = max_num_instances_to_use
 
-instances = awsremote.get_machines(num_instances_to_use, aws_group_name)
-
-#make a list of our instances' IP addresses
-for instance in instances:
-    machines.append(Machine(instance.ip_address))
+machines = awsremote.get_machines(num_instances_to_use, aws_group_name)
 
 #set up our instances and their free job slots
 for machine in machines:
