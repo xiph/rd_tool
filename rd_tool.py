@@ -13,6 +13,7 @@ import multiprocessing
 import boto.ec2.autoscale
 from pprint import pprint
 import json
+import awsremote
 
 #our timestamping function, accurate to milliseconds
 #(remove [:-3] to display microseconds)
@@ -194,68 +195,21 @@ if num_instances_to_use > max_num_instances_to_use:
     'AWS instances, but the max is',max_num_instances_to_use,'.')
   num_instances_to_use = max_num_instances_to_use
 
-#connect to AWS
-ec2 = boto.ec2.connect_to_region('us-west-2');
-autoscale = boto.ec2.autoscale.AutoScaleConnection();
+instances = awsremote.get_machines(num_instances_to_use, aws_group_name)
 
-#how many machines are currently running?
-group = autoscale.get_all_groups(names=[aws_group_name])[0]
-num_instances = len(group.instances)
-print(GetTime(),'Number of instances online:',len(group.instances))
+#make a list of our instances' IP addresses
+for instance in instances:
+    machines.append(Machine(instance.ip_address))
 
-#switch on more machines if we need them
-if num_instances < num_instances_to_use:
-    print(GetTime(),'Launching instances...')
-    autoscale.set_desired_capacity(aws_group_name,num_instances_to_use)
+#set up our instances and their free job slots
+for machine in machines:
+    machine.setup()
 
-    #tell us status every few seconds
-    group = None
-    while num_instances < num_instances_to_use:
-        group = autoscale.get_all_groups(names=[aws_group_name])[0]
-        num_instances = len(group.instances)
-        print(GetTime(),'Number of instances online:',len(group.instances))
-        sleep(3)
-
-#grab instance IDs
-instance_ids = [i.instance_id for i in group.instances]
-print(GetTime(),"These instances are online:",instance_ids)
-
-if 1:
-    instances = ec2.get_only_instances(instance_ids)
-    for instance in instances:
-        print(GetTime(),'Waiting for instance',instance.id,'to boot...')
-        while 1:
-            instance.update()
-            if instance.state == 'running':
-                print(GetTime(),instance.id,'is running!')
-                break
-            sleep(3)
-    for instance_id in instance_ids:
-        print(GetTime(),'Waiting for instance',instance_id,'to report OK...')
-        while 1:
-            statuses = ec2.get_all_instance_status([instance_id])
-            if len(statuses) < 1:
-                sleep(3)
-                continue
-            status = statuses[0]
-            if status.instance_status.status == 'ok':
-                print(GetTime(),instance.id,'reported OK!')
-                break
-            sleep(3)
-
-    #make a list of our instances' IP addresses
-    for instance in instances:
-        machines.append(Machine(instance.ip_address))
-
-    #set up our instances and their free job slots
+#by doing the machines in the inner loop,
+#we end up with heavy jobs split across machines better
+for i in range(0,32):
     for machine in machines:
-        machine.setup()
-
-    #by doing the machines in the inner loop,
-    #we end up with heavy jobs split across machines better
-    for i in range(0,32):
-        for machine in machines:
-            free_slots.append(Slot(machine))
+        free_slots.append(Slot(machine))
 
 #Make a list of the bits of work we need to do.
 #We pack the stack ordered by filesize ASC, quality ASC (aka. -v DESC)
