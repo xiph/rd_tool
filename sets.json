@@ -18,6 +18,22 @@
       "old_town_cross_1080p50_2s.y4m",
       "park_joy_1080p50_2s.y4m"
     ],
+  "video-hd-2":
+    [
+      "aspen_1080p_50f.y4m",
+      "blue_sky_1080p25_50f.y4m",
+      "crowd_run_1080p50_50f.y4m",
+      "ducks_take_off_1080p50_50f.y4m",
+      "factory_1080p30_50f.y4m",
+      "life_1080p30_50f.y4m",
+      "old_town_cross_1080p50_50f.y4m",
+      "park_joy_1080p50_50f.y4m",
+      "pedesetrian_area_1080p25_50f.y4m",
+      "red_kayak_1080p_50f.y4m",
+      "riverbed_1080p25_50f.y4m",
+      "rush_hour_1080p25_50f.y4m",
+      "station2_1080p25_50f.y4m"
+    ],
   "ntt-short-1":
     [
       "BasketballPass_416x240_50_1s.y4m",
