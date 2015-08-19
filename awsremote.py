@@ -5,6 +5,9 @@ from time import sleep
 from datetime import datetime
 import subprocess
 
+def shellquote(s):
+    return "'" + s.replace("'", "'\"'\"'") + "'"
+
 #our timestamping function, accurate to milliseconds
 #(remove [:-3] to display microseconds)
 def GetTime():
@@ -21,6 +24,40 @@ class Machine:
           sys.exit(1)
     def execute(self,command):
         ssh_command = ['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no',command]
+        
+#the job slots we can fill
+class Slot:
+    def __init__(self, machine=None):
+        self.machine = machine
+        self.p = None
+    def execute(self, work):
+        self.work = work
+        output_name = work.filename+'.'+str(work.quality)+'.ogv'
+        if self.work.individual:
+            input_path = '/mnt/media/'+self.work.filename
+        else:
+            input_path = '/mnt/media/'+self.work.set+'/'+self.work.filename
+        print(GetTime(),'Encoding',work.filename,'with quality',work.quality,'on',self.machine.host)
+        if self.machine is None:
+            print(GetTime(),'No support for local execution.')
+            sys.exit(1)
+        else:
+            self.p = subprocess.Popen(['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no',
+                'ec2-user@'+self.machine.host,
+                ('DAALA_ROOT=/home/ec2-user/daala/ x="'+str(work.quality)+'" CODEC="'+work.codec+'" EXTRA_OPTIONS="'+work.extra_options+
+                    '" /home/ec2-user/rd_tool/metrics_gather.sh '+shellquote(input_path)
+                ).encode("utf-8")], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    def busy(self):
+        if self.p is None:
+            return False
+        elif self.p.poll() is None:
+            return True
+        else:
+            return False
+    def gather(self):
+        (stdout, stderr) = self.p.communicate()
+        self.work.raw = stdout
+        self.work.parse()
 
 def get_machines(num_instances_to_use, aws_group_name):
     machines = []
@@ -74,4 +111,13 @@ def get_machines(num_instances_to_use, aws_group_name):
     for instance in instances:
         machines.append(Machine(instance.ip_address))
     return machines
+    
+def get_slots(machines):
+    slots = []
+    #by doing the machines in the inner loop,
+    #we end up with heavy jobs split across machines better
+    for i in range(0,32):
+        for machine in machines:
+            slots.append(Slot(machine))
+    return slots
 

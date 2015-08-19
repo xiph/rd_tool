@@ -30,48 +30,6 @@ extra_options = ''
 if 'EXTRA_OPTIONS' in os.environ:
     extra_options = os.environ['EXTRA_OPTIONS']
 
-def shellquote(s):
-    return "'" + s.replace("'", "'\"'\"'") + "'"
-
-#the job slots we can fill
-class Slot:
-    def __init__(self, machine=None):
-        self.machine = machine
-        self.p = None
-    def execute(self, work):
-        self.work = work
-        output_name = work.filename+'.'+str(work.quality)+'.ogv'
-        if args.individual:
-            input_path = '/mnt/media/'+self.work.filename
-        else:
-            input_path = '/mnt/media/'+self.work.set+'/'+self.work.filename
-        env = {}
-        env['DAALA_ROOT'] = daala_root
-        env['EXTRA_OPTIONS'] = str(extra_options)
-        env['x'] = str(work.quality)
-        print(GetTime(),'Encoding',work.filename,'with quality',work.quality,'on',self.machine.host)
-        if self.machine is None:
-            print(GetTime(),'No support for local execution.')
-            sys.exit(1)
-            self.p = subprocess.Popen(['metrics_gather.sh',work.filename], env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-        else:
-            self.p = subprocess.Popen(['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no',
-                'ec2-user@'+self.machine.host,
-                ('DAALA_ROOT=/home/ec2-user/daala/ x="'+str(work.quality)+'" CODEC="'+args.codec+'" EXTRA_OPTIONS="'+extra_options+
-                    '" /home/ec2-user/rd_tool/metrics_gather.sh '+shellquote(input_path)
-                ).encode("utf-8")], env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    def busy(self):
-        if self.p is None:
-            return False
-        elif self.p.poll() is None:
-            return True
-        else:
-            return False
-    def gather(self):
-        (stdout, stderr) = self.p.communicate()
-        self.work.raw = stdout
-        self.work.parse()
-
 class Work:
     def parse(self):
         split = None
@@ -181,12 +139,8 @@ machines = awsremote.get_machines(num_instances_to_use, aws_group_name)
 #set up our instances and their free job slots
 for machine in machines:
     machine.setup()
-
-#by doing the machines in the inner loop,
-#we end up with heavy jobs split across machines better
-for i in range(0,32):
-    for machine in machines:
-        free_slots.append(Slot(machine))
+    
+free_slots = awsremote.get_slots(machines)
 
 #Make a list of the bits of work we need to do.
 #We pack the stack ordered by filesize ASC, quality ASC (aka. -v DESC)
@@ -199,15 +153,21 @@ if args.individual:
             work = Work()
             work.version = 2
             work.quality = q
+            work.codec = args.codec
             work.filename = filename
+            work.extra_options = extra_options
+            work.individual = True
             work_items.append(work)
 else:
     for filename in video_sets[args.set[0]]:
         for q in sorted(quality[args.codec], reverse = True):
             work = Work()
             work.quality = q
+            work.codec = args.codec
             work.set = args.set[0]
             work.filename = filename
+            work.extra_options = extra_options
+            work.individual = False
             work_items.append(work)
 
 if len(free_slots) < 1:
