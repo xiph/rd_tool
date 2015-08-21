@@ -15,6 +15,9 @@ from pprint import pprint
 import json
 import awsremote
 
+def shellquote(s):
+    return "'" + s.replace("'", "'\"'\"'") + "'"
+
 #our timestamping function, accurate to milliseconds
 #(remove [:-3] to display microseconds)
 def GetTime():
@@ -31,7 +34,10 @@ if 'EXTRA_OPTIONS' in os.environ:
     extra_options = os.environ['EXTRA_OPTIONS']
 
 class Work:
-    def parse(self):
+    def __init__(self):
+        self.failed = False
+    def parse(self, stdout, stderr):
+        self.raw = stdout
         split = None
         try:
             split = self.raw.decode('utf-8').replace(')',' ').split()
@@ -56,9 +62,22 @@ class Work:
             self.metric["fastssim"][2] = split[34]
             self.failed = False
         except IndexError:
-            print(GetTime(),'Decoding result data failed! Result was:')
-            print(GetTime(),self.raw.decode('utf-8'))
+            print(GetTime(),'Decoding result for '+self.filename+' at quality '+str(self.quality)+'failed!')
+            print(GetTime(),'stdout:')
+            print(GetTime(),stdout.decode('utf-8'))
+            print(GetTime(),'stderr:')
+            print(GetTime(),stderr.decode('utf-8'))
             self.failed = True
+    def get_command(self):
+        work = self
+        output_name = work.filename+'.'+str(work.quality)+'.ogv'
+        if self.individual:
+            input_path = '/mnt/media/'+work.filename
+        else:
+            input_path = '/mnt/media/'+work.set+'/'+work.filename
+        return ('DAALA_ROOT=/home/ec2-user/daala/ x="'+str(work.quality) + 
+            '" CODEC="'+work.codec+'" EXTRA_OPTIONS="'+work.extra_options +
+            '" /home/ec2-user/rd_tool/metrics_gather.sh '+shellquote(input_path))
 
 #set up Codec:QualityRange dictionary
 quality = {
@@ -180,7 +199,8 @@ max_retries = 10
 while(1):
     for slot in taken_slots:
         if slot.busy() == False:
-            slot.gather()
+            (stdout, stderr) = slot.gather()
+            slot.work.parse(stdout, stderr)
             if slot.work.failed == False:
                 work_done.append(slot.work)
                 print(GetTime(),len(work_done),'out of',total_num_of_jobs,'finished.')
@@ -205,6 +225,7 @@ while(1):
         if len(free_slots) != 0:
             slot = free_slots.pop()
             work = work_items.pop()
+            print(GetTime(),'Encoding',work.filename,'with quality',work.quality,'on',slot.machine.host)
             threading.Thread(slot.execute(work))
             taken_slots.append(slot)
     sleep(0.02)
@@ -214,7 +235,6 @@ work_done.sort(key=lambda work: work.quality)
 
 print(GetTime(),'Logging results...')
 for work in work_done:
-    work.parse()
     if not work.failed:
         if args.individual:
             f = open((args.prefix+'/'+os.path.basename(work.filename)+'.out').encode('utf-8'),'a')

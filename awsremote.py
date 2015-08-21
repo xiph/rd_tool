@@ -4,6 +4,7 @@ import boto.ec2.autoscale
 from time import sleep
 from datetime import datetime
 import subprocess
+import sys
 
 def shellquote(s):
     return "'" + s.replace("'", "'\"'\"'") + "'"
@@ -30,23 +31,6 @@ class Slot:
     def __init__(self, machine=None):
         self.machine = machine
         self.p = None
-    def execute(self, work):
-        self.work = work
-        output_name = work.filename+'.'+str(work.quality)+'.ogv'
-        if self.work.individual:
-            input_path = '/mnt/media/'+self.work.filename
-        else:
-            input_path = '/mnt/media/'+self.work.set+'/'+self.work.filename
-        print(GetTime(),'Encoding',work.filename,'with quality',work.quality,'on',self.machine.host)
-        if self.machine is None:
-            print(GetTime(),'No support for local execution.')
-            sys.exit(1)
-        else:
-            self.p = subprocess.Popen(['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no',
-                'ec2-user@'+self.machine.host,
-                ('DAALA_ROOT=/home/ec2-user/daala/ x="'+str(work.quality)+'" CODEC="'+work.codec+'" EXTRA_OPTIONS="'+work.extra_options+
-                    '" /home/ec2-user/rd_tool/metrics_gather.sh '+shellquote(input_path)
-                ).encode("utf-8")], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     def busy(self):
         if self.p is None:
             return False
@@ -55,9 +39,14 @@ class Slot:
         else:
             return False
     def gather(self):
-        (stdout, stderr) = self.p.communicate()
-        self.work.raw = stdout
-        self.work.parse()
+        return self.p.communicate()
+    def execute(self, work):
+        self.work = work
+        self.start_shell(work.get_command())
+    def start_shell(self, command):
+       self.p = subprocess.Popen(['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no',
+           'ec2-user@'+self.machine.host,
+           command.encode("utf-8")], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 def get_machines(num_instances_to_use, aws_group_name):
     machines = []
