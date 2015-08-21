@@ -112,6 +112,7 @@ parser.add_argument('-codec',default='daala')
 parser.add_argument('-prefix',default='.')
 parser.add_argument('-individual', action='store_true')
 parser.add_argument('-awsgroup', default='Daala')
+parser.add_argument('-machines', default=13)
 args = parser.parse_args()
 
 aws_group_name = args.awsgroup
@@ -145,7 +146,7 @@ print(GetTime(),'0 out of',total_num_of_jobs,'finished.')
 num_instances_to_use = (31 + total_num_of_jobs) / 18
 
 #...but lock AWS to a max number of instances
-max_num_instances_to_use = 13
+max_num_instances_to_use = args.machines
 
 if num_instances_to_use > max_num_instances_to_use:
   print(GetTime(),'Ideally, we should use',num_instances_to_use,
