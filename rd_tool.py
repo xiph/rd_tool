@@ -70,7 +70,6 @@ class Work:
             self.failed = True
     def get_command(self):
         work = self
-        output_name = work.filename+'.'+str(work.quality)+'.ogv'
         if self.individual:
             input_path = '/mnt/media/'+work.filename
         else:
