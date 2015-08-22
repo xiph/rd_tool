@@ -14,6 +14,7 @@ import boto.ec2.autoscale
 from pprint import pprint
 import json
 import awsremote
+import scheduler
 
 def shellquote(s):
     return "'" + s.replace("'", "'\"'\"'") + "'"
@@ -95,12 +96,7 @@ range(4,64,4),
 range(4,40,4)
 }
 
-#declare the lists we will need
-free_slots = []
-taken_slots = []
-
 work_items = []
-work_done = []
 
 #load all the different sets and their filenames
 video_sets_f = open('sets.json','r')
@@ -146,7 +142,7 @@ print(GetTime(),'0 out of',total_num_of_jobs,'finished.')
 num_instances_to_use = (31 + total_num_of_jobs) / 18
 
 #...but lock AWS to a max number of instances
-max_num_instances_to_use = args.machines
+max_num_instances_to_use = int(args.machines)
 
 if num_instances_to_use > max_num_instances_to_use:
   print(GetTime(),'Ideally, we should use',num_instances_to_use,
@@ -159,7 +155,7 @@ machines = awsremote.get_machines(num_instances_to_use, aws_group_name)
 for machine in machines:
     machine.setup()
     
-free_slots = awsremote.get_slots(machines)
+slots = awsremote.get_slots(machines)
 
 #Make a list of the bits of work we need to do.
 #We pack the stack ordered by filesize ASC, quality ASC (aka. -v DESC)
@@ -189,47 +185,11 @@ else:
             work.individual = False
             work_items.append(work)
 
-if len(free_slots) < 1:
+if len(slots) < 1:
     print(GetTime(),'All AWS machines are down.')
     sys.exit(1)
 
-retries = 0
-max_retries = 10
-
-while(1):
-    for slot in taken_slots:
-        if slot.busy() == False:
-            (stdout, stderr) = slot.gather()
-            slot.work.parse(stdout, stderr)
-            if slot.work.failed == False:
-                work_done.append(slot.work)
-                print(GetTime(),len(work_done),'out of',total_num_of_jobs,'finished.')
-            elif retries >= max_retries:
-                break
-            else:
-                retries = retries + 1
-                print(GetTime(),'Retrying work...',retries,'of',max_retries,'retries.')
-                work_items.append(slot.work)
-            taken_slots.remove(slot)
-            free_slots.append(slot)
-
-    #have we finished all the work?
-    if len(work_items) == 0:
-        if len(taken_slots) == 0:
-            print(GetTime(),'All work finished.')
-            break
-    elif retries >= max_retries:
-        print(GetTime(),'Max number of failed retries reached!')
-        sys.exit(1)
-    else:
-        if len(free_slots) != 0:
-            slot = free_slots.pop()
-            work = work_items.pop()
-            print(GetTime(),'Encoding',work.filename,'with quality',work.quality,'on',slot.machine.host)
-            threading.Thread(slot.execute(work))
-            taken_slots.append(slot)
-    sleep(0.02)
-
+work_done = scheduler.run(work_items, slots)
 
 work_done.sort(key=lambda work: work.quality)
 
