@@ -163,27 +163,23 @@ slots = awsremote.get_slots(machines)
 #for more efficient use of the AWS machines' time.
 
 if args.individual:
-    for filename in args.set:
-        for q in sorted(quality[args.codec], reverse = True):
-            work = Work()
-            work.version = 2
-            work.quality = q
-            work.codec = args.codec
-            work.filename = filename
-            work.extra_options = extra_options
-            work.individual = True
-            work_items.append(work)
+    video_filenames = args.set
 else:
-    for filename in video_sets[args.set[0]]:
-        for q in sorted(quality[args.codec], reverse = True):
-            work = Work()
-            work.quality = q
-            work.codec = args.codec
-            work.set = args.set[0]
-            work.filename = filename
-            work.extra_options = extra_options
+    video_filenames = video_sets[args.set[0]]
+
+for filename in video_filenames:
+    for q in sorted(quality[args.codec], reverse = True):
+        work = Work()
+        work.quality = q
+        work.codec = args.codec
+        if args.individual:
+            work.individual = True
+        else:
             work.individual = False
-            work_items.append(work)
+            work.set = args.set[0]
+        work.filename = filename
+        work.extra_options = extra_options
+        work_items.append(work)
 
 if len(slots) < 1:
     print(GetTime(),'All AWS machines are down.')
