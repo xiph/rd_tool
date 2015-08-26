@@ -31,18 +31,14 @@ class Slot:
     def __init__(self, machine=None):
         self.machine = machine
         self.p = None
-    def busy(self):
-        if self.p is None:
-            return False
-        elif self.p.poll() is None:
-            return True
-        else:
-            return False
+        self.busy = False
     def gather(self):
         return self.p.communicate()
     def execute(self, work):
+        self.busy = True
         self.work = work
-        self.start_shell(work.get_command())
+        work.execute(self)
+        self.busy = False
     def start_shell(self, command):
        self.p = subprocess.Popen(['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no',
            'ec2-user@'+self.machine.host,

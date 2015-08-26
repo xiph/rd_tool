@@ -69,15 +69,17 @@ class Work:
             print(GetTime(),'stderr:')
             print(GetTime(),stderr.decode('utf-8'))
             self.failed = True
-    def get_command(self):
+    def execute(self, slot):
         work = self
         if self.individual:
             input_path = '/mnt/media/'+work.filename
         else:
             input_path = '/mnt/media/'+work.set+'/'+work.filename
-        return ('DAALA_ROOT=/home/ec2-user/daala/ x="'+str(work.quality) + 
+        slot.start_shell(('DAALA_ROOT=/home/ec2-user/daala/ x="'+str(work.quality) +
             '" CODEC="'+work.codec+'" EXTRA_OPTIONS="'+work.extra_options +
-            '" /home/ec2-user/rd_tool/metrics_gather.sh '+shellquote(input_path))
+            '" /home/ec2-user/rd_tool/metrics_gather.sh '+shellquote(input_path)))
+        (stdout, stderr) = slot.gather()
+        self.parse(stdout, stderr)
 
 #set up Codec:QualityRange dictionary
 quality = {

@@ -17,9 +17,7 @@ def run(work_items, slots):
     total_num_of_jobs = len(work_items)
     while(1):
         for slot in taken_slots:
-            if slot.busy() == False:
-                (stdout, stderr) = slot.gather()
-                slot.work.parse(stdout, stderr)
+            if slot.busy == False:
                 if slot.work.failed == False:
                     work_done.append(slot.work)
                     print(GetTime(),len(work_done),'out of',total_num_of_jobs,'finished.')
@@ -44,8 +42,12 @@ def run(work_items, slots):
             if len(free_slots) != 0:
                 slot = free_slots.pop()
                 work = work_items.pop()
+                slot.work = work
                 print(GetTime(),'Encoding',work.filename,'with quality',work.quality,'on',slot.machine.host)
-                threading.Thread(slot.execute(work))
+                work_thread = threading.Thread(target=slot.execute, args=(work,))
+                work_thread.daemon = True
+                slot.busy = True
+                work_thread.start()
                 taken_slots.append(slot)
         sleep(0.02)
     return work_done
