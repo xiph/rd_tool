@@ -80,6 +80,28 @@ class Work:
             '" /home/ec2-user/rd_tool/metrics_gather.sh '+shellquote(input_path)))
         (stdout, stderr) = slot.gather()
         self.parse(stdout, stderr)
+    def get_name(self):
+        return self.filename + ' with quality ' + str(self.quality)
+        
+class ABWork:
+    def __init__(self):
+        self.failed = False
+    def execute(self, slot):
+        work = self
+        if self.individual:
+            input_path = '/mnt/media/'+work.filename
+        else:
+            input_path = '/mnt/media/'+work.set+'/'+work.filename
+        slot.start_shell(('DAALA_ROOT=/home/ec2-user/daala/ Y4M2PNG=/home/ec2-user/daalatool/tools/y4m2png EXTRA_OPTIONS="'+work.extra_options +
+            '" /home/ec2-user/daalatool/tools/ab_compare.sh -a /home/ec2-user/daalatool/tools/ -c daala -b '+str(self.bpp)+' '+shellquote(input_path)))
+        (stdout, stderr) = slot.gather()
+        (base, ext) = os.path.splitext(work.filename)
+        # search for the correct filename
+        filename = slot.check_shell('find -maxdepth 1 -name '+shellquote(base)+'*.png')
+        print(filename)
+        slot.get_file(filename, './')
+    def get_name(self):
+        return self.filename + ' with bpp ' + str(self.bpp)
 
 #set up Codec:QualityRange dictionary
 quality = {
@@ -111,6 +133,7 @@ parser.add_argument('-prefix',default='.')
 parser.add_argument('-individual', action='store_true')
 parser.add_argument('-awsgroup', default='Daala')
 parser.add_argument('-machines', default=13)
+parser.add_argument('-mode', default='metric')
 args = parser.parse_args()
 
 aws_group_name = args.awsgroup
@@ -169,19 +192,37 @@ if args.individual:
 else:
     video_filenames = video_sets[args.set[0]]
 
-for filename in video_filenames:
-    for q in sorted(quality[args.codec], reverse = True):
-        work = Work()
-        work.quality = q
-        work.codec = args.codec
-        if args.individual:
-            work.individual = True
-        else:
-            work.individual = False
-            work.set = args.set[0]
-        work.filename = filename
-        work.extra_options = extra_options
-        work_items.append(work)
+if args.mode == 'metric':
+    for filename in video_filenames:
+        for q in sorted(quality[args.codec], reverse = True):
+            work = Work()
+            work.quality = q
+            work.codec = args.codec
+            if args.individual:
+                work.individual = True
+            else:
+                work.individual = False
+                work.set = args.set[0]
+            work.filename = filename
+            work.extra_options = extra_options
+            work_items.append(work)
+elif args.mode == 'ab':
+    for filename in video_filenames:  
+        for bpp in {0.1}:
+            work = ABWork()
+            work.bpp = bpp
+            work.codec = args.codec
+            if args.individual:
+                work.individual = True
+            else:
+                work.individual = False
+                work.set = args.set[0]
+            work.filename = filename
+            work.extra_options = extra_options
+            work_items.append(work)
+else:
+    print('Unsupported -mode parameter.')
+    sys.exit(1)
 
 if len(slots) < 1:
     print(GetTime(),'All AWS machines are down.')
@@ -189,27 +230,26 @@ if len(slots) < 1:
 
 work_done = scheduler.run(work_items, slots)
 
-work_done.sort(key=lambda work: work.quality)
-
-print(GetTime(),'Logging results...')
-for work in work_done:
-    if not work.failed:
-        if args.individual:
-            f = open((args.prefix+'/'+os.path.basename(work.filename)+'.out').encode('utf-8'),'a')
-        else:
-            f = open((args.prefix+'/'+work.filename+'-daala.out').encode('utf-8'),'a')
-        f.write(str(work.quality)+' ')
-        f.write(str(work.pixels)+' ')
-        f.write(str(work.size)+' ')
-        f.write(str(work.metric['psnr'][0])+' ')
-        f.write(str(work.metric['psnrhvs'][0])+' ')
-        f.write(str(work.metric['ssim'][0])+' ')
-        f.write(str(work.metric['fastssim'][0])+' ')
-        f.write('\n')
-        f.close()
-
-if not args.individual:
-  subprocess.call('OUTPUT="'+args.prefix+'/'+'total" "'+daala_root+'/tools/rd_average.sh" "'+args.prefix+'/*.out"',
-      shell=True);
+if args.mode == 'metric':
+    print(GetTime(),'Logging results...')
+    work_done.sort(key=lambda work: work.quality)
+    for work in work_done:
+        if not work.failed:
+            if args.individual:
+                f = open((args.prefix+'/'+os.path.basename(work.filename)+'.out').encode('utf-8'),'a')
+            else:
+                f = open((args.prefix+'/'+work.filename+'-daala.out').encode('utf-8'),'a')
+            f.write(str(work.quality)+' ')
+            f.write(str(work.pixels)+' ')
+            f.write(str(work.size)+' ')
+            f.write(str(work.metric['psnr'][0])+' ')
+            f.write(str(work.metric['psnrhvs'][0])+' ')
+            f.write(str(work.metric['ssim'][0])+' ')
+            f.write(str(work.metric['fastssim'][0])+' ')
+            f.write('\n')
+            f.close()
+    if not args.individual:
+      subprocess.call('OUTPUT="'+args.prefix+'/'+'total" "'+daala_root+'/tools/rd_average.sh" "'+args.prefix+'/*.out"',
+          shell=True);
 
 print(GetTime(),'Done!')

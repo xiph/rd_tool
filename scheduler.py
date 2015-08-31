@@ -43,7 +43,7 @@ def run(work_items, slots):
                 slot = free_slots.pop()
                 work = work_items.pop()
                 slot.work = work
-                print(GetTime(),'Encoding',work.filename,'with quality',work.quality,'on',slot.machine.host)
+                print(GetTime(),'Encoding',work.get_name(),'on',slot.machine.host)
                 work_thread = threading.Thread(target=slot.execute, args=(work,))
                 work_thread.daemon = True
                 slot.busy = True

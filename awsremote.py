@@ -43,6 +43,12 @@ class Slot:
        self.p = subprocess.Popen(['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no',
            'ec2-user@'+self.machine.host,
            command.encode("utf-8")], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    def get_file(self, remote, local):
+        subprocess.call(['scp','-i','daala.pem','ec2-user@'+self.machine.host+':'+remote,local])
+    def check_shell(self, command):
+        return subprocess.check_output(['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no',
+           'ec2-user@'+self.machine.host,
+           command.encode("utf-8")])
 
 def get_machines(num_instances_to_use, aws_group_name):
     machines = []
