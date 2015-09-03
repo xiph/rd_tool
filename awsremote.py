@@ -50,11 +50,18 @@ class Slot:
            'ec2-user@'+self.machine.host,
            command.encode("utf-8")])
 
+# Returns true if an instance exists
+def instance_exists(instance, ec2):
+    status = ec2.describe_instance_status(InstanceIds=[instance])
+
+    return len(status['InstanceStatuses']) > 0
+
 # These status inquiries return huge dictionaries which must be almost entirely ignored.
 # They provide a filter but I couldn't get it to work (and it required an extra 6 lines
 # to use it).
 def state_name_of(instance, ec2):
     status = ec2.describe_instance_status(InstanceIds=[instance])
+
     # Returns one of the values in the previous call.
     return status['InstanceStatuses'][0]['InstanceState']['Name']
 
@@ -62,14 +69,20 @@ def state_name_of(instance, ec2):
 # given dictionary.
 def status_of(instance, ec2):
     status = ec2.describe_instance_status(InstanceIds=[instance])
+
     # Returns one of the values in the previous call.
     return status['InstanceStatuses'][0]['InstanceStatus']['Status']
 
 # Again, similar to `state_name_of()`
 def ip_address_of(instance, ec2):
     address = ec2.describe_instances(InstanceIds=[instance])
-    # Returns one of the values in the previous call.
-    return address['Reservations'][0]['Instances'][0]['PublicIpAddress']
+
+    if len(address['Reservations']) < 1 or len(address['Reservations'][0]['Instances']) < 1:
+        print('There is no public IP address available for instance', instance)
+        sys.exit(1)
+    else:
+        # Returns one of the values in the previous call.
+        return address['Reservations'][0]['Instances'][0]['PublicIpAddress']
 
 def get_machines(num_instances_to_use, aws_group_name):
     machines = []
@@ -104,14 +117,14 @@ def get_machines(num_instances_to_use, aws_group_name):
     for instance_id in instance_ids:
         print(GetTime(),'Waiting for instance',instance_id,'to boot...')
         while True:
-            if state_name_of(instance_id, ec2) == 'running':
+            if instance_exists(instance_id, ec2) and state_name_of(instance_id, ec2) == 'running':
                 print(GetTime(),instance_id, 'is running!')
                 break
             sleep(3)
     for instance_id in instance_ids:
         print(GetTime(),'Waiting for instance',instance_id,'to report OK...')
         while True:
-            if status_of(instance_id, ec2) == 'ok':
+            if instance_exists(instance_id, ec2) and status_of(instance_id, ec2) == 'ok':
                 print(GetTime(),instance_id,'reported OK!')
                 break
             sleep(3)
