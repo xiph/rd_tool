@@ -1,15 +1,18 @@
 {
-  "video-1-short":
-    [
+  "video-1-short": {
+    "type": "video",
+    "sources": [
       "grandma_short.y4m",
       "akiyo_cif_short.y4m",
       "sintel_trailer_2k_short.y4m",
       "soccer_short.y4m",
       "ducks_take_off_short.y4m",
       "park_joy_short.y4m"
-    ],
-  "video-hd-1":
-    [
+    ]
+  },
+  "video-hd-1": {
+    "type": "video",
+    "sources": [
       "sintel_trailer_2k_1080p24_2s.y4m",
       "pedestrian_area_1080p25_2s.y4m",
       "station2_1080p25_2s.y4m",
@@ -17,9 +20,11 @@
       "ducks_take_off_1080p50_2s.y4m",
       "old_town_cross_1080p50_2s.y4m",
       "park_joy_1080p50_2s.y4m"
-    ],
-  "video-hd-2":
-    [
+    ]
+  },
+  "video-hd-2": {
+    "type": "video",
+    "sources": [
       "aspen_1080p_50f.y4m",
       "blue_sky_1080p25_50f.y4m",
       "crowd_run_1080p50_50f.y4m",
@@ -33,9 +38,11 @@
       "riverbed_1080p25_50f.y4m",
       "rush_hour_1080p25_50f.y4m",
       "station2_1080p25_50f.y4m"
-    ],
-  "ntt-short-1":
-    [
+    ]
+  },
+  "ntt-short-1": {
+    "type": "video",
+    "sources": [
       "BasketballPass_416x240_50_1s.y4m",
       "BlowingBubbles_416x240_50_1s.y4m",
       "BQSquare_416x240_60_1s.y4m",
@@ -54,9 +61,11 @@
       "BasketballDrive_1920x1080_50_1s.y4m",
       "Cactus_1920x1080_50_1s.y4m",
       "BQTerrace_1920x1080_60_1s.y4m"
-    ],
-  "ntt-short-1-64":
-    [
+    ]
+  },
+  "ntt-short-1-64": {
+    "type": "video",
+    "sources": [
       "BasketballPass_384x192_50_1s.y4m",
       "BlowingBubbles_384x192_50_1s.y4m",
       "BQSquare_384x192_60_1s.y4m",
@@ -75,15 +84,19 @@
       "BasketballDrive_1920x1024_50_1s.y4m",
       "Cactus_1920x1024_50_1s.y4m",
       "BQTerrace_1920x1024_60_1s.y4m"
-    ],
-  "ntt-short-1-vc-720p30":
-    [
+    ]
+  },
+  "ntt-short-1-vc-720p30": {
+    "type": "video",
+    "sources": [
       "FourPeople_1280x720_30_1s.y4m",
       "Johnny_1280x720_30_1s.y4m",
       "KristenAndSara_1280x720_30_1s.y4m"
-    ],
-  "screenshots":
-    [
+    ]
+  },
+  "screenshots": {
+    "type": "image",
+    "sources": [
       "20130119071322_Microsoft_Project_screenshot.png.y4m",
       "20130920125838_Firefox_Screenshot.png.y4m",
       "Audacity_1.3.beta_screenshot.png.y4m",
@@ -99,9 +112,11 @@
       "Piwik_screenshot_german.png.y4m",
       "Screenshot_kmeleon09.png.y4m",
       "Screenshot_lxde_ubuntu_urdu.png.y4m"
-    ],
-  "subset1":
-    [
+    ]
+  },
+  "subset1": {
+    "type": "image",
+    "sources": [
       "08-2011._Panthera_tigris_tigris_-_Texas_Park_-_Lanzarote_-TP04.y4m",
       "125_-_Québec_-_Pont_de_Québec_de_nuit_-_Septembre_2009.y4m",
       "2011-03-05_03-13_Madeira_159_Funchal,_Mercado_dos_Lavradores.y4m",
@@ -152,9 +167,11 @@
       "Washington_Monument,_Washington,_D.C._04037u_original.y4m",
       "Wasserfassstelle_von_1898_im_Schanerloch.y4m",
       "White_Dune_-_Mui_Ne.y4m"
-    ],
-  "subset2":
-    [
+    ]
+  },
+  "subset2": {
+    "type": "image",
+    "sources":  [
       "20100701_Pelpin,_cathedral,_1.y4m",
       "77_Bombay_Street_Photo_by_Sven_Fischer.y4m",
       "80_-_Machu_Picchu_-_Juin_2009_-_edit.2.y4m",
@@ -205,9 +222,11 @@
       "Vocabulaire_de_l'académie,_1832_01.y4m",
       "Zoo_de_la_Barben_20100605_048.y4m",
       "Вид_из_Green_Plaza_065.y4m"
-    ],
-  "subset3":
-    [
+    ]
+  },
+  "subset3": {
+    "type": "image",
+    "sources": [
       "020_BS_Schlösschen_gundeldingen.y4m",
       "02_568a_DA_(belg,).y4m",
       "072.Sieste.y4m",
@@ -1208,9 +1227,11 @@
       "№743+_В.Аксенов,_ВНекрасов,_ВКондырев,_Орлеан,_1985.y4m",
       "柳州市红光桥.y4m",
       "水湳經貿園區鳥瞰圖_(面台中港).y4m"
-    ],
-  "subset4":
-    [
+    ]
+  },
+  "subset4": {
+    "type": "image",
+    "sources": [
       "Flickr_-_Joost_J._Bakker_IJmuiden_(8).y4m",
       "100_Arme_der_Guan-yin_with_new_arms.y4m",
       "102nd_Infantry_Rgt._in_Laghman_province_2010-09-25.y4m",
@@ -2212,4 +2233,5 @@
       "虎丘庙会.y4m",
       "隅田公園_SUMIDA_park.y4m"
     ]
+  }
 }
