@@ -1,6 +1,4 @@
-#!/usr/bin/env python2
-
-from __future__ import print_function
+#!/usr/bin/env python3
 
 import argparse
 import os
@@ -10,7 +8,6 @@ import subprocess
 from time import sleep
 from datetime import datetime
 import multiprocessing
-import boto.ec2.autoscale
 from pprint import pprint
 import json
 import awsremote
@@ -106,18 +103,12 @@ class ABWork:
 #set up Codec:QualityRange dictionary
 quality = {
 "daala": [5,7,11,16,25,37,55,81,122,181,270,400],
-"x264":
-range(1,52,5),
-"x265":
-range(5,52,5),
-"x265-rt":
-range(5,52,5),
-"vp8":
-range(4,64,4),
-"vp9":
-range(4,64,4),
-"thor":
-range(4,40,4)
+"x264": list(range(1,52,5)),
+"x265": list(range(5,52,5)),
+"x265-rt": list(range(5,52,5)),
+"vp8": list(range(4,64,4)),
+"vp9": list(range(4,64,4)),
+"thor": list(range(4,40,4))
 }
 
 work_items = []
@@ -164,7 +155,7 @@ print(GetTime(),'0 out of',total_num_of_jobs,'finished.')
 #how many AWS instances do we want to spin up?
 #The assumption is each machine can deal with 18 threads,
 #so up to 18 jobs, use 1 machine, then up to 64 use 2, etc...
-num_instances_to_use = (31 + total_num_of_jobs) / 18
+num_instances_to_use = (31 + total_num_of_jobs) // 18
 
 #...but lock AWS to a max number of instances
 max_num_instances_to_use = int(args.machines)
