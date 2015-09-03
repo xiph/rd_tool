@@ -159,7 +159,7 @@ if not args.individual:
         sys.exit(1)
 
 if not args.individual:
-    total_num_of_jobs = len(video_sets[args.set[0]]) * len(quality[args.codec])
+    total_num_of_jobs = len(video_sets[args.set[0]]['sources']) * len(quality[args.codec])
 else:
     total_num_of_jobs = len(quality[args.codec]) #FIXME
 
@@ -196,7 +196,7 @@ slots = awsremote.get_slots(machines)
 if args.individual:
     video_filenames = args.set
 else:
-    video_filenames = video_sets[args.set[0]]
+    video_filenames = video_sets[args.set[0]]['sources']
 
 if args.mode == 'metric':
     for filename in video_filenames:
