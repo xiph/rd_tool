@@ -1,27 +1,19 @@
 #!/usr/bin/env python3
 
 import boto3
+from utility import get_time
 from time import sleep
-from datetime import datetime
 import subprocess
 import sys
 
-def shellquote(s):
-    return "'" + s.replace("'", "'\"'\"'") + "'"
-
-#our timestamping function, accurate to milliseconds
-#(remove [:-3] to display microseconds)
-def GetTime():
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-    
 #the AWS instances
 class Machine:
     def __init__(self,host):
         self.host = host
     def setup(self):
-        print(GetTime(),'Connecting to',self.host)
+        print(get_time(),'Connecting to',self.host)
         if subprocess.call(['./transfer_git.sh',self.host]) != 0:
-          print(GetTime(),'Couldn\'t set up machine '+self.host)
+          print(get_time(),'Couldn\'t set up machine '+self.host)
           sys.exit(1)
     def execute(self,command):
         ssh_command = ['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no',command]
@@ -93,11 +85,11 @@ def get_machines(num_instances_to_use, aws_group_name):
     #how many machines are currently running?
     instances = autoscale.describe_auto_scaling_instances()['AutoScalingInstances']
     num_instances = len(instances)
-    print(GetTime(),'Number of instances online:', num_instances)
+    print(get_time(),'Number of instances online:', num_instances)
 
     #switch on more machines if we need them
     if num_instances < num_instances_to_use:
-        print(GetTime(),'Launching instances...')
+        print(get_time(),'Launching instances...')
         autoscale.set_desired_capacity(
             AutoScalingGroupName = aws_group_name,
             DesiredCapacity = num_instances_to_use
@@ -107,25 +99,25 @@ def get_machines(num_instances_to_use, aws_group_name):
         while num_instances < num_instances_to_use:
             instances = autoscale.describe_auto_scaling_instances()['AutoScalingInstances']
             num_instances = len(instances)
-            print(GetTime(),'Number of instances online:', num_instances)
+            print(get_time(),'Number of instances online:', num_instances)
             sleep(3)
 
     #grab instance IDs
     instance_ids = [i['InstanceId'] for i in instances]
-    print(GetTime(),"These instances are online:",instance_ids)
+    print(get_time(),"These instances are online:",instance_ids)
 
     for instance_id in instance_ids:
-        print(GetTime(),'Waiting for instance',instance_id,'to boot...')
+        print(get_time(),'Waiting for instance',instance_id,'to boot...')
         while True:
             if instance_exists(instance_id, ec2) and state_name_of(instance_id, ec2) == 'running':
-                print(GetTime(),instance_id, 'is running!')
+                print(get_time(),instance_id, 'is running!')
                 break
             sleep(3)
     for instance_id in instance_ids:
-        print(GetTime(),'Waiting for instance',instance_id,'to report OK...')
+        print(get_time(),'Waiting for instance',instance_id,'to report OK...')
         while True:
             if instance_exists(instance_id, ec2) and status_of(instance_id, ec2) == 'ok':
-                print(GetTime(),instance_id,'reported OK!')
+                print(get_time(),instance_id,'reported OK!')
                 break
             sleep(3)
     for instance_id in instance_ids:
