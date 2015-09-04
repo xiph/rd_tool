@@ -4,6 +4,7 @@ from __future__ import print_function
 from datetime import datetime
 import threading
 from time import sleep
+import sys
 
 #our timestamping function, accurate to milliseconds
 #(remove [:-3] to display microseconds)
@@ -51,5 +52,5 @@ def run(work_items, slots):
                 slot.busy = True
                 work_thread.start()
                 taken_slots.append(slot)
-        sleep(0.02)
+        sleep(1)
     return work_done
