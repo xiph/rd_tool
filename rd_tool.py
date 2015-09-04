@@ -70,7 +70,7 @@ class Work:
         self.parse(stdout, stderr)
     def get_name(self):
         return self.filename + ' with quality ' + str(self.quality)
-        
+
 class ABWork:
     def __init__(self):
         self.failed = False
@@ -129,11 +129,11 @@ if args.codec not in quality:
 
 #check we have the set name in our sets-filenames dictionary
 if not args.individual:
-  if args.set[0] not in video_sets:
-      print(get_time(),'Specified invalid set '+args.set[0]+'. Available sets are:')
-      for video_set in video_sets:
-          print(get_time(),video_set)
-      sys.exit(1)
+    if args.set[0] not in video_sets:
+        print(get_time(),'Specified invalid set '+args.set[0]+'. Available sets are:')
+        for video_set in video_sets:
+            print(get_time(),video_set)
+        sys.exit(1)
 
 if not args.individual:
     total_num_of_jobs = len(video_sets[args.set[0]]) * len(quality[args.codec])
@@ -152,9 +152,9 @@ num_instances_to_use = (31 + total_num_of_jobs) // 18
 max_num_instances_to_use = int(args.machines)
 
 if num_instances_to_use > max_num_instances_to_use:
-  print(get_time(),'Ideally, we should use',num_instances_to_use,
-    'AWS instances, but the max is',max_num_instances_to_use,'.')
-  num_instances_to_use = max_num_instances_to_use
+    print(get_time(),'Ideally, we should use',num_instances_to_use,
+        'AWS instances, but the max is',max_num_instances_to_use,'.')
+    num_instances_to_use = max_num_instances_to_use
 
 machines = awsremote.get_machines(num_instances_to_use, aws_group_name)
 
@@ -232,6 +232,6 @@ if args.mode == 'metric':
             f.close()
     if not args.individual:
       subprocess.call('OUTPUT="'+args.prefix+'/'+'total" "'+daala_root+'/tools/rd_average.sh" "'+args.prefix+'/*.out"',
-          shell=True);
+          shell=True)
 
 print(get_time(),'Done!')
