@@ -74,6 +74,14 @@ def ip_address_of(instance, ec2):
         # Returns one of the values in the previous call.
         return address['Reservations'][0]['Instances'][0]['PublicIpAddress']
 
+def get_instances_in_group(autoscale, aws_group_name):
+    all_instances = autoscale.describe_auto_scaling_instances()['AutoScalingInstances']
+    instances = []
+    for instance in all_instances:
+        if instance['AutoScalingGroupName'] == aws_group_name:
+            instances.append(instance)
+    return instances
+
 def get_machines(num_instances_to_use, aws_group_name):
     machines = []
     #connect to AWS
@@ -81,7 +89,7 @@ def get_machines(num_instances_to_use, aws_group_name):
     autoscale = boto3.client('autoscaling');
 
     #how many machines are currently running?
-    instances = autoscale.describe_auto_scaling_instances()['AutoScalingInstances']
+    instances = get_instances_in_group(autoscale, aws_group_name)
     num_instances = len(instances)
     print(get_time(),'Number of instances online:', num_instances)
 
@@ -95,7 +103,7 @@ def get_machines(num_instances_to_use, aws_group_name):
 
         #tell us status every few seconds
         while num_instances < num_instances_to_use:
-            instances = autoscale.describe_auto_scaling_instances()['AutoScalingInstances']
+            instances = get_instances_in_group(autoscale, aws_group_name)
             num_instances = len(instances)
             print(get_time(),'Number of instances online:', num_instances)
             sleep(3)
