@@ -1,17 +1,10 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 
-from __future__ import print_function
-
+from utility import get_time
 import argparse
 import os
 import sys
-import threading
 import subprocess
-from time import sleep
-from datetime import datetime
-import multiprocessing
-import boto.ec2.autoscale
-from pprint import pprint
 import json
 import awsremote
 import scheduler
@@ -19,13 +12,8 @@ import scheduler
 def shellquote(s):
     return "'" + s.replace("'", "'\"'\"'") + "'"
 
-#our timestamping function, accurate to milliseconds
-#(remove [:-3] to display microseconds)
-def GetTime():
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-
 if 'DAALA_ROOT' not in os.environ:
-    print(GetTime(),"Please specify the DAALA_ROOT environment variable to use this tool.")
+    print(get_time(),"Please specify the DAALA_ROOT environment variable to use this tool.")
     sys.exit(1)
 
 daala_root = os.environ['DAALA_ROOT']
@@ -63,11 +51,11 @@ class Work:
             self.metric["fastssim"][2] = split[34]
             self.failed = False
         except IndexError:
-            print(GetTime(),'Decoding result for '+self.filename+' at quality '+str(self.quality)+'failed!')
-            print(GetTime(),'stdout:')
-            print(GetTime(),stdout.decode('utf-8'))
-            print(GetTime(),'stderr:')
-            print(GetTime(),stderr.decode('utf-8'))
+            print(get_time(),'Decoding result for '+self.filename+' at quality '+str(self.quality)+'failed!')
+            print(get_time(),'stdout:')
+            print(get_time(),stdout.decode('utf-8'))
+            print(get_time(),'stderr:')
+            print(get_time(),stderr.decode('utf-8'))
             self.failed = True
     def execute(self, slot):
         work = self
@@ -82,7 +70,7 @@ class Work:
         self.parse(stdout, stderr)
     def get_name(self):
         return self.filename + ' with quality ' + str(self.quality)
-        
+
 class ABWork:
     def __init__(self):
         self.failed = False
@@ -106,18 +94,12 @@ class ABWork:
 #set up Codec:QualityRange dictionary
 quality = {
 "daala": [5,7,11,16,25,37,55,81,122,181,270,400],
-"x264":
-range(1,52,5),
-"x265":
-range(5,52,5),
-"x265-rt":
-range(5,52,5),
-"vp8":
-range(4,64,4),
-"vp9":
-range(4,64,4),
-"thor":
-range(4,40,4)
+"x264": list(range(1,52,5)),
+"x265": list(range(5,52,5)),
+"x265-rt": list(range(5,52,5)),
+"vp8": list(range(4,64,4)),
+"vp9": list(range(4,64,4)),
+"thor": list(range(4,40,4))
 }
 
 work_items = []
@@ -140,18 +122,18 @@ aws_group_name = args.awsgroup
 
 #check we have the codec in our codec-qualities dictionary
 if args.codec not in quality:
-    print(GetTime(),'Invalid codec. Valid codecs are:')
+    print(get_time(),'Invalid codec. Valid codecs are:')
     for q in quality:
-        print(GetTime(),q)
+        print(get_time(),q)
     sys.exit(1)
 
 #check we have the set name in our sets-filenames dictionary
 if not args.individual:
-  if args.set[0] not in video_sets:
-      print(GetTime(),'Specified invalid set '+args.set[0]+'. Available sets are:')
-      for video_set in video_sets:
-          print(GetTime(),video_set)
-      sys.exit(1)
+    if args.set[0] not in video_sets:
+        print(get_time(),'Specified invalid set '+args.set[0]+'. Available sets are:')
+        for video_set in video_sets:
+            print(get_time(),video_set)
+        sys.exit(1)
 
 if not args.individual:
     total_num_of_jobs = len(video_sets[args.set[0]]) * len(quality[args.codec])
@@ -159,20 +141,20 @@ else:
     total_num_of_jobs = len(quality[args.codec]) #FIXME
 
 #a logging message just to get the regex progress bar on the AWCY site started...
-print(GetTime(),'0 out of',total_num_of_jobs,'finished.')
+print(get_time(),'0 out of',total_num_of_jobs,'finished.')
 
 #how many AWS instances do we want to spin up?
 #The assumption is each machine can deal with 18 threads,
 #so up to 18 jobs, use 1 machine, then up to 64 use 2, etc...
-num_instances_to_use = (31 + total_num_of_jobs) / 18
+num_instances_to_use = (31 + total_num_of_jobs) // 18
 
 #...but lock AWS to a max number of instances
 max_num_instances_to_use = int(args.machines)
 
 if num_instances_to_use > max_num_instances_to_use:
-  print(GetTime(),'Ideally, we should use',num_instances_to_use,
-    'AWS instances, but the max is',max_num_instances_to_use,'.')
-  num_instances_to_use = max_num_instances_to_use
+    print(get_time(),'Ideally, we should use',num_instances_to_use,
+        'AWS instances, but the max is',max_num_instances_to_use,'.')
+    num_instances_to_use = max_num_instances_to_use
 
 machines = awsremote.get_machines(num_instances_to_use, aws_group_name)
 
@@ -225,13 +207,13 @@ else:
     sys.exit(1)
 
 if len(slots) < 1:
-    print(GetTime(),'All AWS machines are down.')
+    print(get_time(),'All AWS machines are down.')
     sys.exit(1)
 
 work_done = scheduler.run(work_items, slots)
 
 if args.mode == 'metric':
-    print(GetTime(),'Logging results...')
+    print(get_time(),'Logging results...')
     work_done.sort(key=lambda work: work.quality)
     for work in work_done:
         if not work.failed:
@@ -250,6 +232,6 @@ if args.mode == 'metric':
             f.close()
     if not args.individual:
       subprocess.call('OUTPUT="'+args.prefix+'/'+'total" "'+daala_root+'/tools/rd_average.sh" "'+args.prefix+'/*.out"',
-          shell=True);
+          shell=True)
 
-print(GetTime(),'Done!')
+print(get_time(),'Done!')
