@@ -9,6 +9,11 @@ import json
 import awsremote
 import scheduler
 
+# Finding files such as `this_(that)` requires `'` be placed on both
+# sides of the quote so the `()` are both captured. Files such as
+# `du_Parterre_d'Eau` must be converted into
+#`'du_Parterre_d'"'"'Eau'
+#                ^^^ Required to make sure the `'` is captured.
 def shellquote(s):
     return "'" + s.replace("'", "'\"'\"'") + "'"
 
@@ -80,14 +85,33 @@ class ABWork:
             input_path = '/mnt/media/'+work.filename
         else:
             input_path = '/mnt/media/'+work.set+'/'+work.filename
-        slot.start_shell(('DAALA_ROOT=/home/ec2-user/daala/ Y4M2PNG=/home/ec2-user/daalatool/tools/y4m2png EXTRA_OPTIONS="'+work.extra_options +
-            '" /home/ec2-user/daalatool/tools/ab_compare.sh -a /home/ec2-user/daalatool/tools/ -c daala -b '+str(self.bpp)+' '+shellquote(input_path)))
-        (stdout, stderr) = slot.gather()
-        (base, ext) = os.path.splitext(work.filename)
-        # search for the correct filename
-        filename = slot.check_shell('find -maxdepth 1 -name '+shellquote(base)+'*.png')
-        print(filename)
-        slot.get_file(filename, './')
+
+        try:
+            slot.start_shell('/home/ec2-user/daala/tools/ab_meta_compare.sh ' + shellquote(str(self.bpp)) + ' ' + shellquote(self.time) + ' ' + work.set + ' ' + shellquote(input_path) )
+            (stdout, stderr) = slot.gather()
+
+            # filename with extension
+            if 'video' in work.set:
+                filename = input_path.split('/')[-1].rsplit('.', 1)[0] + '.ogv'
+            else:
+                filename = input_path.split('/')[-1].rsplit('.', 1)[0] + '.png'
+
+            middle = self.time + '/' + work.set + '/bpp_' + str(self.bpp)
+
+            remote_file = '/home/ec2-user/runs/' + middle + '/' + shellquote(filename)
+            local_folder = '../runs/' + middle
+            local_file = '../runs/' + middle + '/' + filename
+
+            subprocess.Popen(['mkdir', '--parents', local_folder])
+            slot.get_file(remote_file, local_file)
+            self.failed = False
+        except IndexError:
+            print(GetTime(), 'Encoding and copying', filename, 'at bpp', str(self.bpp), 'failed')
+            print(GetTime(),'stdout:')
+            print(GetTime(),stdout.decode('utf-8'))
+            print(GetTime(),'stderr:')
+            print(GetTime(),stderr.decode('utf-8'))
+            self.failed = True
     def get_name(self):
         return self.filename + ' with bpp ' + str(self.bpp)
 
@@ -164,6 +188,9 @@ for machine in machines:
     
 slots = awsremote.get_slots(machines)
 
+# Z is added because that's what awcy uses on the end
+start_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S.%f")[:-3] + 'Z'
+
 #Make a list of the bits of work we need to do.
 #We pack the stack ordered by filesize ASC, quality ASC (aka. -v DESC)
 #so we pop the hardest encodes first,
@@ -189,11 +216,13 @@ if args.mode == 'metric':
             work.extra_options = extra_options
             work_items.append(work)
 elif args.mode == 'ab':
-    for filename in video_filenames:  
-        for bpp in {0.1}:
+    bits_per_pixel = [x/10.0 for x in range(1, 11)]
+    for filename in video_filenames:
+        for bpp in bits_per_pixel:
             work = ABWork()
             work.bpp = bpp
             work.codec = args.codec
+            work.time = start_time
             if args.individual:
                 work.individual = True
             else:
