@@ -81,10 +81,7 @@ class ABWork:
         self.failed = False
     def execute(self, slot):
         work = self
-        if self.individual:
-            input_path = '/mnt/media/'+work.filename
-        else:
-            input_path = '/mnt/media/'+work.set+'/'+work.filename
+        input_path = '/mnt/media/' + work.set + '/' + work.filename
 
         try:
             slot.start_shell('/home/ec2-user/daala/tools/ab_meta_compare.sh ' + shellquote(str(self.bpp)) + ' ' + shellquote(self.time) + ' ' + work.set + ' ' + shellquote(input_path) )
@@ -223,11 +220,7 @@ elif args.mode == 'ab':
             work.bpp = bpp
             work.codec = args.codec
             work.time = start_time
-            if args.individual:
-                work.individual = True
-            else:
-                work.individual = False
-                work.set = args.set[0]
+            work.set = args.set[0]
             work.filename = filename
             work.extra_options = extra_options
             work_items.append(work)
