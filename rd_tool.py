@@ -185,7 +185,7 @@ machines = awsremote.get_machines(num_instances_to_use, aws_group_name)
 #set up our instances and their free job slots
 for machine in machines:
     machine.setup()
-    
+
 slots = awsremote.get_slots(machines)
 
 # Z is added because that's what awcy uses on the end
