@@ -84,7 +84,7 @@ class ABWork:
         input_path = '/mnt/media/' + work.set + '/' + work.filename
 
         try:
-            slot.start_shell('/home/ec2-user/daala/tools/ab_meta_compare.sh ' + shellquote(str(self.bpp)) + ' ' + shellquote(self.time) + ' ' + work.set + ' ' + shellquote(input_path) )
+            slot.start_shell('/home/ec2-user/daala/tools/ab_meta_compare.sh ' + shellquote(str(self.bpp)) + ' ' + shellquote(self.runid) + ' ' + work.set + ' ' + shellquote(input_path) )
             (stdout, stderr) = slot.gather()
 
             # filename with extension
@@ -93,7 +93,7 @@ class ABWork:
             else:
                 filename = input_path.split('/')[-1].rsplit('.', 1)[0] + '.png'
 
-            middle = self.time + '/' + work.set + '/bpp_' + str(self.bpp)
+            middle = self.runid + '/' + work.set + '/bpp_' + str(self.bpp)
 
             remote_file = '/home/ec2-user/runs/' + middle + '/' + shellquote(filename)
             local_folder = '../runs/' + middle
@@ -137,6 +137,8 @@ parser.add_argument('-individual', action='store_true')
 parser.add_argument('-awsgroup', default='Daala')
 parser.add_argument('-machines', default=13)
 parser.add_argument('-mode', default='metric')
+parser.add_argument('-runid', default=get_time())
+
 args = parser.parse_args()
 
 aws_group_name = args.awsgroup
@@ -185,8 +187,6 @@ for machine in machines:
 
 slots = awsremote.get_slots(machines)
 
-# Z is added because that's what awcy uses on the end
-start_time = datetime.now().strftime("%Y-%m-%dT%H-%M-%S.%f")[:-3] + 'Z'
 
 #Make a list of the bits of work we need to do.
 #We pack the stack ordered by filesize ASC, quality ASC (aka. -v DESC)
@@ -219,7 +219,7 @@ elif args.mode == 'ab':
             work = ABWork()
             work.bpp = bpp
             work.codec = args.codec
-            work.time = start_time
+            work.runid = str(args.runid)
             work.set = args.set[0]
             work.filename = filename
             work.extra_options = extra_options
