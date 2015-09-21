@@ -213,17 +213,20 @@ if args.mode == 'metric':
             work.extra_options = extra_options
             work_items.append(work)
 elif args.mode == 'ab':
-    bits_per_pixel = [x/10.0 for x in range(1, 11)]
-    for filename in video_filenames:
-        for bpp in bits_per_pixel:
-            work = ABWork()
-            work.bpp = bpp
-            work.codec = args.codec
-            work.runid = str(args.runid)
-            work.set = args.set[0]
-            work.filename = filename
-            work.extra_options = extra_options
-            work_items.append(work)
+    if video_sets[args.set[0]]['type'] == 'video':
+        print("mode `ab` isn't supported for videos. Skipping.")
+    else:
+        bits_per_pixel = [x/10.0 for x in range(1, 11)]
+        for filename in video_filenames:
+            for bpp in bits_per_pixel:
+                work = ABWork()
+                work.bpp = bpp
+                work.codec = args.codec
+                work.runid = str(args.runid)
+                work.set = args.set[0]
+                work.filename = filename
+                work.extra_options = extra_options
+                work_items.append(work)
 else:
     print('Unsupported -mode parameter.')
     sys.exit(1)
