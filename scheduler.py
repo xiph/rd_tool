@@ -46,5 +46,5 @@ def run(work_items, slots):
                 slot.busy = True
                 work_thread.start()
                 taken_slots.append(slot)
-        sleep(1)
+        sleep(0.2)
     return work_done
