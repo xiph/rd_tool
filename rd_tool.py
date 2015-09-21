@@ -9,6 +9,11 @@ import json
 import awsremote
 import scheduler
 
+# Finding files such as `this_(that)` requires `'` be placed on both
+# sides of the quote so the `()` are both captured. Files such as
+# `du_Parterre_d'Eau` must be converted into
+#`'du_Parterre_d'"'"'Eau'
+#                ^^^ Required to make sure the `'` is captured.
 def shellquote(s):
     return "'" + s.replace("'", "'\"'\"'") + "'"
 
@@ -76,18 +81,34 @@ class ABWork:
         self.failed = False
     def execute(self, slot):
         work = self
-        if self.individual:
-            input_path = '/mnt/media/'+work.filename
-        else:
-            input_path = '/mnt/media/'+work.set+'/'+work.filename
-        slot.start_shell(('DAALA_ROOT=/home/ec2-user/daala/ Y4M2PNG=/home/ec2-user/daalatool/tools/y4m2png EXTRA_OPTIONS="'+work.extra_options +
-            '" /home/ec2-user/daalatool/tools/ab_compare.sh -a /home/ec2-user/daalatool/tools/ -c daala -b '+str(self.bpp)+' '+shellquote(input_path)))
-        (stdout, stderr) = slot.gather()
-        (base, ext) = os.path.splitext(work.filename)
-        # search for the correct filename
-        filename = slot.check_shell('find -maxdepth 1 -name '+shellquote(base)+'*.png')
-        print(filename)
-        slot.get_file(filename, './')
+        input_path = '/mnt/media/' + work.set + '/' + work.filename
+
+        try:
+            slot.start_shell('/home/ec2-user/daala/tools/ab_meta_compare.sh ' + shellquote(str(self.bpp)) + ' ' + shellquote(self.runid) + ' ' + work.set + ' ' + shellquote(input_path) )
+            (stdout, stderr) = slot.gather()
+
+            # filename with extension
+            if 'video' in work.set:
+                filename = input_path.split('/')[-1].rsplit('.', 1)[0] + '.ogv'
+            else:
+                filename = input_path.split('/')[-1].rsplit('.', 1)[0] + '.png'
+
+            middle = self.runid + '/' + work.set + '/bpp_' + str(self.bpp)
+
+            remote_file = '/home/ec2-user/runs/' + middle + '/' + shellquote(filename)
+            local_folder = '../runs/' + middle
+            local_file = '../runs/' + middle + '/' + filename
+
+            subprocess.Popen(['mkdir', '--parents', local_folder])
+            slot.get_file(remote_file, local_file)
+            self.failed = False
+        except IndexError:
+            print(GetTime(), 'Encoding and copying', filename, 'at bpp', str(self.bpp), 'failed')
+            print(GetTime(),'stdout:')
+            print(GetTime(),stdout.decode('utf-8'))
+            print(GetTime(),'stderr:')
+            print(GetTime(),stderr.decode('utf-8'))
+            self.failed = True
     def get_name(self):
         return self.filename + ' with bpp ' + str(self.bpp)
 
@@ -116,6 +137,8 @@ parser.add_argument('-individual', action='store_true')
 parser.add_argument('-awsgroup', default='Daala')
 parser.add_argument('-machines', default=13)
 parser.add_argument('-mode', default='metric')
+parser.add_argument('-runid', default=get_time())
+
 args = parser.parse_args()
 
 aws_group_name = args.awsgroup
@@ -136,7 +159,7 @@ if not args.individual:
         sys.exit(1)
 
 if not args.individual:
-    total_num_of_jobs = len(video_sets[args.set[0]]) * len(quality[args.codec])
+    total_num_of_jobs = len(video_sets[args.set[0]]['sources']) * len(quality[args.codec])
 else:
     total_num_of_jobs = len(quality[args.codec]) #FIXME
 
@@ -161,8 +184,9 @@ machines = awsremote.get_machines(num_instances_to_use, aws_group_name)
 #set up our instances and their free job slots
 for machine in machines:
     machine.setup()
-    
+
 slots = awsremote.get_slots(machines)
+
 
 #Make a list of the bits of work we need to do.
 #We pack the stack ordered by filesize ASC, quality ASC (aka. -v DESC)
@@ -172,7 +196,7 @@ slots = awsremote.get_slots(machines)
 if args.individual:
     video_filenames = args.set
 else:
-    video_filenames = video_sets[args.set[0]]
+    video_filenames = video_sets[args.set[0]]['sources']
 
 if args.mode == 'metric':
     for filename in video_filenames:
@@ -189,19 +213,20 @@ if args.mode == 'metric':
             work.extra_options = extra_options
             work_items.append(work)
 elif args.mode == 'ab':
-    for filename in video_filenames:  
-        for bpp in {0.1}:
-            work = ABWork()
-            work.bpp = bpp
-            work.codec = args.codec
-            if args.individual:
-                work.individual = True
-            else:
-                work.individual = False
+    if video_sets[args.set[0]]['type'] == 'video':
+        print("mode `ab` isn't supported for videos. Skipping.")
+    else:
+        bits_per_pixel = [x/10.0 for x in range(1, 11)]
+        for filename in video_filenames:
+            for bpp in bits_per_pixel:
+                work = ABWork()
+                work.bpp = bpp
+                work.codec = args.codec
+                work.runid = str(args.runid)
                 work.set = args.set[0]
-            work.filename = filename
-            work.extra_options = extra_options
-            work_items.append(work)
+                work.filename = filename
+                work.extra_options = extra_options
+                work_items.append(work)
 else:
     print('Unsupported -mode parameter.')
     sys.exit(1)
