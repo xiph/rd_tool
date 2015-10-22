@@ -8,6 +8,7 @@ bpp="$1"
 time="$2"
 workset="$3" # subset1 or video-1-short for example
 file_path="$4" # is a `*.y4m` file
+codec="$5"
 
 base_path="/home/ec2-user"
 daala_path="$base_path/daala"
@@ -18,7 +19,7 @@ tools_path="$daala_path/tools"
 output_path="$base_path/runs/$time/$workset/bpp_$bpp"
 
 options="-b $bpp
-         -c daala
+         -c $codec
          -l $libvpx_path
          -x $x264_path
          -X $x265_path

@@ -84,7 +84,7 @@ class ABWork:
         input_path = '/mnt/media/' + work.set + '/' + work.filename
 
         try:
-            slot.start_shell('/home/ec2-user/rd_tool/ab_meta_compare.sh ' + shellquote(str(self.bpp)) + ' ' + shellquote(self.runid) + ' ' + work.set + ' ' + shellquote(input_path) )
+            slot.start_shell('/home/ec2-user/rd_tool/ab_meta_compare.sh ' + shellquote(str(self.bpp)) + ' ' + shellquote(self.runid) + ' ' + work.set + ' ' + shellquote(input_path) + ' ' + shellquote(self.codec))
             (stdout, stderr) = slot.gather()
 
             # filename with extension
