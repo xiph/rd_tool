@@ -183,7 +183,7 @@ machines = awsremote.get_machines(num_instances_to_use, aws_group_name)
 
 #set up our instances and their free job slots
 for machine in machines:
-    machine.setup()
+    machine.setup(args.codec)
 
 slots = awsremote.get_slots(machines)
 

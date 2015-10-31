@@ -10,6 +10,11 @@ if [ -z $DAALA_ROOT ]; then
   exit 1
 fi
 
+if [ -z $2 ]; then
+  echo "Please specify a codec"
+  exit 1
+fi
+
 echo Testing server...
 $SSH ec2-user@$1 "echo Available"
 
@@ -33,4 +38,4 @@ rsync -r -e "$SSH" ./ ec2-user@$1:/home/ec2-user/rd_tool/
 
 echo Uploading local build...
 
-rsync -r -e "$SSH" $DAALA_ROOT/ ec2-user@$1:/home/ec2-user/daala/
+rsync -r -e "$SSH" ../$2/ ec2-user@$1:/home/ec2-user/$2/

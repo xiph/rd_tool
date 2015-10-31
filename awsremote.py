@@ -10,12 +10,12 @@ import sys
 class Machine:
     def __init__(self,host):
         self.host = host
-    def setup(self):
+    def setup(self,codec):
         print(get_time(),'Connecting to',self.host)
-        if subprocess.call(['./transfer_git.sh',self.host]) != 0:
+        if subprocess.call(['./transfer_git.sh',self.host,codec]) != 0:
           print(get_time(),'Couldn\'t set up machine '+self.host)
           sys.exit(1)
-        
+
 #the job slots we can fill
 class Slot:
     def __init__(self, machine=None):
@@ -129,7 +129,7 @@ def get_machines(num_instances_to_use, aws_group_name):
     for instance_id in instance_ids:
         machines.append(Machine(ip_address_of(instance_id, ec2)))
     return machines
-    
+
 def get_slots(machines):
     slots = []
     #by doing the machines in the inner loop,
