@@ -56,42 +56,35 @@ daala)
   mv "00000000out-$BASENAME.y4m" "$BASENAME.y4m"
   ;;
 x264)
-  QSTR="--preset placebo --min-keyint 256 --keyint 256 --no-scenecut --crf=\$x"
-  $X264 --dump-yuv $BASENAME.yuv $(echo $QSTR | sed 's/\$x/'$x'/g') -o $BASENAME.x264 $FILE 2> $BASENAME-enc.out > /dev/null
+  $X264 --dump-yuv $BASENAME.yuv --preset placebo --min-keyint 256 --keyint 256 --no-scenecut --crf=$x -o $BASENAME.x264 $FILE 2> $BASENAME-enc.out > /dev/null
   $YUV2YUV4MPEG $BASENAME -w$WIDTH -h$HEIGHT -an0 -ad0 -c420mpeg2
   SIZE=$(stat -c %s $BASENAME.x264)
   ;;
 x265)
-  QSTR="--preset slow --frame-threads 1 --min-keyint 256 --keyint 256 --no-scenecut --crf=\$x"
-  $X265 -r $BASENAME.y4m $(echo $QSTR | sed 's/\$x/'$x'/g') -o $BASENAME.x265 $FILE 2> $BASENAME-enc.out > /dev/null
+  $X265 -r $BASENAME.y4m --preset slow --frame-threads 1 --min-keyint 256 --keyint 256 --no-scenecut --crf=$x -o $BASENAME.x265 $FILE 2> $BASENAME-enc.out > /dev/null
   SIZE=$(stat -c %s $BASENAME.x265)
   ;;
 x265-rt)
-  QSTR="--preset slow --tune zerolatency --rc-lookahead 0 --bframes 0 --frame-threads 1 --min-keyint 256 --keyint 256 --no-scenecut --crf=\$x"
-  $X265 -r $BASENAME.y4m $(echo $QSTR | sed 's/\$x/'$x'/g') --csv $BASENAME.csv -o $BASENAME.x265 $FILE 2> $BASENAME-enc.out > /dev/null
+  $X265 -r $BASENAME.y4m --preset slow --tune zerolatency --rc-lookahead 0 --bframes 0 --frame-threads 1 --min-keyint 256 --keyint 256 --no-scenecut --crf=$x --csv $BASENAME.csv -o $BASENAME.x265 $FILE 2> $BASENAME-enc.out > /dev/null
   SIZE=$(stat -c %s $BASENAME.x265)
   ;;
 vp8)
-  QSTR="--end-usage=cq --target-bitrate=100000 --cq-level=\$x"
-  $VPXENC --codec=$CODEC --threads=1 --cpu-used=0 --kf-min-dist=256 --kf-max-dist=256 $(echo $QSTR | sed 's/\$x/'$x'/g') -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
+  $VPXENC --codec=$CODEC --threads=1 --cpu-used=0 --kf-min-dist=256 --kf-max-dist=256 --end-usage=cq --target-bitrate=100000 --cq-level=$x -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
   $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
 vp9)
-  QSTR="--end-usage=q --cq-level=\$x"
-  $VPXENC --codec=$CODEC --cpu-used=0 --threads=1 --kf-min-dist=256 --kf-max-dist=256 $(echo $QSTR | sed 's/\$x/'$x'/g') -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
+  $VPXENC --codec=$CODEC --cpu-used=0 --threads=1 --kf-min-dist=256 --kf-max-dist=256 --end-usage=q --cq-level=$x -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
   $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
 vp10)
-  QSTR="--end-usage=q --cq-level=\$x"
-  $VPXENC --codec=$CODEC --cpu-used=0 --threads=1 --kf-min-dist=256 --kf-max-dist=256 $(echo $QSTR | sed 's/\$x/'$x'/g') -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
+  $VPXENC --codec=$CODEC --cpu-used=0 --threads=1 --kf-min-dist=256 --kf-max-dist=256 --end-usage=q --cq-level=$x -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
   $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
 thor)
-  QSTR="-qp \$x"
-  $THORENC $(echo $QSTR | sed 's/\$x/'$x'/g') -cf /home/ec2-user/thor/config_awcy.txt -if $FILE -of $BASENAME.thor -rf $BASENAME.y4m > $BASENAME-enc.out
+  $THORENC -qp $x -cf /home/ec2-user/thor/config_awcy.txt -if $FILE -of $BASENAME.thor -rf $BASENAME.y4m > $BASENAME-enc.out
   SIZE=$(stat -c %s $BASENAME.thor)
   ;;
 esac
