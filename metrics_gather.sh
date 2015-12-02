@@ -94,7 +94,7 @@ vp9-rt)
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
 thor)
-  $THORENC -qp $x -HQperiod 1 -num_reorder_pics 15 -interp_ref 1 -dqpI -2 -dqpB0 2 -dqpB1 1 -dqpB2 0 -dqpB3 0 -mqpP 1.2 -mqpB 1.2 -mqpB0 1.075 -mqpB1 1.15 -mqpB2 1.225 -mqpB3 1.3 -lambda_coeffI 0.8 -lambda_coeffP 1.2 -lambda_coeffB 1.2 -lambda_coeffB0 1.2 -lambda_coeffB1 1.2 -lambda_coeffB2 1.2 -lambda_coeffB3 1.2 -intra_rdo 1 -enable_tb_split 1 -eanble_pb_split 1 -early_skip_thr 0.3 -max_num_ref 4 -use_block_contexts 1 -enable_bipred 1 -encoder_speed 0 -if $FILE -of $BASENAME.thor -rf $BASENAME.y4m > $BASENAME-enc.out
+  $THORENC -qp $x -cf /home/ec2-user/thor/config_HDB16_high_efficiency.txt -if $FILE -of $BASENAME.thor -rf $BASENAME.y4m > $BASENAME-enc.out
   SIZE=$(stat -c %s $BASENAME.thor)
   ;;
 esac
