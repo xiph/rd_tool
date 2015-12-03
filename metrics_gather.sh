@@ -88,7 +88,7 @@ vp10)
   $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
-vp9-rt)
+vp10-rt)
   $VPXENC --codec=$CODEC --cpu-used=0 --threads=1 --kf-min-dist=256 --kf-max-dist=256 -p 1 --lag-in-frames=0 --end-usage=q --cq-level=$x -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
   $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
