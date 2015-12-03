@@ -118,10 +118,10 @@ quality = {
 "x264": list(range(1,52,5)),
 "x265": list(range(5,52,5)),
 "x265-rt": list(range(5,52,5)),
-"vp8": list(range(4,64,4)),
-"vp9": list(range(4,64,4)),
-"vp10": list(range(4,64,4)),
-"thor": list(range(4,53,5))
+"vp8": list(range(7,64,4)),
+"vp9": list(range(7,64,4)),
+"vp10": list(range(7,64,4)),
+"thor": list(range(7,53,5))
 }
 
 work_items = []
