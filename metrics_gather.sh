@@ -84,7 +84,7 @@ vp9-rt)
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
 vp10)
-  $VPXENC --codec=$CODEC --cpu-used=0 --threads=1 --kf-min-dist=256 --kf-max-dist=256 --min-q=0 --max-q=63 --end-usage=q --cq-level=$x -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
+  $VPXENC --codec=$CODEC --cpu-used=0 --passes=2 --threads=1 --kf-min-dist=256 --kf-max-dist=256 --min-q=0 --max-q=63 --end-usage=q --cq-level=$x -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
   $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
