@@ -44,9 +44,11 @@ rm "$BASENAME.out" 2> /dev/null || true
 WIDTH="$(head -1 $FILE | cut -d\  -f 2 | tr -d 'W')"
 HEIGHT="$(head -1 $FILE | cut -d\  -f 3 | tr -d 'H')"
 
+KFINT=1000
+
 case $CODEC in
 daala)
-  OD_LOG_MODULES='encoder:10' OD_DUMP_IMAGES_SUFFIX="$BASENAME" "$ENCODER_EXAMPLE" -k 256 -v "$x" $EXTRA_OPTIONS "$FILE" -o "$BASENAME.ogv" > /dev/null 2> "$BASENAME-enc.out"
+  OD_LOG_MODULES='encoder:10' OD_DUMP_IMAGES_SUFFIX="$BASENAME" "$ENCODER_EXAMPLE" -k $KFINT -v "$x" $EXTRA_OPTIONS "$FILE" -o "$BASENAME.ogv" > /dev/null 2> "$BASENAME-enc.out"
   if [ ! -f "$BASENAME.ogv" ]
   then
     echo Failed to produce "$BASENAME.ogv"
@@ -56,40 +58,40 @@ daala)
   mv "00000000out-$BASENAME.y4m" "$BASENAME.y4m"
   ;;
 x264)
-  $X264 --dump-yuv $BASENAME.yuv --preset placebo --min-keyint 256 --keyint 256 --no-scenecut --crf=$x -o $BASENAME.x264 $FILE 2> $BASENAME-enc.out > /dev/null
+  $X264 --dump-yuv $BASENAME.yuv --preset placebo --min-keyint $KFINT --keyint $KFINT --no-scenecut --crf=$x -o $BASENAME.x264 $FILE 2> $BASENAME-enc.out > /dev/null
   $YUV2YUV4MPEG $BASENAME -w$WIDTH -h$HEIGHT -an0 -ad0 -c420mpeg2
   SIZE=$(stat -c %s $BASENAME.x264)
   ;;
 x265)
-  $X265 -r $BASENAME.y4m --preset slow --frame-threads 1 --min-keyint 256 --keyint 256 --no-scenecut --crf=$x -o $BASENAME.x265 $FILE 2> $BASENAME-enc.out > /dev/null
+  $X265 -r $BASENAME.y4m --preset slow --frame-threads 1 --min-keyint $KFINT --keyint $KFINT --no-scenecut --crf=$x -o $BASENAME.x265 $FILE 2> $BASENAME-enc.out > /dev/null
   SIZE=$(stat -c %s $BASENAME.x265)
   ;;
 x265-rt)
-  $X265 -r $BASENAME.y4m --preset slow --tune zerolatency --rc-lookahead 0 --bframes 0 --frame-threads 1 --min-keyint 256 --keyint 256 --no-scenecut --crf=$x --csv $BASENAME.csv -o $BASENAME.x265 $FILE 2> $BASENAME-enc.out > /dev/null
+  $X265 -r $BASENAME.y4m --preset slow --tune zerolatency --rc-lookahead 0 --bframes 0 --frame-threads 1 --min-keyint $KFINT --keyint $KFINT --no-scenecut --crf=$x --csv $BASENAME.csv -o $BASENAME.x265 $FILE 2> $BASENAME-enc.out > /dev/null
   SIZE=$(stat -c %s $BASENAME.x265)
   ;;
 vp8)
-  $VPXENC --codec=$CODEC --threads=1 --cpu-used=0 --kf-min-dist=256 --kf-max-dist=256 --end-usage=cq --target-bitrate=100000 --cq-level=$x -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
+  $VPXENC --codec=$CODEC --threads=1 --cpu-used=0 --kf-min-dist=$KFINT --kf-max-dist=$KFINT --end-usage=cq --target-bitrate=100000 --cq-level=$x -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
   $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
 vp9)
-  $VPXENC --codec=$CODEC --cpu-used=0 --threads=1 --auto-alt-ref=1 --kf-min-dist=256 --kf-max-dist=256 --end-usage=q --cq-level=$x -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
+  $VPXENC --codec=$CODEC --cpu-used=0 --threads=1 --kf-min-dist=$KFINT --kf-max-dist=$KFINT --end-usage=q --cq-level=$x -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
   $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
 vp9-rt)
-  $VPXENC --codec=$CODEC --cpu-used=0 --threads=1 --kf-min-dist=256 --kf-max-dist=256 -p 1 --lag-in-frames=0 --end-usage=q --cq-level=$x -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
+  $VPXENC --codec=$CODEC --cpu-used=0 --threads=1 --kf-min-dist=$KFINT --kf-max-dist=$KFINT -p 1 --lag-in-frames=0 --end-usage=q --cq-level=$x -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
   $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
 vp10)
-  $VPXENC --codec=$CODEC --cpu-used=0 --passes=2 --threads=1 --kf-min-dist=256 --kf-max-dist=256 --min-q=0 --max-q=63 --end-usage=q --cq-level=$x -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
+  $VPXENC --codec=$CODEC --cpu-used=0 --passes=2 --threads=1 --kf-min-dist=$KFINT --kf-max-dist=$KFINT --end-usage=q --cq-level=$x -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
   $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
 vp10-rt)
-  $VPXENC --codec=$CODEC --cpu-used=0 --passes=1 --threads=1 --kf-min-dist=256 --kf-max-dist=256 --lag-in-frames=0 --end-usage=q --cq-level=$x -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
+  $VPXENC --codec=$CODEC --cpu-used=0 --passes=1 --threads=1 --kf-min-dist=$KFINT --kf-max-dist=$KFINT --lag-in-frames=0 --end-usage=q --cq-level=$x -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
   $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
