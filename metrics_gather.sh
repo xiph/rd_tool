@@ -89,12 +89,16 @@ vp10)
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
 vp10-rt)
-  $VPXENC --codec=$CODEC --cpu-used=0 --threads=1 --kf-min-dist=256 --kf-max-dist=256 -p 1 --lag-in-frames=0 --end-usage=q --cq-level=$x -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
+  $VPXENC --codec=$CODEC --cpu-used=0 --passes=1 --threads=1 --kf-min-dist=256 --kf-max-dist=256 --lag-in-frames=0 --end-usage=q --cq-level=$x -o $BASENAME.vpx $FILE 2> $BASENAME-enc.out > /dev/null
   $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
 thor)
   $THORENC -qp $x -cf /home/ec2-user/thor/config_HDB16_high_efficiency.txt -if $FILE -of $BASENAME.thor -rf $BASENAME.y4m > $BASENAME-enc.out
+  SIZE=$(stat -c %s $BASENAME.thor)
+  ;;
+thor-rt)
+  $THORENC -qp $x -cf /home/ec2-user/thor/config_LDB_high_efficiency.txt -if $FILE -of $BASENAME.thor -rf $BASENAME.y4m > $BASENAME-enc.out
   SIZE=$(stat -c %s $BASENAME.thor)
   ;;
 esac
