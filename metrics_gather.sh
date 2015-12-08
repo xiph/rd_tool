@@ -86,12 +86,12 @@ vp9-rt)
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
 vp10)
-  $VPXENC --codec=$CODEC --ivf --auto-alt-ref=2 --cpu-used=0 --passes=2 --threads=1 --kf-min-dist=$KFINT --kf-max-dist=$KFINT --end-usage=q --cq-level=$x -o $BASENAME.vpx $EXTRA_OPTIONS $FILE 2> $BASENAME-enc.out > /dev/null
+  $VPXENC --codec=$CODEC --ivf --frame-parallel=0 --tile-columns=0 --auto-alt-ref=2 --cpu-used=0 --passes=2 --threads=1 --kf-min-dist=$KFINT --kf-max-dist=$KFINT --end-usage=q --cq-level=$x -o $BASENAME.vpx $EXTRA_OPTIONS $FILE 2> $BASENAME-enc.out > /dev/null
   $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
 vp10-rt)
-  $VPXENC --codec=$CODEC --ivf --cpu-used=0 --passes=1 --threads=1 --kf-min-dist=$KFINT --kf-max-dist=$KFINT --lag-in-frames=0 --end-usage=q --cq-level=$x -o $BASENAME.vpx $EXTRA_OPTIONS $FILE 2> $BASENAME-enc.out > /dev/null
+  $VPXENC --codec=$CODEC --ivf --frame-parallel=0 --tile-columns=0 --cpu-used=0 --passes=1 --threads=1 --kf-min-dist=$KFINT --kf-max-dist=$KFINT --lag-in-frames=0 --end-usage=q --cq-level=$x -o $BASENAME.vpx $EXTRA_OPTIONS $FILE 2> $BASENAME-enc.out > /dev/null
   $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
