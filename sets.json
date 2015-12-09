@@ -40,6 +40,20 @@
       "station2_1080p25_50f.y4m"
     ]
   },
+  "vc-720p-1": {
+    "type": "video",
+    "sources": [
+      "desktop2360p_300f.y4m",
+      "desktop360p_300f.y4m",
+      "kirlandvga_300f.y4m",
+      "mmmovingvga_300f.y4m",
+      "mmstionaryvga_300f.y4m",
+      "niklasvga_300f.y4m",
+      "tacomanarrowsvga_300f.y4m",
+      "tacomascmvvga_300f.y4m",
+      "thaloundeskmtgvga_300f.y4m"
+    ]
+  },
   "ntt-short-1": {
     "type": "video",
     "sources": [

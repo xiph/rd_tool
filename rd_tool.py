@@ -139,6 +139,7 @@ parser.add_argument('-awsgroup', default='Daala')
 parser.add_argument('-machines', default=13)
 parser.add_argument('-mode', default='metric')
 parser.add_argument('-runid', default=get_time())
+parser.add_argument('-seed')
 
 args = parser.parse_args()
 
@@ -215,6 +216,7 @@ if args.mode == 'metric':
             work_items.append(work)
 elif args.mode == 'ab':
     if video_sets[args.set[0]]['type'] == 'video':
+        bits_per_pixel = [0.01]
         print("mode `ab` isn't supported for videos. Skipping.")
     else:
         bits_per_pixel = [x/10.0 for x in range(1, 11)]
