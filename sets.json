@@ -40,7 +40,7 @@
       "station2_1080p25_50f.y4m"
     ]
   },
-  "vc-720p-1": {
+  "vc-360p-1": {
     "type": "video",
     "sources": [
       "desktop2360p_300f.y4m",
