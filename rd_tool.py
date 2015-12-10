@@ -121,7 +121,9 @@ quality = {
 "vp8": list(range(7,64,4)),
 "vp9": list(range(7,64,4)),
 "vp10": list(range(7,64,4)),
-"thor": list(range(7,53,5))
+"vp10-rt": list(range(7,64,4)),
+"thor": list(range(7,53,5)),
+"thor-rt": list(range(7,53,5))
 }
 
 work_items = []
