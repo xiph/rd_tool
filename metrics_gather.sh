@@ -44,6 +44,9 @@ rm "$BASENAME.out" 2> /dev/null || true
 WIDTH="$(head -1 $FILE | cut -d\  -f 2 | tr -d 'W')"
 HEIGHT="$(head -1 $FILE | cut -d\  -f 3 | tr -d 'H')"
 
+# used for libvpx vbr
+RATE=$(($x*$WIDTH*$HEIGHT*30/1000))
+
 KFINT=1000
 
 case $CODEC in
@@ -86,7 +89,7 @@ vp9-rt)
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
 vp10)
-  $VPXENC --codec=$CODEC --ivf --frame-parallel=0 --tile-columns=0 --auto-alt-ref=2 --cpu-used=0 --passes=2 --threads=1 --kf-min-dist=$KFINT --kf-max-dist=$KFINT --end-usage=q --cq-level=$x -o $BASENAME.vpx $EXTRA_OPTIONS $FILE 2> $BASENAME-enc.out > /dev/null
+  $VPXENC --codec=$CODEC --ivf --frame-parallel=0 --tile-columns=0 --auto-alt-ref=2 --cpu-used=0 --passes=2 --threads=1 --kf-min-dist=$KFINT --kf-max-dist=$KFINT --end-usage=vbr --target-bitrate=$RATE -o $BASENAME.vpx $EXTRA_OPTIONS $FILE 2> $BASENAME-enc.out > /dev/null
   $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
