@@ -32,6 +32,10 @@ if [ -z "$DUMP_FASTSSIM" ]; then
   export DUMP_FASTSSIM="$DAALATOOL_ROOT/tools/dump_fastssim"
 fi
 
+if [ -z "$DUMP_CIEDE" ]; then
+  export DUMP_CIEDE="$DAALATOOL_ROOT/tools/dump_ciede2000.py"
+fi
+
 if [ -z "$CODEC" ]; then
   export CODEC=daala
 fi
@@ -116,6 +120,7 @@ PSNR=$(cat "$BASENAME-psnr.out" | grep Total)
 PSNRHVS=$("$DUMP_PSNRHVS" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 SSIM=$("$DUMP_SSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 FASTSSIM=$("$DUMP_FASTSSIM" -c "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
+CIEDE=$("$DUMP_FASTSSIM" -c "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 
 rm -f "$BASENAME.y4m" "$BASENAME.ogv" "$BASENAME.x264" "$BASENAME.x265" "$BASENAME.vpx" "$BASENAME-enc.out" "$BASENAME-psnr.out" "$BASENAME.thor" 2> /dev/null
 
@@ -124,3 +129,4 @@ echo "$PSNR"
 echo "$PSNRHVS"
 echo "$SSIM"
 echo "$FASTSSIM"
+echo "$CIEDE"
