@@ -45,7 +45,7 @@ WIDTH="$(head -1 $FILE | cut -d\  -f 2 | tr -d 'W')"
 HEIGHT="$(head -1 $FILE | cut -d\  -f 3 | tr -d 'H')"
 
 # used for libvpx vbr
-RATE=$(echo $x*$WIDTH*$HEIGHT*30/1000 | bc)
+RATE=$(($x*$WIDTH*$HEIGHT*30/1000))
 
 KFINT=1000
 
