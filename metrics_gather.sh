@@ -64,6 +64,7 @@ daala)
   if [ ! -f "$BASENAME.ogv" ]
   then
     echo Failed to produce "$BASENAME.ogv"
+    cat "$BASENAME-enc.out"
     exit 1
   fi
   SIZE=$(stat -c %s "$BASENAME.ogv")
