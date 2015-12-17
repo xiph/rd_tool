@@ -109,11 +109,11 @@ vp10-rt)
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
 thor)
-  $THORENC -qp $x -cf /home/ec2-user/thor/config_HDB16_high_efficiency.txt -if $FILE -of $BASENAME.thor -rf $BASENAME.y4m $EXTRA_OPTIONS > $BASENAME-enc.out
+  $THORENC -qp $x -cf /home/ec2-user/$CODEC/config_HDB16_high_efficiency.txt -if $FILE -of $BASENAME.thor -rf $BASENAME.y4m $EXTRA_OPTIONS > $BASENAME-enc.out
   SIZE=$(stat -c %s $BASENAME.thor)
   ;;
 thor-rt)
-  $THORENC -qp $x -cf /home/ec2-user/thor/config_LDB_high_efficiency.txt -if $FILE -of $BASENAME.thor -rf $BASENAME.y4m $EXTRA_OPTIONS > $BASENAME-enc.out
+  $THORENC -qp $x -cf /home/ec2-user/$CODEC/config_LDB_high_efficiency.txt -if $FILE -of $BASENAME.thor -rf $BASENAME.y4m $EXTRA_OPTIONS > $BASENAME-enc.out
   SIZE=$(stat -c %s $BASENAME.thor)
   ;;
 esac
