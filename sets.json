@@ -40,6 +40,26 @@
       "station2_1080p25_50f.y4m"
     ]
   },
+  "video-hd-3": {
+    "type": "video",
+    "sources": [
+      "aspen_1080p_100f.y4m",
+      "blue_sky_1080p25_100f.y4m",
+      "crowd_run_1080p50_100f.y4m",
+      "ducks_take_off_1080p50_100f.y4m",
+      "factory_1080p30_100f.y4m",
+      "life_1080p30_100f.y4m",
+      "old_town_cross_1080p50_100f.y4m",
+      "park_joy_1080p50_100f.y4m",
+      "pedestrian_area_1080p25_100f.y4m",
+      "red_kayak_1080p_100f.y4m",
+      "riverbed_1080p25_100f.y4m",
+      "rush_field_cuts_1080p_100f.y4m",
+      "rush_hour_1080p25_100f.y4m",
+      "station2_1080p25_100f.y4m",
+      "touchdown_pass_1080p_100f.y4m"
+    ]
+  },
   "vc-360p-1": {
     "type": "video",
     "sources": [
