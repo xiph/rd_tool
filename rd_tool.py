@@ -259,6 +259,7 @@ if args.mode == 'metric':
             f.write(str(work.metric['psnrhvs'][0])+' ')
             f.write(str(work.metric['ssim'][0])+' ')
             f.write(str(work.metric['fastssim'][0])+' ')
+            f.write(str(work.metric['ciede2000'][0])+' ')
             f.write('\n')
             f.close()
     if not args.individual:
