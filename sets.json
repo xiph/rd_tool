@@ -54,6 +54,22 @@
       "thaloundeskmtgvga_300f.y4m"
     ]
   },
+  "vc-720p-1": {
+    "type": "video",
+    "sources": [
+      "dark720p_250f.y4m",
+      "FourPeople_1280x720_60_250f.y4m",
+      "gipsrecmotion720p_250f.y4m",
+      "gipsrestat720p_250f.y4m",
+      "Johnny_1280x720_60_250f.y4m",
+      "KristenAndSara_1280x720_60_250f.y4m",
+      "niklas720p_250f.y4m",
+      "testnoise720p_250f.y4m",
+      "vidyo1_720p_60fps_250f.y4m",
+      "vidyo3_720p_60fps_250f.y4m",
+      "vidyo4_720p_60fps_250f.y4m"
+    ]
+  },
   "ntt-short-1": {
     "type": "video",
     "sources": [
