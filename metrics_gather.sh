@@ -3,13 +3,18 @@
 set -e
 
 export LD_LIBRARY_PATH=/usr/local/lib/
-export DAALATOOL_ROOT=/home/ec2-user/daalatool/
+
+if [ -z "$DAALATOOL_ROOT" ]; then
+  export DAALATOOL_ROOT=/home/ec2-user/daalatool/
+fi
 export X264=/home/ec2-user/x264/x264
 export X265=/home/ec2-user/x265/build/linux/x265
 export VPXENC=/home/ec2-user/$CODEC/vpxenc
 export VPXDEC=/home/ec2-user/$CODEC/vpxdec
 export THORENC=/home/ec2-user/thor/build/Thorenc
-export ENCODER_EXAMPLE=/home/ec2-user/daala/examples/encoder_example
+if [ -z "$ENCODER_EXAMPLE" ]; then
+  export ENCODER_EXAMPLE=/home/ec2-user/daala/examples/encoder_example
+fi
 export YUV2YUV4MPEG=$DAALATOOL_ROOT/tools/yuv2yuv4mpeg
 
 if [ -z "$DUMP_VIDEO" ]; then
@@ -120,7 +125,7 @@ PSNR=$(cat "$BASENAME-psnr.out" | grep Total)
 PSNRHVS=$("$DUMP_PSNRHVS" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 SSIM=$("$DUMP_SSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 FASTSSIM=$("$DUMP_FASTSSIM" -c "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
-CIEDE=$("$DUMP_FASTSSIM" -c "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
+CIEDE=$("$DUMP_CIEDE" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 
 rm -f "$BASENAME.y4m" "$BASENAME.ogv" "$BASENAME.x264" "$BASENAME.x265" "$BASENAME.vpx" "$BASENAME-enc.out" "$BASENAME-psnr.out" "$BASENAME.thor" 2> /dev/null
 

@@ -54,6 +54,7 @@ class Work:
             self.metric["fastssim"][0] = split[30]
             self.metric["fastssim"][1] = split[32]
             self.metric["fastssim"][2] = split[34]
+            self.metric['ciede2000'] = split[36]
             self.failed = False
         except IndexError:
             print(get_time(),'Decoding result for '+self.filename+' at quality '+str(self.quality)+'failed!')
