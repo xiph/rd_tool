@@ -108,6 +108,30 @@
       "Netflix_WindAndNature_2k_60fps_10bit_420_0_120f.y4m",
     ]
   },
+  "twitch-1": {
+    "type": "video",
+    "sources": [
+      "CSGO_0_120f.y4m",
+      "CSGO_10_120f.y4m",
+      "DOTA2_0_120f.y4m",
+      "DOTA2_10_120f.y4m",
+      "EuroTruckSimulator2_0_120f.y4m",
+      "EuroTruckSimulator2_10_120f.y4m",
+      "Fallout4_0_120f.y4m",
+      "Fallout4_10_120f.y4m",
+      "GTAV_0_120f.y4m",
+      "GTAV_10_120f.y4m",
+      "Hearthstone_0_120f.y4m",
+      "Hearthstone_10_120f.y4m",
+      "MINECRAFT_0_120f.y4m",
+      "MINECRAFT_10_120f.y4m",
+      "RUST_0_120f.y4m",
+      "RUST_10_120f.y4m",
+      "STARCRAFT_0_120f.y4m",
+      "STARCRAFT_10_120f.y4m",
+      "WITCHER3_0_120f.y4m",
+    ]
+  },
   "vc-360p-1": {
     "type": "video",
     "sources": [
