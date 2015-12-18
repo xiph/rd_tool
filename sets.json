@@ -60,6 +60,30 @@
       "touchdown_pass_1080p_100f.y4m"
     ]
   },
+  "netflix-1": {
+    "type": "video",
+    "sources": [
+      "Netflix_Aerial_4096x2160_60fps_10bit_420_6_120f.y4m",
+      "Netflix_BarScene_4096x2160_60fps_10bit_420_2_120f.y4m",
+      "Netflix_Boat_4096x2160_60fps_10bit_420_0_120f.y4m",
+      "Netflix_BoxingPractice_4096x2160_60fps_10bit_420_0_120f.y4m",
+      "Netflix_Crosswalk_4096x2160_60fps_10bit_420_0_120f.y4m",
+      "Netflix_Dancers_4096x2160_60fps_10bit_420_0_120f.y4m",
+      "Netflix_DinnerScene_4096x2160_60fps_10bit_420_0_120f.y4m",
+      "Netflix_DrivingPOV_4096x2160_60fps_10bit_420_0_120f.y4m",
+      "Netflix_FoodMarket2_4096x2160_60fps_10bit_420_0_120f.y4m",
+      "Netflix_FoodMarket_4096x2160_60fps_10bit_420_0_120f.y4m",
+      "Netflix_Narrator_4096x2160_60fps_10bit_420_0_120f.y4m",
+      "Netflix_PierSeaside_4096x2160_60fps_10bit_420_0_120f.y4m",
+      "Netflix_RitualDance_4096x2160_60fps_10bit_420_0_120f.y4m",
+      "Netflix_RollerCoaster_4096x2160_60fps_10bit_420_2_120f.y4m",
+      "Netflix_SquareAndTimelapse_4096x2160_60fps_10bit_420_0_120f.y4m",
+      "Netflix_Tango_4096x2160_60fps_10bit_420_0_120f.y4m",
+      "Netflix_ToddlerFountain_4096x2160_60fps_10bit_420_0_120f.y4m",
+      "Netflix_TunnelFlag_4096x2160_60fps_10bit_420_0_120f.y4m",
+      "Netflix_WindAndNature_4096x2160_60fps_10bit_420_0_120f.y4m"
+    ]
+  },
   "vc-360p-1": {
     "type": "video",
     "sources": [
