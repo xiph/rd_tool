@@ -119,10 +119,10 @@ quality = {
 "x264": list(range(1,52,5)),
 "x265": list(range(5,52,5)),
 "x265-rt": list(range(5,52,5)),
-"vp8": list(range(7,64,4)),
-"vp9": list(range(7,64,4)),
-"vp10": list(range(7,64,5)),
-"vp10-rt": list(range(7,64,5)),
+"vp8": list(range(12,64,5)),
+"vp9": list(range(12,64,5)),
+"vp10": list(range(12,64,5)),
+"vp10-rt": list(range(12,64,5)),
 "thor": list(range(7,43,3)),
 "thor-rt": list(range(7,43,3))
 }
