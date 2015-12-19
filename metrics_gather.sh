@@ -11,7 +11,9 @@ export X264=/home/ec2-user/x264/x264
 export X265=/home/ec2-user/x265/build/linux/x265
 export VPXENC=/home/ec2-user/$CODEC/vpxenc
 export VPXDEC=/home/ec2-user/$CODEC/vpxdec
-export THORENC=/home/ec2-user/thor/build/Thorenc
+if [ -z "$THORENC" ]; then
+  export THORENC=/home/ec2-user/thor/build/Thorenc
+fi
 if [ -z "$ENCODER_EXAMPLE" ]; then
   export ENCODER_EXAMPLE=/home/ec2-user/daala/examples/encoder_example
 fi
