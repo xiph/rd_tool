@@ -12,7 +12,10 @@ export X265=/home/ec2-user/x265/build/linux/x265
 export VPXENC=/home/ec2-user/$CODEC/vpxenc
 export VPXDEC=/home/ec2-user/$CODEC/vpxdec
 if [ -z "$THORENC" ]; then
-  export THORENC=/home/ec2-user/thor/build/Thorenc
+  export THORENC="/home/ec2-user/$CODEC/build/Thorenc"
+fi
+if [ -z "$THORDIR" ]; then
+  export THORDIR="$(dirname $THORENC)/../"
 fi
 if [ -z "$ENCODER_EXAMPLE" ]; then
   export ENCODER_EXAMPLE=/home/ec2-user/daala/examples/encoder_example
@@ -111,11 +114,11 @@ vp10-rt)
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
 thor)
-  $THORENC -qp $x -cf /home/ec2-user/$CODEC/config_HDB16_high_efficiency.txt -if $FILE -of $BASENAME.thor -rf $BASENAME.y4m $EXTRA_OPTIONS > $BASENAME-enc.out
+  $THORENC -qp $x -cf "$THORDIR/config_HDB16_high_efficiency.txt" -if $FILE -of $BASENAME.thor -rf $BASENAME.y4m $EXTRA_OPTIONS > $BASENAME-enc.out
   SIZE=$(stat -c %s $BASENAME.thor)
   ;;
 thor-rt)
-  $THORENC -qp $x -cf /home/ec2-user/$CODEC/config_LDB_high_efficiency.txt -if $FILE -of $BASENAME.thor -rf $BASENAME.y4m $EXTRA_OPTIONS > $BASENAME-enc.out
+  $THORENC -qp $x -cf "$THORDIR/config_LDB_high_efficiency.txt" -if $FILE -of $BASENAME.thor -rf $BASENAME.y4m $EXTRA_OPTIONS > $BASENAME-enc.out
   SIZE=$(stat -c %s $BASENAME.thor)
   ;;
 esac
