@@ -17,6 +17,9 @@ fi
 if [ -z "$THORDIR" ]; then
   export THORDIR="$(dirname $THORENC)/../"
 fi
+if [ -z "$THORDEC" ]; then
+  export THORDEC="$(dirname $THORENC)/Thordec"
+fi
 if [ -z "$ENCODER_EXAMPLE" ]; then
   export ENCODER_EXAMPLE=/home/ec2-user/daala/examples/encoder_example
 fi
@@ -44,6 +47,10 @@ fi
 
 if [ -z "$DUMP_CIEDE" ]; then
   export DUMP_CIEDE="$DAALATOOL_ROOT/tools/dump_ciede2000.py"
+fi
+
+if [ -z "$YUV2YUV4MPEG" ]; then
+  export DUMP_CIEDE="$DAALATOOL_ROOT/tools/yuv2yuv4mpeg"
 fi
 
 if [ -z "$CODEC" ]; then
@@ -114,8 +121,11 @@ vp10-rt)
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
 thor)
-  $THORENC -qp $x -cf "$THORDIR/config_HDB16_high_efficiency.txt" -if $FILE -of $BASENAME.thor -rf $BASENAME.y4m $EXTRA_OPTIONS > $BASENAME-enc.out
+  $THORENC -qp $x -cf "$THORDIR/config_HDB16_high_efficiency.txt" -if $FILE -of $BASENAME.thor $EXTRA_OPTIONS > $BASENAME-enc.out
   SIZE=$(stat -c %s $BASENAME.thor)
+  # using reconstruction is currently broken with HDB
+  $THORDEC $BASENAME.thor $BASENAME.yuv
+  $YUV2YUV4MPEG $BASENAME -w$WIDTH -h$HEIGHT
   ;;
 thor-rt)
   $THORENC -qp $x -cf "$THORDIR/config_LDB_high_efficiency.txt" -if $FILE -of $BASENAME.thor -rf $BASENAME.y4m $EXTRA_OPTIONS > $BASENAME-enc.out
@@ -133,7 +143,7 @@ SSIM=$("$DUMP_SSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 FASTSSIM=$("$DUMP_FASTSSIM" -c "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 CIEDE=$("$DUMP_CIEDE" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 
-rm -f "$BASENAME.y4m" "$BASENAME.ogv" "$BASENAME.x264" "$BASENAME.x265" "$BASENAME.vpx" "$BASENAME-enc.out" "$BASENAME-psnr.out" "$BASENAME.thor" 2> /dev/null
+rm -f "$BASENAME.y4m" "$BASENAME.yuv" "$BASENAME.ogv" "$BASENAME.x264" "$BASENAME.x265" "$BASENAME.vpx" "$BASENAME-enc.out" "$BASENAME-psnr.out" "$BASENAME.thor" 2> /dev/null
 
 echo "$x" "$PIXELS" "$SIZE"
 echo "$PSNR"
