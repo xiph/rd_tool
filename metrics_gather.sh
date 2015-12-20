@@ -124,7 +124,7 @@ thor)
   $THORENC -qp $x -cf "$THORDIR/config_HDB16_high_efficiency.txt" -if $FILE -of $BASENAME.thor $EXTRA_OPTIONS > $BASENAME-enc.out
   SIZE=$(stat -c %s $BASENAME.thor)
   # using reconstruction is currently broken with HDB
-  $THORDEC $BASENAME.thor $BASENAME.yuv
+  $THORDEC $BASENAME.thor $BASENAME.yuv > /dev/null
   $YUV2YUV4MPEG $BASENAME -w$WIDTH -h$HEIGHT
   ;;
 thor-rt)
