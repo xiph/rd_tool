@@ -4,15 +4,19 @@ set -e
 
 export LD_LIBRARY_PATH=/usr/local/lib/
 
-if [ -z "$DAALATOOL_ROOT" ]; then
-  export DAALATOOL_ROOT=/home/ec2-user/daalatool/
+if [ -z "$WORK_ROOT" ]; then
+  export WORK_ROOT=/home/ec2-user
 fi
-export X264=/home/ec2-user/x264/x264
-export X265=/home/ec2-user/x265/build/linux/x265
-export VPXENC=/home/ec2-user/$CODEC/vpxenc
-export VPXDEC=/home/ec2-user/$CODEC/vpxdec
+
+if [ -z "$DAALATOOL_ROOT" ]; then
+  export DAALATOOL_ROOT=""$WORK_ROOT/daalatool/""
+fi
+export X264="$WORK_ROOT/x264/x264"
+export X265="$WORK_ROOT/home/ec2-user/x265/build/linux/x265"
+export VPXENC="$WORK_ROOT/home/ec2-user/$CODEC/vpxenc"
+export VPXDEC="$WORK_ROOT/home/ec2-user/$CODEC/vpxdec"
 if [ -z "$THORENC" ]; then
-  export THORENC="/home/ec2-user/$CODEC/build/Thorenc"
+  export THORENC="$WORK_ROOT/$CODEC/build/Thorenc"
 fi
 if [ -z "$THORDIR" ]; then
   export THORDIR="$(dirname $THORENC)/../"
@@ -21,9 +25,9 @@ if [ -z "$THORDEC" ]; then
   export THORDEC="$(dirname $THORENC)/Thordec"
 fi
 if [ -z "$ENCODER_EXAMPLE" ]; then
-  export ENCODER_EXAMPLE=/home/ec2-user/daala/examples/encoder_example
+  export ENCODER_EXAMPLE="$WORK_ROOT/daala/examples/encoder_example"
 fi
-export YUV2YUV4MPEG=$DAALATOOL_ROOT/tools/yuv2yuv4mpeg
+export YUV2YUV4MPEG="$DAALATOOL_ROOT/tools/yuv2yuv4mpeg"
 
 if [ -z "$DUMP_VIDEO" ]; then
   export DUMP_VIDEO="$DAALA_ROOT/examples/dump_video"
