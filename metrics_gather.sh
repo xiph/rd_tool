@@ -9,7 +9,7 @@ if [ -z "$WORK_ROOT" ]; then
 fi
 
 if [ -z "$DAALATOOL_ROOT" ]; then
-  export DAALATOOL_ROOT=""$WORK_ROOT/daalatool/""
+  export DAALATOOL_ROOT="$WORK_ROOT/daalatool/"
 fi
 export X264="$WORK_ROOT/x264/x264"
 export X265="$WORK_ROOT/home/ec2-user/x265/build/linux/x265"
