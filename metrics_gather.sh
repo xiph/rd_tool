@@ -8,6 +8,8 @@ if [ -z "$WORK_ROOT" ]; then
   export WORK_ROOT=/home/ec2-user
 fi
 
+cd "$WORK_ROOT"
+
 if [ -z "$DAALATOOL_ROOT" ]; then
   export DAALATOOL_ROOT="$WORK_ROOT/daalatool/"
 fi
