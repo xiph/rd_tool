@@ -11,7 +11,6 @@ class Machine:
     def __init__(self,host):
         self.host = host
         self.user = 'ec2-user'
-        self.work_root = '/home/ec2-user'
     def setup(self,codec):
         print(get_time(),'Connecting to',self.host)
         if subprocess.call(['./transfer_git.sh',self.host,codec]) != 0:
@@ -22,6 +21,7 @@ class Machine:
 class Slot:
     def __init__(self, machine=None):
         self.machine = machine
+        self.work_root = '/home/ec2-user'
         self.p = None
         self.busy = False
     def gather(self):

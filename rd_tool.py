@@ -69,7 +69,7 @@ class Work:
             input_path = '/mnt/media/'+work.filename
         else:
             input_path = '/mnt/media/'+work.set+'/'+work.filename
-        slot.start_shell(('DAALA_ROOT=/home/ec2-user/daala/ WORK_ROOT="'+work.machine.work_root+'" x="'+str(work.quality) +
+        slot.start_shell(('DAALA_ROOT=/home/ec2-user/daala/ WORK_ROOT="'+slot.work_root+'" x="'+str(work.quality) +
             '" CODEC="'+work.codec+'" EXTRA_OPTIONS="'+work.extra_options +
             '" /home/ec2-user/rd_tool/metrics_gather.sh '+shellquote(input_path)))
         (stdout, stderr) = slot.gather()
