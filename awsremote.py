@@ -37,6 +37,8 @@ class Slot:
            command.encode("utf-8")], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     def get_file(self, remote, local):
         subprocess.call(['scp','-i','daala.pem','ec2-user@'+self.machine.host+':'+remote,local])
+    def rsync(self, local, remote):
+        subprocess.call(['rsync', '-r', '-e', "ssh -i daala.pem -o StrictHostKeyChecking=no", local, self.machine.user + '@' + self.machine.host + ':' + remote])
     def check_shell(self, command):
         return subprocess.check_output(['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no',
            'ec2-user@'+self.machine.host,
