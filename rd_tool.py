@@ -77,6 +77,26 @@ class Work:
     def get_name(self):
         return self.filename + ' with quality ' + str(self.quality)
 
+class OneShotWork:
+    def __init__(self):
+        self.failed = False
+    def execute(self, slot):
+        work = self
+        if self.individual:
+            input_path = '/mnt/media/'+work.filename
+        else:
+            input_path = '/mnt/media/'+work.set+'/'+work.filename
+        self.quality = int(float(subprocess.check_output(['../quantizer_log.m','../runs/'+self.runid+'/'+work.set+'/'+work.filename+'-daala.out',self.bpp])))
+        print(get_time(), self.filename + ' using quantizer ' + str(self.quality))
+        slot.start_shell(('DAALA_ROOT=/home/ec2-user/daala/ WORK_ROOT="'+slot.work_root+'" x="'+str(work.quality) +
+            '" CODEC="'+work.codec+'" EXTRA_OPTIONS="'+work.extra_options +
+            '" NO_DELETE=1 /home/ec2-user/rd_tool/metrics_gather.sh '+shellquote(input_path)))
+        (stdout, stderr) = slot.gather()
+        print(stdout)
+        print(stderr)
+    def get_name(self):
+        return self.filename
+
 class ABWork:
     def __init__(self):
         self.failed = False
@@ -143,6 +163,7 @@ parser.add_argument('-machines', default=14)
 parser.add_argument('-mode', default='metric')
 parser.add_argument('-runid', default=get_time())
 parser.add_argument('-seed')
+parser.add_argument('-bpp')
 
 args = parser.parse_args()
 
@@ -217,6 +238,20 @@ if args.mode == 'metric':
             work.filename = filename
             work.extra_options = extra_options
             work_items.append(work)
+if args.mode == 'oneshot':
+    for filename in video_filenames:
+        work = OneShotWork()
+        work.bpp = args.bpp
+        work.codec = args.codec
+        if args.individual:
+            work.individual = True
+        else:
+            work.individual = False
+            work.set = args.set[0]
+        work.filename = filename
+        work.runid = str(args.runid)
+        work.extra_options = extra_options
+        work_items.append(work)
 elif args.mode == 'ab':
     if video_sets[args.set[0]]['type'] == 'video':
         bits_per_pixel = [0.01]
