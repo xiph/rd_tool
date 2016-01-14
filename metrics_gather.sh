@@ -14,9 +14,9 @@ if [ -z "$DAALATOOL_ROOT" ]; then
   export DAALATOOL_ROOT="$WORK_ROOT/daalatool/"
 fi
 export X264="$WORK_ROOT/x264/x264"
-export X265="$WORK_ROOT/home/ec2-user/x265/build/linux/x265"
-export VPXENC="$WORK_ROOT/home/ec2-user/$CODEC/vpxenc"
-export VPXDEC="$WORK_ROOT/home/ec2-user/$CODEC/vpxdec"
+export X265="$WORK_ROOT/x265/build/linux/x265"
+export VPXENC="$WORK_ROOT/$CODEC/vpxenc"
+export VPXDEC="$WORK_ROOT/r/$CODEC/vpxdec"
 if [ -z "$THORENC" ]; then
   export THORENC="$WORK_ROOT/$CODEC/build/Thorenc"
 fi
@@ -149,7 +149,9 @@ SSIM=$("$DUMP_SSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 FASTSSIM=$("$DUMP_FASTSSIM" -c "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 CIEDE=$("$DUMP_CIEDE" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 
-rm -f "$BASENAME.y4m" "$BASENAME.yuv" "$BASENAME.ogv" "$BASENAME.x264" "$BASENAME.x265" "$BASENAME.vpx" "$BASENAME-enc.out" "$BASENAME-psnr.out" "$BASENAME.thor" 2> /dev/null
+if [ ! "$NO_DELETE" ]; then
+  rm -f "$BASENAME.y4m" "$BASENAME.yuv" "$BASENAME.ogv" "$BASENAME.x264" "$BASENAME.x265" "$BASENAME.vpx" "$BASENAME-enc.out" "$BASENAME-psnr.out" "$BASENAME.thor" 2> /dev/null
+fi
 
 echo "$x" "$PIXELS" "$SIZE"
 echo "$PSNR"
