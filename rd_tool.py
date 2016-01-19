@@ -238,7 +238,7 @@ if args.mode == 'metric':
             work.filename = filename
             work.extra_options = extra_options
             work_items.append(work)
-if args.mode == 'oneshot':
+elif args.mode == 'oneshot':
     for filename in video_filenames:
         work = OneShotWork()
         work.bpp = args.bpp
