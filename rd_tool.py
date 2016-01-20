@@ -6,6 +6,7 @@ import os
 import sys
 import subprocess
 import json
+import codecs
 import awsremote
 import scheduler
 
@@ -150,7 +151,7 @@ quality = {
 work_items = []
 
 #load all the different sets and their filenames
-video_sets_f = open('sets.json','r')
+video_sets_f = codecs.open('sets.json','r',encoding='utf-8')
 video_sets = json.load(video_sets_f)
 
 parser = argparse.ArgumentParser(description='Collect RD curve data.')
