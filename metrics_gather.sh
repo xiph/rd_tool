@@ -16,7 +16,7 @@ fi
 export X264="$WORK_ROOT/x264/x264"
 export X265="$WORK_ROOT/x265/build/linux/x265"
 export VPXENC="$WORK_ROOT/$CODEC/vpxenc"
-export VPXDEC="$WORK_ROOT/r/$CODEC/vpxdec"
+export VPXDEC="$WORK_ROOT/$CODEC/vpxdec"
 if [ -z "$THORENC" ]; then
   export THORENC="$WORK_ROOT/$CODEC/build/Thorenc"
 fi
