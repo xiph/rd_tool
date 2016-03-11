@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from utility import get_time
+from utility import get_time, rd_print
 import argparse
 import os
 import sys
@@ -19,7 +19,7 @@ def shellquote(s):
     return "'" + s.replace("'", "'\"'\"'") + "'"
 
 if 'DAALA_ROOT' not in os.environ:
-    print(get_time(),"Please specify the DAALA_ROOT environment variable to use this tool.")
+    rd_print("Please specify the DAALA_ROOT environment variable to use this tool.")
     sys.exit(1)
 
 daala_root = os.environ['DAALA_ROOT']
@@ -59,11 +59,11 @@ class Work:
             self.metric['ciede2000'] = split[36]
             self.failed = False
         except IndexError:
-            print(get_time(),'Decoding result for '+self.filename+' at quality '+str(self.quality)+'failed!')
-            print(get_time(),'stdout:')
-            print(get_time(),stdout.decode('utf-8'))
-            print(get_time(),'stderr:')
-            print(get_time(),stderr.decode('utf-8'))
+            rd_print('Decoding result for '+self.filename+' at quality '+str(self.quality)+'failed!')
+            rd_print('stdout:')
+            rd_print(stdout.decode('utf-8'))
+            rd_print('stderr:')
+            rd_print(stderr.decode('utf-8'))
             self.failed = True
     def execute(self, slot):
         work = self
@@ -89,7 +89,7 @@ class OneShotWork:
         else:
             input_path = '/mnt/media/'+work.set+'/'+work.filename
         self.quality = int(float(subprocess.check_output(['../quantizer_log.m','../runs/'+self.runid+'/'+work.set+'/'+work.filename+'-daala.out',self.bpp])))
-        print(get_time(), self.filename + ' using quantizer ' + str(self.quality))
+        rd_print(self.filename + ' using quantizer ' + str(self.quality))
         slot.start_shell(('DAALA_ROOT=/home/ec2-user/daala/ WORK_ROOT="'+slot.work_root+'" x="'+str(work.quality) +
             '" CODEC="'+work.codec+'" EXTRA_OPTIONS="'+work.extra_options +
             '" NO_DELETE=1 /home/ec2-user/rd_tool/metrics_gather.sh '+shellquote(input_path)))
@@ -126,11 +126,11 @@ class ABWork:
             slot.get_file(remote_file, local_file)
             self.failed = False
         except IndexError:
-            print(GetTime(), 'Encoding and copying', filename, 'at bpp', str(self.bpp), 'failed')
-            print(GetTime(),'stdout:')
-            print(GetTime(),stdout.decode('utf-8'))
-            print(GetTime(),'stderr:')
-            print(GetTime(),stderr.decode('utf-8'))
+            rd_print('Encoding and copying', filename, 'at bpp', str(self.bpp), 'failed')
+            rd_print('stdout:')
+            rd_print(stdout.decode('utf-8'))
+            rd_print('stderr:')
+            rd_print(stderr.decode('utf-8'))
             self.failed = True
     def get_name(self):
         return self.filename + ' with bpp ' + str(self.bpp)
@@ -173,17 +173,17 @@ aws_group_name = args.awsgroup
 
 #check we have the codec in our codec-qualities dictionary
 if args.codec not in quality:
-    print(get_time(),'Invalid codec. Valid codecs are:')
+    rd_print('Invalid codec. Valid codecs are:')
     for q in quality:
-        print(get_time(),q)
+        rd_print(q)
     sys.exit(1)
 
 #check we have the set name in our sets-filenames dictionary
 if not args.individual:
     if args.set[0] not in video_sets:
-        print(get_time(),'Specified invalid set '+args.set[0]+'. Available sets are:')
+        rd_print('Specified invalid set '+args.set[0]+'. Available sets are:')
         for video_set in video_sets:
-            print(get_time(),video_set)
+            rd_print(video_set)
         sys.exit(1)
 
 if not args.individual:
@@ -192,7 +192,7 @@ else:
     total_num_of_jobs = len(quality[args.codec]) #FIXME
 
 #a logging message just to get the regex progress bar on the AWCY site started...
-print(get_time(),'0 out of',total_num_of_jobs,'finished.')
+rd_print('0 out of',total_num_of_jobs,'finished.')
 
 #how many AWS instances do we want to spin up?
 #The assumption is each machine can deal with 18 threads,
@@ -203,7 +203,7 @@ num_instances_to_use = (31 + total_num_of_jobs) // 18
 max_num_instances_to_use = int(args.machines)
 
 if num_instances_to_use > max_num_instances_to_use:
-    print(get_time(),'Ideally, we should use',num_instances_to_use,
+    rd_print('Ideally, we should use',num_instances_to_use,
         'AWS instances, but the max is',max_num_instances_to_use,'.')
     num_instances_to_use = max_num_instances_to_use
 
@@ -275,13 +275,13 @@ else:
     sys.exit(1)
 
 if len(slots) < 1:
-    print(get_time(),'All AWS machines are down.')
+    rd_print('All AWS machines are down.')
     sys.exit(1)
 
 work_done = scheduler.run(work_items, slots)
 
 if args.mode == 'metric':
-    print(get_time(),'Logging results...')
+    rd_print('Logging results...')
     work_done.sort(key=lambda work: work.quality)
     for work in work_done:
         if not work.failed:
@@ -303,4 +303,4 @@ if args.mode == 'metric':
       subprocess.call('OUTPUT="'+args.prefix+'/'+'total" "'+daala_root+'/tools/rd_average.sh" "'+args.prefix+'/*.out"',
           shell=True)
 
-print(get_time(),'Done!')
+rd_print('Done!')
