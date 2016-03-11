@@ -27,6 +27,7 @@ daala_root = os.environ['DAALA_ROOT']
 extra_options = ''
 if 'EXTRA_OPTIONS' in os.environ:
     extra_options = os.environ['EXTRA_OPTIONS']
+    print(get_time(),'Passing extra command-line options:"%s"' % extra_options)
 
 class Work:
     def __init__(self):
