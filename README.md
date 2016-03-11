@@ -8,4 +8,4 @@ It currently requires two authentication files, daala.pem placed in this directo
 Dependencies
 ============
 
-You will need Python 2.7 or later, as well as boto.
+You will need Python 3.4 or later, as well as [boto3](https://github.com/boto/boto3).
