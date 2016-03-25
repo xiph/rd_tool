@@ -209,12 +209,11 @@ if num_instances_to_use > max_num_instances_to_use:
 
 machines = awsremote.get_machines(num_instances_to_use, aws_group_name)
 
-#set up our instances and their free job slots
-for machine in machines:
-    machine.setup(args.codec)
-
 slots = awsremote.get_slots(machines)
 
+#set up our instances and their free job slots
+for slot in slots:
+    slot.setup(args.codec)
 
 #Make a list of the bits of work we need to do.
 #We pack the stack ordered by filesize ASC, quality ASC (aka. -v DESC)

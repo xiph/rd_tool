@@ -11,21 +11,21 @@ class Machine:
     def __init__(self,host):
         self.host = host
         self.user = 'ec2-user'
-    def setup(self,codec):
-        print(get_time(),'Connecting to',self.host)
-        if subprocess.call(['./transfer_git.sh',self.host,codec]) != 0:
-          print(get_time(),'Couldn\'t set up machine '+self.host)
-          sys.exit(1)
 
 #the job slots we can fill
 class Slot:
-    def __init__(self, machine=None):
+    def __init__(self, machine=None, work_root='/home/ec2-user'):
         self.machine = machine
-        self.work_root = '/home/ec2-user'
+        self.work_root = work_root
         self.p = None
         self.busy = False
     def gather(self):
         return self.p.communicate()
+    def setup(self,codec):
+        print(get_time(),'Connecting to',self.machine.host)
+        if subprocess.call(['./transfer_git.sh',self.machine.host,codec,self.work_root]) != 0:
+          print(get_time(),'Couldn\'t set up '+self.machine.host+':'+self.work_root)
+          sys.exit(1)
     def execute(self, work):
         self.busy = True
         self.work = work
@@ -146,5 +146,5 @@ def get_slots(machines):
     #we end up with heavy jobs split across machines better
     for i in range(0,32):
         for machine in machines:
-            slots.append(Slot(machine))
+            slots.append(Slot(machine,'/home/ec2-user/slot'+str(i)))
     return slots

@@ -8,6 +8,7 @@ if [ -z "$WORK_ROOT" ]; then
   export WORK_ROOT=/home/ec2-user
 fi
 
+mkdir -p "$WORK_ROOT"
 cd "$WORK_ROOT"
 
 if [ -z "$DAALATOOL_ROOT" ]; then
