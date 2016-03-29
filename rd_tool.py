@@ -73,7 +73,7 @@ class Work:
             input_path = '/mnt/media/'+work.set+'/'+work.filename
         slot.start_shell(('DAALA_ROOT=/home/ec2-user/daala/ WORK_ROOT="'+slot.work_root+'" x="'+str(work.quality) +
             '" CODEC="'+work.codec+'" EXTRA_OPTIONS="'+work.extra_options +
-            '" /home/ec2-user/rd_tool/metrics_gather.sh '+shellquote(input_path)))
+            '" '+slot.work_root+'/rd_tool/metrics_gather.sh '+shellquote(input_path)))
         (stdout, stderr) = slot.gather()
         self.parse(stdout, stderr)
     def get_name(self):
@@ -92,7 +92,7 @@ class OneShotWork:
         rd_print(self.filename + ' using quantizer ' + str(self.quality))
         slot.start_shell(('DAALA_ROOT=/home/ec2-user/daala/ WORK_ROOT="'+slot.work_root+'" x="'+str(work.quality) +
             '" CODEC="'+work.codec+'" EXTRA_OPTIONS="'+work.extra_options +
-            '" NO_DELETE=1 /home/ec2-user/rd_tool/metrics_gather.sh '+shellquote(input_path)))
+            '" NO_DELETE=1 '+slot.work_root+'/rd_tool/metrics_gather.sh '+shellquote(input_path)))
         (stdout, stderr) = slot.gather()
         print(stdout)
         print(stderr)
@@ -210,10 +210,6 @@ if num_instances_to_use > max_num_instances_to_use:
 machines = awsremote.get_machines(num_instances_to_use, aws_group_name)
 
 slots = awsremote.get_slots(machines)
-
-#set up our instances and their free job slots
-for slot in slots:
-    slot.setup(args.codec)
 
 #Make a list of the bits of work we need to do.
 #We pack the stack ordered by filesize ASC, quality ASC (aka. -v DESC)

@@ -12,7 +12,7 @@ mkdir -p "$WORK_ROOT"
 cd "$WORK_ROOT"
 
 if [ -z "$DAALATOOL_ROOT" ]; then
-  export DAALATOOL_ROOT="$WORK_ROOT/daalatool/"
+  export DAALATOOL_ROOT="/home/ec2-user/daalatool/"
 fi
 export X264="$WORK_ROOT/x264/x264"
 export X265="$WORK_ROOT/x265/build/linux/x265"

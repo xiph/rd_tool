@@ -29,6 +29,7 @@ class Slot:
     def execute(self, work):
         self.busy = True
         self.work = work
+        self.setup(work.codec)
         work.execute(self)
         self.busy = False
     def start_shell(self, command):
