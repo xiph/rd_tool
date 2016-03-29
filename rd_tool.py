@@ -136,7 +136,7 @@ class ABWork:
         return self.filename + ' with bpp ' + str(self.bpp)
 
 #set up Codec:QualityRange dictionary
-quality = {
+quality_presets = {
 "daala": [5,7,11,16,25,37,55,81,122,181,270,400],
 "x264": list(range(1,52,5)),
 "x265": list(range(5,52,5)),
@@ -166,17 +166,24 @@ parser.add_argument('-mode', default='metric')
 parser.add_argument('-runid', default=get_time())
 parser.add_argument('-seed')
 parser.add_argument('-bpp')
+parser.add_argument('-qualities',metavar='Quality levels to run',nargs='+')
+
 
 args = parser.parse_args()
 
 aws_group_name = args.awsgroup
 
 #check we have the codec in our codec-qualities dictionary
-if args.codec not in quality:
+if args.codec not in quality_presets:
     rd_print('Invalid codec. Valid codecs are:')
     for q in quality:
         rd_print(q)
     sys.exit(1)
+
+if args.qualities:
+    quality = args.qualities
+else:
+    quality = quality_presets[args.codec]
 
 #check we have the set name in our sets-filenames dictionary
 if not args.individual:
@@ -187,9 +194,9 @@ if not args.individual:
         sys.exit(1)
 
 if not args.individual:
-    total_num_of_jobs = len(video_sets[args.set[0]]['sources']) * len(quality[args.codec])
+    total_num_of_jobs = len(video_sets[args.set[0]]['sources']) * len(quality)
 else:
-    total_num_of_jobs = len(quality[args.codec]) #FIXME
+    total_num_of_jobs = len(quality) #FIXME
 
 #a logging message just to get the regex progress bar on the AWCY site started...
 rd_print('0 out of',total_num_of_jobs,'finished.')
@@ -223,7 +230,7 @@ else:
 
 if args.mode == 'metric':
     for filename in video_filenames:
-        for q in sorted(quality[args.codec], reverse = True):
+        for q in sorted(quality, reverse = True):
             work = Work()
             work.quality = q
             work.codec = args.codec

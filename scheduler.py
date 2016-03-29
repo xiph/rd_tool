@@ -19,6 +19,7 @@ def run(work_items, slots):
                     work_done.append(slot.work)
                     print(get_time(),len(work_done),'out of',total_num_of_jobs,'finished.')
                 elif retries >= max_retries:
+                    print(get_time(),'Max retries hit!')
                     break
                 else:
                     retries = retries + 1
@@ -47,4 +48,5 @@ def run(work_items, slots):
                 work_thread.start()
                 taken_slots.append(slot)
         sleep(0.2)
+        print('Taken slots:', len(taken_slots), 'Work done:', len(work_done), 'Work left:', len(work_items))
     return work_done

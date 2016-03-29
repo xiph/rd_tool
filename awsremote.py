@@ -25,13 +25,17 @@ class Slot:
         print(get_time(),'Connecting to',self.machine.host)
         if subprocess.call(['./transfer_git.sh',self.machine.host,codec,self.work_root]) != 0:
           print(get_time(),'Couldn\'t set up '+self.machine.host+':'+self.work_root)
-          sys.exit(1)
+          return False
+        return True
     def execute(self, work):
         self.busy = True
         self.work = work
-        self.setup(work.codec)
-        work.execute(self)
-        self.busy = False
+        if self.setup(work.codec):
+          work.execute(self)
+          self.busy = False
+        else:
+          work.failed = True
+          self.busy = False
     def start_shell(self, command):
        self.p = subprocess.Popen(['ssh','-i','daala.pem','-o',' StrictHostKeyChecking=no',
            self.machine.user+'@'+self.machine.host,
