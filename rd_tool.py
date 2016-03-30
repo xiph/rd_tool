@@ -207,7 +207,9 @@ if num_instances_to_use > max_num_instances_to_use:
         'AWS instances, but the max is',max_num_instances_to_use,'.')
     num_instances_to_use = max_num_instances_to_use
 
-machines = awsremote.get_machines(num_instances_to_use, aws_group_name)
+machines = False
+while not machines:
+  machines = awsremote.get_machines(num_instances_to_use, aws_group_name)
 
 #set up our instances and their free job slots
 for machine in machines:
