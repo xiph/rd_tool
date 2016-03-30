@@ -119,14 +119,18 @@ def get_machines(num_instances_to_use, aws_group_name):
     for instance_id in instance_ids:
         print(get_time(),'Waiting for instance',instance_id,'to boot...')
         while True:
-            state = state_name_of(instance_id, ec2)
-            if state == 'running':
-                print(get_time(),instance_id, 'is running!')
-                break
-            elif state == 'pending':
-                pass
-            else:
-                print(instance_id, 'in state',state,', not usable')
+            try:
+                state = state_name_of(instance_id, ec2)
+                if state == 'running':
+                    print(get_time(),instance_id, 'is running!')
+                    break
+                elif state == 'pending':
+                    pass
+                else:
+                    print(instance_id, 'in state',state,', not usable')
+                    return False
+            except IndexError:
+                print(instance_id, 'not queryable yet')
                 return False
             sleep(3)
     for instance_id in instance_ids:
