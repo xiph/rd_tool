@@ -24,6 +24,9 @@
   },
   "video-hd-2": {
     "type": "video",
+    "width": 4096,
+    "height": 2160,
+    "framerate": 50,
     "sources": [
       "aspen_1080p_50f.y4m",
       "blue_sky_1080p25_50f.y4m",
@@ -42,6 +45,9 @@
   },
   "video-hd-3": {
     "type": "video",
+    "width": 4096,
+    "height": 2160,
+    "framerate": 50,
     "sources": [
       "aspen_1080p_100f.y4m",
       "blue_sky_1080p25_100f.y4m",
@@ -62,6 +68,9 @@
   },
   "netflix-4k-1": {
     "type": "video",
+    "width": 4096,
+    "height": 2160,
+    "framerate": 60,
     "sources": [
       "Netflix_Aerial_4096x2160_60fps_10bit_420_6_120f.y4m",
       "Netflix_BarScene_4096x2160_60fps_10bit_420_2_120f.y4m",
@@ -86,6 +95,9 @@
   },
   "netflix-2k-1": {
     "type": "video",
+    "width": 2048,
+    "height": 1080,
+    "framerate": 60,
     "sources": [
       "Netflix_Aerial_2k_60fps_10bit_420_6_120f.y4m",
       "Netflix_BarScene_2k_60fps_10bit_420_2_120f.y4m",
@@ -110,6 +122,9 @@
   },
   "twitch-1": {
     "type": "video",
+    "width": 1920,
+    "height": 1080,
+    "framerate": 60,
     "sources": [
       "CSGO_0_120f.y4m",
       "CSGO_10_120f.y4m",
@@ -134,6 +149,9 @@
   },
   "vc-360p-1": {
     "type": "video",
+    "width": 640,
+    "height": 360,
+    "framerate": 60,
     "sources": [
       "desktop2360p_300f.y4m",
       "desktop360p_300f.y4m",
@@ -148,6 +166,9 @@
   },
   "vc-720p-1": {
     "type": "video",
+    "width": 1280,
+    "height": 720,
+    "framerate": 60,
     "sources": [
       "dark720p_250f.y4m",
       "FourPeople_1280x720_60_250f.y4m",
