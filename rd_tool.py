@@ -9,6 +9,7 @@ import json
 import codecs
 import awsremote
 import scheduler
+import sshslot
 
 # Finding files such as `this_(that)` requires `'` be placed on both
 # sides of the quote so the `()` are both captured. Files such as
@@ -167,6 +168,7 @@ parser.add_argument('-runid', default=get_time())
 parser.add_argument('-seed')
 parser.add_argument('-bpp')
 parser.add_argument('-qualities',nargs='+')
+parser.add_argument('-machineconf')
 
 args = parser.parse_args()
 
@@ -210,18 +212,23 @@ max_num_instances_to_use = int(args.machines)
 
 if num_instances_to_use > max_num_instances_to_use:
     rd_print('Ideally, we should use',num_instances_to_use,
-        'AWS instances, but the max is',max_num_instances_to_use,'.')
+        'instances, but the max is',max_num_instances_to_use,'.')
     num_instances_to_use = max_num_instances_to_use
 
-machines = False
-while not machines:
-  machines = awsremote.get_machines(num_instances_to_use, aws_group_name)
+machines = []
+if args.machineconf:
+    machineconf = json.load(open(args.machineconf, 'r'))
+    for m in machineconf:
+        machines.append(sshslot.Machine(m['host'],m['user'],m['cores']))
+else:
+    while not machines:
+        machines = awsremote.get_machines(num_instances_to_use, aws_group_name)
 
+slots = []
 #set up our instances and their free job slots
 for machine in machines:
     machine.setup(args.codec)
-
-slots = awsremote.get_slots(machines)
+    slots.extend(machine.get_slots())
 
 
 #Make a list of the bits of work we need to do.
