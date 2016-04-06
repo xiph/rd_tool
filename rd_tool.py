@@ -146,6 +146,8 @@ quality_presets = {
 "vp9": list(range(12,64,5)),
 "vp10": list(range(12,64,5)),
 "vp10-rt": list(range(12,64,5)),
+"av1": list(range(12,64,5)),
+"av1-rt": list(range(12,64,5)),
 "thor": list(range(7,43,3)),
 "thor-rt": list(range(7,43,3))
 }
