@@ -185,6 +185,7 @@
   },
   "ntt-short-1": {
     "type": "video",
+    "anchor": "vp9-anchor-ntt-short-1c",
     "sources": [
       "BasketballPass_416x240_50_1s.y4m",
       "BlowingBubbles_416x240_50_1s.y4m",
@@ -259,6 +260,7 @@
   },
   "subset1": {
     "type": "image",
+    "anchor": "vp9-anchor-subset1-1",
     "sources": [
       "08-2011._Panthera_tigris_tigris_-_Texas_Park_-_Lanzarote_-TP04.y4m",
       "125_-_Québec_-_Pont_de_Québec_de_nuit_-_Septembre_2009.y4m",
@@ -369,6 +371,7 @@
     },
   "subset2": {
     "type": "image",
+    "anchor": "vp9-anchor-subset2-1",
     "sources":  [
       "20100701_Pelpin,_cathedral,_1.y4m",
       "77_Bombay_Street_Photo_by_Sven_Fischer.y4m",
