@@ -138,7 +138,7 @@ class ABWork:
 
 #set up Codec:QualityRange dictionary
 quality_presets = {
-"daala": [1,3,5,7,11,16,25,37,55,81,122,181],
+"daala": [3,5,7,11,16,25,37,55,81,122,181],
 "x264": list(range(1,52,5)),
 "x265": list(range(5,52,5)),
 "x265-rt": list(range(5,52,5)),
