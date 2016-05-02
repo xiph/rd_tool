@@ -66,6 +66,19 @@
       "touchdown_pass_1080p_100f.y4m"
     ]
   },
+  "length-test-1": {
+    "type": "video",
+    "width": 1024,
+    "height": 540,
+    "framerate": 60,
+    "sources": [
+      "ToddlerFountain_1024x540_240.y4m",
+      "ToddlerFountain_1024x540_120.y4m",
+      "ToddlerFountain_1024x540_60.y4m",
+      "ToddlerFountain_1024x540_30.y4m",
+      "ToddlerFountain_1024x540_15.y4m"
+    ]
+  },
   "netflix-4k-1": {
     "type": "video",
     "width": 4096,
