@@ -253,6 +253,7 @@
   },
   "objective-1-beta": {
     "type": "video",
+    "anchor": "objective-1-beta-ref"
     "sources": [
       "aspen_1080p_100f.y4m",
       "blue_sky_1080p25_100f.y4m",
