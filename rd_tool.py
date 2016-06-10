@@ -327,7 +327,7 @@ if args.mode == 'metric':
             f.write(str(work.metric['apsnr'][0])+' ')
             f.write(str(work.metric['apsnr'][1])+' ')
             f.write(str(work.metric['apsnr'][2])+' ')
-            f.write(str(work.metric['msssim'][0]+' ')
+            f.write(str(work.metric['msssim'][0])+' ')
             f.write('\n')
             f.close()
     if not args.individual:
