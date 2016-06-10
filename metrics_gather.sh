@@ -151,7 +151,7 @@ thor-rt)
   ;;
 esac
 
-"$DUMP_PSNR" -a "$FILE" "$BASENAME.y4m" > "$BASENAME-psnr.out" 2> /dev/null
+"$DUMP_PSNR" -a "$FILE" "$BASENAME.y4m" > "$BASENAME-psnr.out"
 
 FRAMES=$(cat "$BASENAME-psnr.out" | grep ^0 | wc -l)
 PIXELS=$(($WIDTH*$HEIGHT*$FRAMES))
