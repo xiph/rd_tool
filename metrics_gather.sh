@@ -151,11 +151,12 @@ thor-rt)
   ;;
 esac
 
-"$DUMP_PSNR" "$FILE" "$BASENAME.y4m" > "$BASENAME-psnr.out" 2> /dev/null
+"$DUMP_PSNR" -a "$FILE" "$BASENAME.y4m" > "$BASENAME-psnr.out" 2> /dev/null
 
 FRAMES=$(cat "$BASENAME-psnr.out" | grep ^0 | wc -l)
 PIXELS=$(($WIDTH*$HEIGHT*$FRAMES))
 PSNR=$(cat "$BASENAME-psnr.out" | grep Total)
+APSNR=$(cat "$BASENAME-psnr.out" | grep Frame-averaged)
 PSNRHVS=$("$DUMP_PSNRHVS" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 SSIM=$("$DUMP_SSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 FASTSSIM=$("$DUMP_FASTSSIM" -c "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)

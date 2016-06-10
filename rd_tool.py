@@ -58,6 +58,9 @@ class Work:
             self.metric["fastssim"][1] = split[32]
             self.metric["fastssim"][2] = split[34]
             self.metric['ciede2000'] = split[36]
+            self.metric['apsnr'][0] = split[40]
+            self.metric['apsnr'][1] = split[42]
+            self.metric['apsnr'][2] = split[44]
             self.failed = False
         except IndexError:
             rd_print('Decoding result for '+self.filename+' at quality '+str(self.quality)+'failed!')
@@ -316,6 +319,9 @@ if args.mode == 'metric':
             f.write(str(work.metric['ciede2000'])+' ')
             f.write(str(work.metric['psnr'][1])+' ')
             f.write(str(work.metric['psnr'][2])+' ')
+            f.write(str(work.metric['apsnr'][0])+' ')
+            f.write(str(work.metric['apsnr'][1])+' ')
+            f.write(str(work.metric['apsnr'][2])+' ')
             f.write('\n')
             f.close()
     if not args.individual:
