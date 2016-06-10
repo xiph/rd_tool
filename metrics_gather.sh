@@ -53,12 +53,16 @@ if [ -z "$DUMP_FASTSSIM" ]; then
   export DUMP_FASTSSIM="$DAALATOOL_ROOT/tools/dump_fastssim"
 fi
 
+if [ -z "$DUMP_MSSSIM" ]; then
+  export DUMP_MSSSIM="$DAALATOOL_ROOT/tools/dump_msssim"
+fi
+
 if [ -z "$DUMP_CIEDE" ]; then
   export DUMP_CIEDE="$DAALATOOL_ROOT/tools/dump_ciede2000.py"
 fi
 
 if [ -z "$YUV2YUV4MPEG" ]; then
-  export DUMP_CIEDE="$DAALATOOL_ROOT/tools/yuv2yuv4mpeg"
+  export YUV2YUV4MPEG="$DAALATOOL_ROOT/tools/yuv2yuv4mpeg"
 fi
 
 if [ -z "$CODEC" ]; then
@@ -161,6 +165,7 @@ PSNRHVS=$("$DUMP_PSNRHVS" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 SSIM=$("$DUMP_SSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 FASTSSIM=$("$DUMP_FASTSSIM" -c "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 CIEDE=$("$DUMP_CIEDE" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
+MSSSIM=$("$DUMP_MSSSIM" -c "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 
 if [ ! "$NO_DELETE" ]; then
   rm -f "$BASENAME.y4m" "$BASENAME.yuv" "$BASENAME.ogv" "$BASENAME.x264" "$BASENAME.x265" "$BASENAME.vpx" "$BASENAME-enc.out" "$BASENAME-psnr.out" "$BASENAME.thor" 2> /dev/null
@@ -173,3 +178,4 @@ echo "$SSIM"
 echo "$FASTSSIM"
 echo "$CIEDE"
 echo "$APSNR"
+echo "$MSSSIM"
