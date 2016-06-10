@@ -58,7 +58,7 @@ class Work:
             self.metric["fastssim"][1] = split[32]
             self.metric["fastssim"][2] = split[34]
             self.metric['ciede2000'] = split[36]
-            eslf.metric['apsnr'] = {}
+            self.metric['apsnr'] = {}
             self.metric['apsnr'][0] = split[40]
             self.metric['apsnr'][1] = split[42]
             self.metric['apsnr'][2] = split[44]
