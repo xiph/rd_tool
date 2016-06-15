@@ -331,7 +331,7 @@ if args.mode == 'metric':
             f.write('\n')
             f.close()
     if not args.individual:
-      subprocess.call('OUTPUT="'+args.prefix+'/'+'total" "'+daala_root+'/tools/rd_average.sh" "'+args.prefix+'/*.out"',
+      subprocess.call('OUTPUT="'+args.prefix+'/'+'total" "'+sys.path[0]+'/rd_average.sh" "'+args.prefix+'/*.out"',
           shell=True)
 
 rd_print('Done!')
