@@ -321,6 +321,18 @@
       "WITCHER3_60f.y4m"
     ]
   },
+  "eos": {
+    "type": "image",
+    "sources": [
+      "checkerboard.y4m",
+      "eos0.y4m",
+      "eos144.y4m",
+      "eos288.y4m",
+      "eos432.y4m",
+      "eos576.y4m",
+      "eos720.y4m"
+    ]
+  },
   "screenshots": {
     "type": "image",
     "sources": [
