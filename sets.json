@@ -411,7 +411,7 @@
   },
   "subset1-monochrome": {
     "type": "image",
-    "anchor": "subset1-monochrome-anchor-3"
+    "anchor": "subset1-monochrome-anchor-3",
     "sources": [
       "08-2011._Panthera_tigris_tigris_-_Texas_Park_-_Lanzarote_-TP04.y4m",
       "125_-_Québec_-_Pont_de_Québec_de_nuit_-_Septembre_2009.y4m",
