@@ -16,17 +16,17 @@ if [ -z $2 ]; then
 fi
 
 echo Testing server...
-$SSH ec2-user@$1 "echo Available"
+$SSH $3@$1 "echo Available"
 
 echo "Checking for other users..."
-if $SSH ec2-user@$1 "pgrep encoder"
+if $SSH $3@$1 "pgrep encoder"
 then
   echo "The server is already running encoder_example processes. Killing."
-  $SSH ec2-user@$1 "killall -9 encoder_example"
+  $SSH $3@$1 "killall -9 encoder_example"
 fi
 
 echo Cleaning server...
-$SSH ec2-user@$1 "rm -rf *.png"
+$SSH $3@$1 "rm -rf $4/*.png"
 
 #echo Importing ssh keys...
 
@@ -34,8 +34,8 @@ $SSH ec2-user@$1 "rm -rf *.png"
 
 echo Uploading tools...
 
-rsync -r -e "$SSH" ./ ec2-user@$1:/home/ec2-user/rd_tool/
+rsync -r -e "$SSH" ./ $3@$1:$4/rd_tool/
 
 echo Uploading local build...
 
-rsync -r -e "$SSH" ../$2/ ec2-user@$1:/home/ec2-user/$2/
+rsync -r -e "$SSH" ../$2/ $3@$1:$4/$2/
