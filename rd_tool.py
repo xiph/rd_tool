@@ -80,9 +80,9 @@ class Work:
             input_path = '/mnt/media/'+work.filename
         else:
             input_path = '/mnt/media/'+work.set+'/'+work.filename
-        slot.start_shell(('DAALA_ROOT=/home/ec2-user/daala/ WORK_ROOT="'+slot.work_root+'" x="'+str(work.quality) +
+        slot.start_shell(('DAALA_ROOT="'+daala_root+'" WORK_ROOT="'+slot.work_root+'" x="'+str(work.quality) +
             '" CODEC="'+work.codec+'" EXTRA_OPTIONS="'+work.extra_options +
-            '" /home/ec2-user/rd_tool/metrics_gather.sh '+shellquote(input_path)))
+            '" ' + slot.work_root + '/rd_tool/metrics_gather.sh '+shellquote(input_path)))
         (stdout, stderr) = slot.gather()
         self.parse(stdout, stderr)
     def get_name(self):
@@ -99,9 +99,9 @@ class OneShotWork:
             input_path = '/mnt/media/'+work.set+'/'+work.filename
         self.quality = int(float(subprocess.check_output(['../quantizer_log.m','../runs/'+self.runid+'/'+work.set+'/'+work.filename+'-daala.out',self.bpp])))
         rd_print(self.filename + ' using quantizer ' + str(self.quality))
-        slot.start_shell(('DAALA_ROOT=/home/ec2-user/daala/ WORK_ROOT="'+slot.work_root+'" x="'+str(work.quality) +
+        slot.start_shell(('DAALA_ROOT="'+daala_root+'" WORK_ROOT="'+slot.work_root+'" x="'+str(work.quality) +
             '" CODEC="'+work.codec+'" EXTRA_OPTIONS="'+work.extra_options +
-            '" NO_DELETE=1 /home/ec2-user/rd_tool/metrics_gather.sh '+shellquote(input_path)))
+            '" NO_DELETE=1'+slot.work_root+'/rd_tool/metrics_gather.sh '+shellquote(input_path)))
         (stdout, stderr) = slot.gather()
         print(stdout)
         print(stderr)
@@ -116,7 +116,7 @@ class ABWork:
         input_path = '/mnt/media/' + work.set + '/' + work.filename
 
         try:
-            slot.start_shell('/home/ec2-user/rd_tool/ab_meta_compare.sh ' + shellquote(str(self.bpp)) + ' ' + shellquote(self.runid) + ' ' + work.set + ' ' + shellquote(input_path) + ' ' + shellquote(self.codec))
+            slot.start_shell(slot.work_root+'/rd_tool/ab_meta_compare.sh ' + shellquote(str(self.bpp)) + ' ' + shellquote(self.runid) + ' ' + work.set + ' ' + shellquote(input_path) + ' ' + shellquote(self.codec))
             (stdout, stderr) = slot.gather()
 
             # filename with extension
@@ -127,7 +127,7 @@ class ABWork:
 
             middle = self.runid + '/' + work.set + '/bpp_' + str(self.bpp)
 
-            remote_file = '/home/ec2-user/runs/' + middle + '/' + shellquote(filename)
+            remote_file = slot.work_root+'/runs/' + middle + '/' + shellquote(filename)
             local_folder = '../runs/' + middle
             local_file = '../runs/' + middle + '/' + filename
 
@@ -229,7 +229,7 @@ machines = []
 if args.machineconf:
     machineconf = json.load(open(args.machineconf, 'r'))
     for m in machineconf:
-        machines.append(sshslot.Machine(m['host'],m['user'],m['cores']))
+        machines.append(sshslot.Machine(m['host'],m['user'],m['cores'],m['work_root']))
 else:
     while not machines:
         machines = awsremote.get_machines(num_instances_to_use, aws_group_name)
