@@ -171,7 +171,7 @@ SSIM=$("$DUMP_SSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 FASTSSIM=$("$DUMP_FASTSSIM" -c "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 CIEDE=$("$DUMP_CIEDE" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 MSSSIM=$("$DUMP_MSSSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
-ENCTIME=$(echo $(cat "$BASENAME-enctime.out" | grep seconds | rev | cut -f1 -d ' ') | awk '{print $1 "+" $2}' | bc)
+ENCTIME=$(echo $(cat "$BASENAME-enctime.out" | grep seconds | rev | cut -f1 -d ' ') + p | dc)
 
 if [ ! "$NO_DELETE" ]; then
   rm -f "$BASENAME.y4m" "$BASENAME.yuv" "$BASENAME.ogv" "$BASENAME.x264" "$BASENAME.x265" "$BASENAME.vpx" "$BASENAME-enctime.out" "$BASENAME-enc.out" "$BASENAME-psnr.out" "$BASENAME.thor" 2> /dev/null
