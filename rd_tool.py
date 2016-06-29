@@ -76,10 +76,7 @@ class Work:
             self.failed = True
     def execute(self, slot):
         work = self
-        if self.individual:
-            input_path = '/mnt/media/'+work.filename
-        else:
-            input_path = '/mnt/media/'+work.set+'/'+work.filename
+        input_path = '/mnt/media/'+work.set+'/'+work.filename
         slot.start_shell(('DAALA_ROOT="'+daala_root+'" WORK_ROOT="'+slot.work_root+'" x="'+str(work.quality) +
             '" CODEC="'+work.codec+'" EXTRA_OPTIONS="'+work.extra_options +
             '" ' + slot.work_root + '/rd_tool/metrics_gather.sh '+shellquote(input_path)))
@@ -93,10 +90,7 @@ class OneShotWork:
         self.failed = False
     def execute(self, slot):
         work = self
-        if self.individual:
-            input_path = '/mnt/media/'+work.filename
-        else:
-            input_path = '/mnt/media/'+work.set+'/'+work.filename
+        input_path = '/mnt/media/'+work.set+'/'+work.filename
         self.quality = int(float(subprocess.check_output(['../quantizer_log.m','../runs/'+self.runid+'/'+work.set+'/'+work.filename+'-daala.out',self.bpp])))
         rd_print(self.filename + ' using quantizer ' + str(self.quality))
         slot.start_shell(('DAALA_ROOT="'+daala_root+'" WORK_ROOT="'+slot.work_root+'" x="'+str(work.quality) +
@@ -170,7 +164,6 @@ parser = argparse.ArgumentParser(description='Collect RD curve data.')
 parser.add_argument('set',metavar='Video set name',nargs='+')
 parser.add_argument('-codec',default='daala')
 parser.add_argument('-prefix',default='.')
-parser.add_argument('-individual', action='store_true')
 parser.add_argument('-awsgroup', default='Daala')
 parser.add_argument('-machines', default=14)
 parser.add_argument('-mode', default='metric')
@@ -197,17 +190,13 @@ else:
     quality = quality_presets[args.codec]
 
 #check we have the set name in our sets-filenames dictionary
-if not args.individual:
-    if args.set[0] not in video_sets:
-        rd_print('Specified invalid set '+args.set[0]+'. Available sets are:')
-        for video_set in video_sets:
-            rd_print(video_set)
-        sys.exit(1)
+if args.set[0] not in video_sets:
+    rd_print('Specified invalid set '+args.set[0]+'. Available sets are:')
+    for video_set in video_sets:
+        rd_print(video_set)
+    sys.exit(1)
 
-if not args.individual:
-    total_num_of_jobs = len(video_sets[args.set[0]]['sources']) * len(quality)
-else:
-    total_num_of_jobs = len(quality) #FIXME
+total_num_of_jobs = len(video_sets[args.set[0]]['sources']) * len(quality)
 
 #a logging message just to get the regex progress bar on the AWCY site started...
 rd_print('0 out of',total_num_of_jobs,'finished.')
@@ -249,10 +238,7 @@ for machine in machines:
 #so we pop the hardest encodes first,
 #for more efficient use of the AWS machines' time.
 
-if args.individual:
-    video_filenames = args.set
-else:
-    video_filenames = video_sets[args.set[0]]['sources']
+video_filenames = video_sets[args.set[0]]['sources']
 
 if args.mode == 'metric':
     for filename in video_filenames:
@@ -260,11 +246,7 @@ if args.mode == 'metric':
             work = Work()
             work.quality = q
             work.codec = args.codec
-            if args.individual:
-                work.individual = True
-            else:
-                work.individual = False
-                work.set = args.set[0]
+            work.set = args.set[0]
             work.filename = filename
             work.extra_options = extra_options
             work_items.append(work)
@@ -273,11 +255,7 @@ elif args.mode == 'oneshot':
         work = OneShotWork()
         work.bpp = args.bpp
         work.codec = args.codec
-        if args.individual:
-            work.individual = True
-        else:
-            work.individual = False
-            work.set = args.set[0]
+        work.set = args.set[0]
         work.filename = filename
         work.runid = str(args.runid)
         work.extra_options = extra_options
@@ -313,10 +291,7 @@ if args.mode == 'metric':
     work_done.sort(key=lambda work: work.quality)
     for work in work_done:
         if not work.failed:
-            if args.individual:
-                f = open((args.prefix+'/'+os.path.basename(work.filename)+'.out').encode('utf-8'),'a')
-            else:
-                f = open((args.prefix+'/'+work.filename+'-daala.out').encode('utf-8'),'a')
+            f = open((args.prefix+'/'+work.filename+'-daala.out').encode('utf-8'),'a')
             f.write(str(work.quality)+' ')
             f.write(str(work.pixels)+' ')
             f.write(str(work.size)+' ')
@@ -333,8 +308,7 @@ if args.mode == 'metric':
             f.write(str(work.metric['msssim'][0])+' ')
             f.write('\n')
             f.close()
-    if not args.individual:
-      subprocess.call('OUTPUT="'+args.prefix+'/'+'total" "'+sys.path[0]+'/rd_average.sh" "'+args.prefix+'/*.out"',
-          shell=True)
+    subprocess.call('OUTPUT="'+args.prefix+'/'+'total" "'+sys.path[0]+'/rd_average.sh" "'+args.prefix+'/*.out"',
+      shell=True)
 
 rd_print('Done!')
