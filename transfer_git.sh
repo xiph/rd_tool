@@ -2,7 +2,7 @@
 
 set -e
 
-SSH="ssh -i daala.pem -o StrictHostKeyChecking=no"
+SSH="ssh -i daala.pem -o StrictHostKeyChecking=no -p $5"
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin
 
 if [ -z $DAALA_ROOT ]; then
