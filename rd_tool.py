@@ -66,6 +66,7 @@ class Work:
             self.metric['msssim'][0] = split[48]
             self.metric['msssim'][1] = split[50]
             self.metric['msssim'][2] = split[52]
+            self.metric['encodetime'] = split[53]
             self.failed = False
         except IndexError:
             rd_print('Decoding result for '+self.filename+' at quality '+str(self.quality)+'failed!')
@@ -331,6 +332,7 @@ if args.mode == 'metric':
             f.write(str(work.metric['apsnr'][1])+' ')
             f.write(str(work.metric['apsnr'][2])+' ')
             f.write(str(work.metric['msssim'][0])+' ')
+            f.write(str(work.metric['encodetime'])+' ')
             f.write('\n')
             f.close()
     if not args.individual:
