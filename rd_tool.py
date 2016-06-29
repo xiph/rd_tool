@@ -30,7 +30,7 @@ if 'EXTRA_OPTIONS' in os.environ:
     extra_options = os.environ['EXTRA_OPTIONS']
     print(get_time(),'Passing extra command-line options:"%s"' % extra_options)
 
-class Work:
+class RDWork:
     def __init__(self):
         self.failed = False
     def parse(self, stdout, stderr):
@@ -84,23 +84,6 @@ class Work:
         self.parse(stdout, stderr)
     def get_name(self):
         return self.filename + ' with quality ' + str(self.quality)
-
-class OneShotWork:
-    def __init__(self):
-        self.failed = False
-    def execute(self, slot):
-        work = self
-        input_path = '/mnt/media/'+work.set+'/'+work.filename
-        self.quality = int(float(subprocess.check_output(['../quantizer_log.m','../runs/'+self.runid+'/'+work.set+'/'+work.filename+'-daala.out',self.bpp])))
-        rd_print(self.filename + ' using quantizer ' + str(self.quality))
-        slot.start_shell(('DAALA_ROOT="'+daala_root+'" WORK_ROOT="'+slot.work_root+'" x="'+str(work.quality) +
-            '" CODEC="'+work.codec+'" EXTRA_OPTIONS="'+work.extra_options +
-            '" NO_DELETE=1'+slot.work_root+'/rd_tool/metrics_gather.sh '+shellquote(input_path)))
-        (stdout, stderr) = slot.gather()
-        print(stdout)
-        print(stderr)
-    def get_name(self):
-        return self.filename
 
 class ABWork:
     def __init__(self):
@@ -243,23 +226,13 @@ video_filenames = video_sets[args.set[0]]['sources']
 if args.mode == 'metric':
     for filename in video_filenames:
         for q in sorted(quality, reverse = True):
-            work = Work()
+            work = RDWork()
             work.quality = q
             work.codec = args.codec
             work.set = args.set[0]
             work.filename = filename
             work.extra_options = extra_options
             work_items.append(work)
-elif args.mode == 'oneshot':
-    for filename in video_filenames:
-        work = OneShotWork()
-        work.bpp = args.bpp
-        work.codec = args.codec
-        work.set = args.set[0]
-        work.filename = filename
-        work.runid = str(args.runid)
-        work.extra_options = extra_options
-        work_items.append(work)
 elif args.mode == 'ab':
     if video_sets[args.set[0]]['type'] == 'video':
         bits_per_pixel = [0.01]
