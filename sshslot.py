@@ -21,11 +21,16 @@ class Machine:
         self.port = str(port)
     def rsync(self, local, remote):
         return subprocess.call(['rsync', '-r', '-e', "ssh -i daala.pem -o StrictHostKeyChecking=no -p "+str(self.port), local, self.user + '@' + self.host + ':' + remote])
+    def check_shell(self, command):
+        return subprocess.check_output(['ssh','-i','daala.pem','-p',self.port,'-o',' StrictHostKeyChecking=no',
+           self.user+'@'+self.host,
+           command.encode("utf-8")])
     def setup(self,codec):
         print(get_time(),'Connecting to',self.host)
         if self.rsync('./',self.work_root+'/rd_tool/') != 0:
             print(get_time(),'Couldn\'t set up machine '+self.host)
             sys.exit(1)
+        self.check_shell('mkdir -p '+self.work_root+'/'+codec)
         for binary in binaries[codec]:
             if self.rsync('../'+codec+'/'+binary,self.work_root+'/'+codec) != 0:
                 print(get_time(),'Couldn\'t upload codec binary '+binary+'to '+self.host)
