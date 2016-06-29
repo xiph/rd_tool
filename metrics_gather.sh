@@ -69,6 +69,10 @@ if [ -z "$CODEC" ]; then
   export CODEC=daala
 fi
 
+if [ -z "$x" ]; then
+  export x=10
+fi
+
 FILE=$1
 
 BASENAME="$(basename $FILE)-$x"
