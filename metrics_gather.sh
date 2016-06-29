@@ -69,6 +69,11 @@ if [ -z "$CODEC" ]; then
   export CODEC=daala
 fi
 
+if [ -z "$x" ]; then
+  echo Missing quality setting
+  exit 1
+fi
+
 FILE=$1
 
 BASENAME="$(basename $FILE)-$x"
