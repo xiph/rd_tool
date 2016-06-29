@@ -232,7 +232,7 @@ machines = []
 if args.machineconf:
     machineconf = json.load(open(args.machineconf, 'r'))
     for m in machineconf:
-        machines.append(sshslot.Machine(m['host'],m['user'],m['cores'],m['work_root'],m['port']))
+        machines.append(sshslot.Machine(m['host'],m['user'],m['cores'],m['work_root'],str(m['port'])))
 else:
     while not machines:
         machines = awsremote.get_machines(num_instances_to_use, aws_group_name)
