@@ -2,18 +2,34 @@ from utility import get_time
 import subprocess
 import sys
 
+binaries = {
+  'daala':['examples/encoder_example'],
+  'x264': ['x264'],
+  'x265': ['build/linux/x265'],
+  'vp8': ['vpxenc','vpxdec'],
+  'vp9': ['vpxenc','vpxdec'],
+  'av1': ['aomenc','aomdec'],
+  'thor': ['build/Thorenc','build/Thordec']
+}
+
 class Machine:
     def __init__(self,host,user='ec2-user',cores=32,work_root='/home/ec2-user',port=22):
         self.host = host
         self.user = user
         self.cores = cores
         self.work_root = work_root
-        self.port = port
+        self.port = str(port)
+    def rsync(self, local, remote):
+        return subprocess.call(['rsync', '-r', '-e', "ssh -i daala.pem -o StrictHostKeyChecking=no -p "+str(self.port), local, self.user + '@' + self.host + ':' + remote])
     def setup(self,codec):
         print(get_time(),'Connecting to',self.host)
-        if subprocess.call(['./transfer_git.sh',self.host,codec,self.user,self.work_root,self.port]) != 0:
-          print(get_time(),'Couldn\'t set up machine '+self.host)
-          sys.exit(1)
+        if self.rsync('./',self.work_root+'/rd_tool/') != 0:
+            print(get_time(),'Couldn\'t set up machine '+self.host)
+            sys.exit(1)
+        for binary in binaries[codec]:
+            if self.rsync('../'+codec+'/'+binary,self.work_root+'/'+codec) != 0:
+                print(get_time(),'Couldn\'t upload codec binary '+binary+'to '+self.host)
+                sys.exit(1)
     def get_slots(self):
         slots = []
         #by doing the machines in the inner loop,
@@ -42,8 +58,6 @@ class Slot:
             command.encode("utf-8")], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     def get_file(self, remote, local):
         subprocess.call(['scp','-i','daala.pem','-P',self.machine.port,self.machine.user+'@'+self.machine.host+':'+remote,local])
-    def rsync(self, local, remote):
-        subprocess.call(['rsync', '-r', '-e', "ssh -i daala.pem -o StrictHostKeyChecking=no", local, self.machine.user + '@' + self.machine.host + ':' + remote])
     def check_shell(self, command):
         return subprocess.check_output(['ssh','-i','daala.pem','-p',self.machine.port,'-o',' StrictHostKeyChecking=no',
            self.machine.user+'@'+self.machine.host,
