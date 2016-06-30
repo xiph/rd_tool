@@ -32,7 +32,7 @@ class Machine:
             sys.exit(1)
         self.check_shell('mkdir -p '+self.work_root+'/'+codec)
         for binary in binaries[codec]:
-            if self.rsync('../'+codec+'/'+binary,self.work_root+'/'+codec) != 0:
+            if self.rsync('../'+codec+'/'+binary,self.work_root+'/'+codec+'/') != 0:
                 print(get_time(),'Couldn\'t upload codec binary '+binary+'to '+self.host)
                 sys.exit(1)
     def get_slots(self):
