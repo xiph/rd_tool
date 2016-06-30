@@ -30,6 +30,7 @@ class Machine:
         if self.rsync('./',self.work_root+'/rd_tool/') != 0:
             print(get_time(),'Couldn\'t set up machine '+self.host)
             sys.exit(1)
+        self.check_shell('rm -rf '+self.work_root+'/'+codec)    
         self.check_shell('mkdir -p '+self.work_root+'/'+codec)
         for binary in binaries[codec]:
             if self.rsync('../'+codec+'/'+binary,self.work_root+'/'+codec+'/') != 0:
