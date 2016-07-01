@@ -1,6 +1,7 @@
 from utility import get_time
 import subprocess
 import sys
+import os
 
 binaries = {
   'daala':['examples/encoder_example'],
@@ -30,10 +31,10 @@ class Machine:
         if self.rsync('./',self.work_root+'/rd_tool/') != 0:
             print(get_time(),'Couldn\'t set up machine '+self.host)
             sys.exit(1)
-        self.check_shell('rm -rf '+self.work_root+'/'+codec)    
-        self.check_shell('mkdir -p '+self.work_root+'/'+codec)
+        self.check_shell('rm -rf '+self.work_root+'/'+codec)
         for binary in binaries[codec]:
-            if self.rsync('../'+codec+'/'+binary,self.work_root+'/'+codec+'/') != 0:
+            self.check_shell('mkdir -p '+self.work_root+'/'+codec+'/'+os.path.dirname(binary));
+            if self.rsync('../'+codec+'/'+binary,self.work_root+'/'+codec+'/'+binary) != 0:
                 print(get_time(),'Couldn\'t upload codec binary '+binary+'to '+self.host)
                 sys.exit(1)
     def get_slots(self):
