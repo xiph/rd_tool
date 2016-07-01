@@ -69,7 +69,7 @@ class RDWork:
             self.metric['encodetime'] = split[53]
             self.failed = False
         except IndexError:
-            rd_print('Decoding result for '+self.filename+' at quality '+str(self.quality)+'failed!')
+            rd_print('Decoding result for '+self.filename+' at quality '+str(self.quality)+' failed!')
             rd_print('stdout:')
             rd_print(stdout.decode('utf-8'))
             rd_print('stderr:')
