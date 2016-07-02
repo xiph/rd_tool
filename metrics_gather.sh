@@ -86,10 +86,12 @@ HEIGHT="$(head -1 $FILE | cut -d\  -f 3 | tr -d 'H')"
 RATE=$(echo $x*$WIDTH*$HEIGHT*30/1000 | bc)
 
 KFINT=1000
+TIMEROUT=$BASENAME-enctime.out
+TIMER='time -v --output='"$TIMEROUT"
 
 case $CODEC in
 daala)
-  OD_LOG_MODULES='encoder:10' OD_DUMP_IMAGES_SUFFIX="$BASENAME" time -v --output="$BASENAME-enctime.out" "$ENCODER_EXAMPLE" -k $KFINT -v "$x" $EXTRA_OPTIONS "$FILE" -o "$BASENAME.ogv" > /dev/null 2> "$BASENAME-enc.out"
+  OD_LOG_MODULES='encoder:10' OD_DUMP_IMAGES_SUFFIX="$BASENAME" $($TIMER "$ENCODER_EXAMPLE" -k $KFINT -v "$x" $EXTRA_OPTIONS "$FILE" -o "$BASENAME.ogv" > /dev/null 2> "$BASENAME-enc.out")
   if [ ! -f "$BASENAME.ogv" ]
   then
     echo Failed to produce "$BASENAME.ogv"
@@ -171,14 +173,14 @@ SSIM=$("$DUMP_SSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 FASTSSIM=$("$DUMP_FASTSSIM" -c "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 CIEDE=$("$DUMP_CIEDE" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 MSSSIM=$("$DUMP_MSSSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
-if [ -e "$BASENAME-enctime.out" ]; then
-  ENCTIME=$(echo $(cat "$BASENAME-enctime.out" | grep seconds | rev | cut -f1 -d ' ' | rev) + p | dc)
+if [ -e "$TIMER_OUT" ]; then
+  ENCTIME=$(echo $(cat "$TIMER_OUT" | grep seconds | rev | cut -f1 -d ' ' | rev) + p | dc)
 else
   ENCTIME=0
 fi
 
 if [ ! "$NO_DELETE" ]; then
-  rm -f "$BASENAME.y4m" "$BASENAME.yuv" "$BASENAME.ogv" "$BASENAME.x264" "$BASENAME.x265" "$BASENAME.vpx" "$BASENAME-enctime.out" "$BASENAME-enc.out" "$BASENAME-psnr.out" "$BASENAME.thor" 2> /dev/null
+  rm -f "$BASENAME.y4m" "$BASENAME.yuv" "$BASENAME.ogv" "$BASENAME.x264" "$BASENAME.x265" "$BASENAME.vpx" "$TIMEROUT" "$BASENAME-enc.out" "$BASENAME-psnr.out" "$BASENAME.thor" 2> /dev/null
 fi
 
 echo "$x" "$PIXELS" "$SIZE"
