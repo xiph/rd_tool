@@ -172,7 +172,7 @@ FASTSSIM=$("$DUMP_FASTSSIM" -c "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total
 CIEDE=$("$DUMP_CIEDE" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 MSSSIM=$("$DUMP_MSSSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 if [ -e "$BASENAME-enctime.out" ]; then
-  ENCTIME=$(echo $(cat "$BASENAME-enctime.out" | grep seconds | rev | cut -f1 -d ' ') + p | dc)
+  ENCTIME=$(echo $(cat "$BASENAME-enctime.out" | grep seconds | rev | cut -f1 -d ' ' | rev) + p | dc)
 else
   ENCTIME=0
 fi
