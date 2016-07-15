@@ -174,7 +174,7 @@ FASTSSIM=$("$DUMP_FASTSSIM" -c "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total
 CIEDE=$("$DUMP_CIEDE" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 MSSSIM=$("$DUMP_MSSSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 if [ -e "$TIMER_OUT" ]; then
-  ENCTIME=$(echo $(cat "$TIMER_OUT" | grep seconds | rev | cut -f1 -d ' ' | rev) + p | dc)
+  ENCTIME=$(awk '/seconds/ { s+=$4 } END { printf "%.2f", s }' "$TIMER_OUT")
 else
   ENCTIME=0
 fi
