@@ -30,30 +30,19 @@ class Machine:
         return subprocess.check_output(['ssh','-i','daala.pem','-p',self.port,'-o',' StrictHostKeyChecking=no',
            self.user+'@'+self.host,
            command.encode("utf-8")])
-    def setup(self,codec):
-        print(get_time(),'Connecting to',self.host)
-        if self.rsync('./',self.work_root+'/rd_tool/') != 0:
-            print(get_time(),'Couldn\'t set up machine '+self.host)
-            sys.exit(1)
-        self.check_shell('rm -rf '+self.work_root+'/'+codec)
-        for binary in binaries[codec]:
-            self.check_shell('mkdir -p '+self.work_root+'/'+codec+'/'+os.path.dirname(binary));
-            if self.rsync('../'+codec+'/'+binary,self.work_root+'/'+codec+'/'+binary) != 0:
-                print(get_time(),'Couldn\'t upload codec binary '+binary+'to '+self.host)
-                sys.exit(1)
     def get_slots(self):
         slots = []
         #by doing the machines in the inner loop,
         #we end up with heavy jobs split across machines better
         for i in range(0,self.cores):
-            slots.append(Slot(self))
+            slots.append(Slot(self, i))
         return slots
 
 #the job slots we can fill
 class Slot:
-    def __init__(self, machine=None):
+    def __init__(self, machine, num):
         self.machine = machine
-        self.work_root = machine.work_root
+        self.work_root = machine.work_root + '/slot' + str(num)
         self.p = None
         self.busy = False
     def gather(self):
@@ -63,6 +52,17 @@ class Slot:
         self.work = work
         work.execute(self)
         self.busy = False
+    def setup(self,codec):
+        self.check_shell('mkdir -p '+self.work_root)
+        if self.machine.rsync('./',self.work_root+'/rd_tool/') != 0:
+            print(get_time(),'Couldn\'t set up machine '+self.machine.host)
+            sys.exit(1)
+        self.check_shell('rm -rf '+self.work_root+'/'+codec)
+        for binary in binaries[codec]:
+            self.check_shell('mkdir -p '+self.work_root+'/'+codec+'/'+os.path.dirname(binary));
+            if self.machine.rsync('../'+codec+'/'+binary,self.work_root+'/'+codec+'/'+binary) != 0:
+                print(get_time(),'Couldn\'t upload codec binary '+binary+'to '+self.machine.host)
+                sys.exit(1)
     def start_shell(self, command):
         self.p = subprocess.Popen(['ssh','-i','daala.pem','-p',self.machine.port,'-o',' StrictHostKeyChecking=no',
             self.machine.user+'@'+self.machine.host,

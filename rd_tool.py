@@ -76,9 +76,10 @@ class RDWork:
             rd_print(stderr.decode('utf-8'))
             self.failed = True
     def execute(self, slot):
+        slot.setup(self.codec)
         work = self
         input_path = slot.machine.media_path+'/'+work.set+'/'+work.filename
-        slot.start_shell(('DAALA_ROOT="'+daala_root+'" WORK_ROOT="'+slot.work_root+'" x="'+str(work.quality) +
+        slot.start_shell(('DAALA_ROOT="'+daala_root+'" WORK_ROOT="'+slot.work_root+'" DAALATOOL_ROOT="'+slot.machine.work_root+'/daalatool" x="'+str(work.quality) +
             '" CODEC="'+work.codec+'" EXTRA_OPTIONS="'+work.extra_options +
             '" ' + slot.work_root + '/rd_tool/metrics_gather.sh '+shellquote(input_path)))
         (stdout, stderr) = slot.gather()
@@ -94,6 +95,7 @@ class ABWork:
         input_path = slot.machine.media_path +'/' + work.set + '/' + work.filename
 
         try:
+            slot.setup(self.codec)
             slot.start_shell(slot.work_root+'/rd_tool/ab_meta_compare.sh ' + shellquote(str(self.bpp)) + ' ' + shellquote(self.runid) + ' ' + work.set + ' ' + shellquote(input_path) + ' ' + shellquote(self.codec))
             (stdout, stderr) = slot.gather()
 
@@ -210,7 +212,6 @@ else:
 slots = []
 #set up our instances and their free job slots
 for machine in machines:
-    machine.setup(args.codec)
     slots.extend(machine.get_slots())
 
 
