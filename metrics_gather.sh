@@ -34,7 +34,7 @@ fi
 export YUV2YUV4MPEG="$DAALATOOL_ROOT/tools/yuv2yuv4mpeg"
 
 if [ -z "$DUMP_VIDEO" ]; then
-  export DUMP_VIDEO="$DAALA_ROOT/examples/dump_video"
+  export DUMP_VIDEO="$WORK_ROOT/daala/examples/dump_video"
 fi
 
 if [ -z "$DUMP_PSNR" ]; then
