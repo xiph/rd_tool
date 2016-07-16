@@ -14,12 +14,13 @@ binaries = {
 }
 
 class Machine:
-    def __init__(self,host,user='ec2-user',cores=32,work_root='/home/ec2-user',port=22):
+    def __init__(self,host,user='ec2-user',cores=32,work_root='/home/ec2-user',port=22,media_path='/mnt/media'):
         self.host = host
         self.user = user
         self.cores = cores
         self.work_root = work_root
         self.port = str(port)
+        self.media_path = media_path
     def rsync(self, local, remote):
         return subprocess.call(['rsync', '-r', '-e', "ssh -i daala.pem -o StrictHostKeyChecking=no -p "+str(self.port), local, self.user + '@' + self.host + ':' + remote])
     def check_shell(self, command):

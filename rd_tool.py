@@ -77,7 +77,7 @@ class RDWork:
             self.failed = True
     def execute(self, slot):
         work = self
-        input_path = '/mnt/media/'+work.set+'/'+work.filename
+        input_path = slot.machine.media_path+'/'+work.set+'/'+work.filename
         slot.start_shell(('DAALA_ROOT="'+daala_root+'" WORK_ROOT="'+slot.work_root+'" x="'+str(work.quality) +
             '" CODEC="'+work.codec+'" EXTRA_OPTIONS="'+work.extra_options +
             '" ' + slot.work_root + '/rd_tool/metrics_gather.sh '+shellquote(input_path)))
@@ -91,7 +91,7 @@ class ABWork:
         self.failed = False
     def execute(self, slot):
         work = self
-        input_path = '/mnt/media/' + work.set + '/' + work.filename
+        input_path = slot.machine.media_path +'/' + work.set + '/' + work.filename
 
         try:
             slot.start_shell(slot.work_root+'/rd_tool/ab_meta_compare.sh ' + shellquote(str(self.bpp)) + ' ' + shellquote(self.runid) + ' ' + work.set + ' ' + shellquote(input_path) + ' ' + shellquote(self.codec))
@@ -202,7 +202,7 @@ machines = []
 if args.machineconf:
     machineconf = json.load(open(args.machineconf, 'r'))
     for m in machineconf:
-        machines.append(sshslot.Machine(m['host'],m['user'],m['cores'],m['work_root'],str(m['port'])))
+        machines.append(sshslot.Machine(m['host'],m['user'],m['cores'],m['work_root'],str(m['port']),m['media_path']))
 else:
     while not machines:
         machines = awsremote.get_machines(num_instances_to_use, aws_group_name)
