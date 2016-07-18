@@ -173,8 +173,8 @@ SSIM=$("$DUMP_SSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 FASTSSIM=$("$DUMP_FASTSSIM" -c "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 CIEDE=$("$DUMP_CIEDE" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 MSSSIM=$("$DUMP_MSSSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
-if [ -e "$TIMER_OUT" ]; then
-  ENCTIME=$(awk '/seconds/ { s+=$4 } END { printf "%.2f", s }' "$TIMER_OUT")
+if [ -e "$TIMEROUT" ]; then
+  ENCTIME=$(awk '/seconds/ { s+=$4 } END { printf "%.2f", s }' "$TIMEROUT")
 else
   ENCTIME=0
 fi
