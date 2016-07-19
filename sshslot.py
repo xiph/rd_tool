@@ -10,6 +10,7 @@ binaries = {
   'vp8': ['vpxenc','vpxdec'],
   'vp9': ['vpxenc','vpxdec'],
   'vp10': ['vpxenc','vpxdec'],
+  'vp10-rt': ['vpxenc','vpxdec'],
   'av1': ['aomenc','aomdec'],
   'av1-rt': ['aomenc','aomdec'],
   'thor': ['build/Thorenc','build/Thordec']
