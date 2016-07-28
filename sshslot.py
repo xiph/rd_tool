@@ -52,7 +52,7 @@ class Slot:
         self.work = work
         work.execute(self)
         self.busy = False
-    def setup(self,codec):
+    def setup(self,codec,bindir):
         self.check_shell('mkdir -p '+self.work_root)
         if self.machine.rsync('./',self.work_root+'/rd_tool/') != 0:
             print(get_time(),'Couldn\'t set up machine '+self.machine.host)
@@ -60,7 +60,7 @@ class Slot:
         self.check_shell('rm -rf '+self.work_root+'/'+codec)
         for binary in binaries[codec]:
             self.check_shell('mkdir -p '+self.work_root+'/'+codec+'/'+os.path.dirname(binary));
-            if self.machine.rsync('../'+codec+'/'+binary,self.work_root+'/'+codec+'/'+binary) != 0:
+            if self.machine.rsync(bindir+'/'+binary,self.work_root+'/'+codec+'/'+binary) != 0:
                 print(get_time(),'Couldn\'t upload codec binary '+binary+'to '+self.machine.host)
                 sys.exit(1)
     def start_shell(self, command):

@@ -52,7 +52,7 @@ class RDWork:
             rd_print(stderr.decode('utf-8'))
             self.failed = True
     def execute(self, slot):
-        slot.setup(self.codec)
+        slot.setup(self.codec,self.bindir)
         work = self
         input_path = slot.machine.media_path+'/'+work.set+'/'+work.filename
         slot.start_shell(('WORK_ROOT="'+slot.work_root+'" DAALATOOL_ROOT="'+slot.machine.work_root+'/daalatool" x="'+str(work.quality) +
@@ -71,7 +71,7 @@ class ABWork:
         input_path = slot.machine.media_path +'/' + work.set + '/' + work.filename
 
         try:
-            slot.setup(self.codec)
+            slot.setup(self.codec,self.bindir)
             slot.start_shell(slot.work_root+'/rd_tool/ab_meta_compare.sh ' + shellquote(str(self.bpp)) + ' ' + shellquote(self.runid) + ' ' + work.set + ' ' + shellquote(input_path) + ' ' + shellquote(self.codec))
             (stdout, stderr) = slot.gather()
 

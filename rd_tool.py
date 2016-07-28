@@ -48,6 +48,7 @@ video_sets = json.load(video_sets_f)
 parser = argparse.ArgumentParser(description='Collect RD curve data.')
 parser.add_argument('set',metavar='Video set name',nargs='+')
 parser.add_argument('-codec',default='daala')
+parser.add_argument('-bindir',default='./')
 parser.add_argument('-prefix',default='.')
 parser.add_argument('-awsgroup', default='Daala')
 parser.add_argument('-machines', default=14)
@@ -127,6 +128,7 @@ if args.mode == 'metric':
             work = RDWork()
             work.quality = q
             work.codec = args.codec
+            work.bindir = args.bindir
             work.set = args.set[0]
             work.filename = filename
             work.extra_options = extra_options
@@ -142,6 +144,7 @@ elif args.mode == 'ab':
                 work = ABWork()
                 work.bpp = bpp
                 work.codec = args.codec
+                work.bindir = args.bindir
                 work.runid = str(args.runid)
                 work.set = args.set[0]
                 work.filename = filename
