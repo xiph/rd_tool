@@ -1,3 +1,5 @@
+from utility import get_time, rd_print
+
 # Finding files such as `this_(that)` requires `'` be placed on both
 # sides of the quote so the `()` are both captured. Files such as
 # `du_Parterre_d'Eau` must be converted into
