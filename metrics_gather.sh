@@ -74,6 +74,12 @@ if [ -z "$x" ]; then
   exit 1
 fi
 
+if [ -e pid ]; then
+  kill -9 -$(cat pid) || true
+fi
+
+echo $$ > pid
+
 FILE=$1
 
 BASENAME="$(basename $FILE)-$x"
@@ -182,6 +188,8 @@ fi
 if [ ! "$NO_DELETE" ]; then
   rm -f "$BASENAME.y4m" "$BASENAME.yuv" "$BASENAME.ogv" "$BASENAME.x264" "$BASENAME.x265" "$BASENAME.vpx" "$TIMEROUT" "$BASENAME-enc.out" "$BASENAME-psnr.out" "$BASENAME.thor" 2> /dev/null
 fi
+
+rm -f pid
 
 echo "$x" "$PIXELS" "$SIZE"
 echo "$PSNR"
