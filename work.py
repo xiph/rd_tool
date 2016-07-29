@@ -54,14 +54,18 @@ class RDWork:
             rd_print(stderr.decode('utf-8'))
             self.failed = True
     def execute(self, slot):
-        slot.setup(self.codec,self.bindir)
-        work = self
-        input_path = slot.machine.media_path+'/'+work.set+'/'+work.filename
-        slot.start_shell(('WORK_ROOT="'+slot.work_root+'" DAALATOOL_ROOT="'+slot.machine.work_root+'/daalatool" x="'+str(work.quality) +
-            '" CODEC="'+work.codec+'" EXTRA_OPTIONS="'+work.extra_options +
-            '" ' + slot.work_root + '/rd_tool/metrics_gather.sh '+shellquote(input_path)))
-        (stdout, stderr) = slot.gather()
-        self.parse(stdout, stderr)
+        try:
+            slot.setup(self.codec,self.bindir)
+            work = self
+            input_path = slot.machine.media_path+'/'+work.set+'/'+work.filename
+            slot.start_shell(('WORK_ROOT="'+slot.work_root+'" DAALATOOL_ROOT="'+slot.machine.work_root+'/daalatool" x="'+str(work.quality) +
+                '" CODEC="'+work.codec+'" EXTRA_OPTIONS="'+work.extra_options +
+                '" ' + slot.work_root + '/rd_tool/metrics_gather.sh '+shellquote(input_path)))
+            (stdout, stderr) = slot.gather()
+            self.parse(stdout, stderr)
+        except Exception as e:
+            rd_print(e.message)
+            self.failed = True
     def get_name(self):
         return self.filename + ' with quality ' + str(self.quality)
 
