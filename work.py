@@ -64,7 +64,7 @@ class RDWork:
             (stdout, stderr) = slot.gather()
             self.parse(stdout, stderr)
         except Exception as e:
-            rd_print(e.message)
+            rd_print(e)
             self.failed = True
     def get_name(self):
         return self.filename + ' with quality ' + str(self.quality)
