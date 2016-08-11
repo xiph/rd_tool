@@ -11,6 +11,7 @@ def shellquote(s):
 class RDWork:
     def __init__(self):
         self.failed = False
+        self.copy_back_files = ['stdout.txt']
     def parse(self, stdout, stderr):
         self.raw = stdout
         split = None
@@ -62,6 +63,8 @@ class RDWork:
                 '" CODEC="'+work.codec+'" EXTRA_OPTIONS="'+work.extra_options +
                 '" ' + slot.work_root + '/rd_tool/metrics_gather.sh '+shellquote(input_path)))
             (stdout, stderr) = slot.gather()
+            for file in self.copy_back_files:
+                slot.get_file(slot.work_root+'/'+file,'../runs/'+work.run_id+'/'+work.set+'/'+work.filename+'-'+str(work.quality)+'-'+file)
             self.parse(stdout, stderr)
         except Exception as e:
             rd_print(e)
