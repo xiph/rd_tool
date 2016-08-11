@@ -10,6 +10,7 @@ def shellquote(s):
 
 class RDWork:
     def __init__(self):
+        self.no_delete = False
         self.failed = False
         self.copy_back_files = ['-stdout.txt']
     def parse(self, stdout, stderr):
@@ -59,9 +60,13 @@ class RDWork:
             slot.setup(self.codec,self.bindir)
             work = self
             input_path = slot.machine.media_path+'/'+work.set+'/'+work.filename
-            slot.start_shell(('WORK_ROOT="'+slot.work_root+'" DAALATOOL_ROOT="'+slot.machine.work_root+'/daalatool" x="'+str(work.quality) +
-                '" CODEC="'+work.codec+'" EXTRA_OPTIONS="'+work.extra_options +
-                '" ' + slot.work_root + '/rd_tool/metrics_gather.sh '+shellquote(input_path)))
+            command = 'WORK_ROOT="'+slot.work_root+'" '
+            command += 'DAALATOOL_ROOT="'+slot.machine.work_root+'/daalatool" '
+            command += ' x="'+str(work.quality) + '" '
+            command += 'CODEC="'+work.codec+'" '
+            command += 'EXTRA_OPTIONS="'+work.extra_options + '" '
+            command += '/rd_tool/metrics_gather.sh '+shellquote(input_path)
+            slot.start_shell(command)
             (stdout, stderr) = slot.gather()
             for file in self.copy_back_files:
                 slot.get_file(slot.work_root+'/'+work.filename+'-'+str(work.quality)+file,'../runs/'+work.runid+'/'+work.set+'/')

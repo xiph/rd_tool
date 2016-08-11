@@ -58,6 +58,7 @@ parser.add_argument('-seed')
 parser.add_argument('-bpp')
 parser.add_argument('-qualities',nargs='+')
 parser.add_argument('-machineconf')
+parser.add_argument('-save-encode',action='store_true')
 
 args = parser.parse_args()
 
@@ -133,6 +134,10 @@ if args.mode == 'metric':
             work.set = args.set[0]
             work.filename = filename
             work.extra_options = extra_options
+            if args.save_encode:
+                work.no_delete = True
+                if work.codec == 'av1':
+                    work.copy_back_files.append('.ivf')
             work_items.append(work)
 elif args.mode == 'ab':
     if video_sets[args.set[0]]['type'] == 'video':
