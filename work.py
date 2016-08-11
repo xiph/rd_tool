@@ -65,6 +65,8 @@ class RDWork:
             command += ' x="'+str(work.quality) + '" '
             command += 'CODEC="'+work.codec+'" '
             command += 'EXTRA_OPTIONS="'+work.extra_options + '" '
+            if self.no_delete:
+                command += 'NO_DELETE=1 '
             command += '/rd_tool/metrics_gather.sh '+shellquote(input_path)
             slot.start_shell(command)
             (stdout, stderr) = slot.gather()
