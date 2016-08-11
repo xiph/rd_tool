@@ -2,6 +2,7 @@ from utility import get_time
 import subprocess
 import sys
 import os
+import time
 
 binaries = {
   'daala':['examples/encoder_example'],
@@ -53,18 +54,18 @@ class Slot:
         work.execute(self)
         self.busy = False
     def setup(self,codec,bindir):
-        sys.sleep(1)
+        time.sleep(1)
         self.check_shell('mkdir -p '+self.work_root)
-        sys.sleep(1)
+        time.sleep(1)
         if self.machine.rsync('./',self.work_root+'/rd_tool/') != 0:
             print(get_time(),'Couldn\'t set up machine '+self.machine.host)
             raise RuntimeError
-        sys.sleep(1)
+        time.sleep(1)
         self.check_shell('rm -rf '+self.work_root+'/'+codec)
         for binary in binaries[codec]:
-            sys.sleep(1)
+            time.sleep(1)
             self.check_shell('mkdir -p '+self.work_root+'/'+codec+'/'+os.path.dirname(binary));
-            sys.sleep(1)
+            time.sleep(1)
             if self.machine.rsync(bindir+'/'+binary,self.work_root+'/'+codec+'/'+binary) != 0:
                 print(get_time(),'Couldn\'t upload codec binary '+binary+'to '+self.machine.host)
                 raise RuntimeError
