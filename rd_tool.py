@@ -127,6 +127,7 @@ if args.mode == 'metric':
         for q in sorted(quality, reverse = True):
             work = RDWork()
             work.quality = q
+            work.runid = str(args.runid)
             work.codec = args.codec
             work.bindir = args.bindir
             work.set = args.set[0]
