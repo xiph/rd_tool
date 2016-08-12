@@ -28,6 +28,9 @@ class Run:
     def __init__(self, codec):
         self.codec = codec
         self.quality = quality_presets[codec]
+        self.runid = get_time()
+        self.extra_options = ''
+        self.save_encode = False
         pass
 
 class RDWork:
