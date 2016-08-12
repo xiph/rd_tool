@@ -23,22 +23,6 @@ if 'EXTRA_OPTIONS' in os.environ:
     extra_options = os.environ['EXTRA_OPTIONS']
     print(get_time(),'Passing extra command-line options:"%s"' % extra_options)
 
-#set up Codec:QualityRange dictionary
-quality_presets = {
-"daala": [3,5,7,11,16,25,37,55,81,122,181],
-"x264": list(range(1,52,5)),
-"x265": list(range(5,52,5)),
-"x265-rt": list(range(5,52,5)),
-"vp8": list(range(12,64,5)),
-"vp9": list(range(12,64,5)),
-"vp10": [8,20,32,43,55,63],
-"vp10-rt": [8,20,32,43,55,63],
-"av1": [8,20,32,43,55,63],
-"av1-rt": [8,20,32,43,55,63],
-"thor": list(range(7,43,3)),
-"thor-rt": list(range(7,43,3))
-}
-
 work_items = []
 
 #load all the different sets and their filenames
@@ -71,11 +55,6 @@ if args.codec not in quality_presets:
         rd_print(q)
     sys.exit(1)
 
-if args.qualities:
-    quality = args.qualities
-else:
-    quality = quality_presets[args.codec]
-
 #check we have the set name in our sets-filenames dictionary
 if args.set[0] not in video_sets:
     rd_print('Specified invalid set '+args.set[0]+'. Available sets are:')
@@ -83,7 +62,34 @@ if args.set[0] not in video_sets:
         rd_print(video_set)
     sys.exit(1)
 
-total_num_of_jobs = len(video_sets[args.set[0]]['sources']) * len(quality)
+#Make a list of the bits of work we need to do.
+#We pack the stack ordered by filesize ASC, quality ASC (aka. -v DESC)
+#so we pop the hardest encodes first,
+#for more efficient use of the AWS machines' time.
+
+video_filenames = video_sets[args.set[0]]['sources']
+
+run = Run(args.codec)
+run.runid = str(args.runid)
+if args.qualities:
+    run.quality = args.qualities
+run.set = args.set[0]
+run.bindir = args.bindir
+run.save_encode = args.save_encode
+run.extra_options = extra_options
+
+if args.mode == 'metric':
+    work_items = create_rdwork(run, video_filenames)
+elif args.mode == 'ab':
+    if video_sets[args.set[0]]['type'] == 'video':
+        print("mode `ab` isn't supported for videos. Skipping.")
+    else:
+        work_items = create_abwork(run, video_filenames)
+else:
+    print('Unsupported -mode parameter.')
+    sys.exit(1)
+
+total_num_of_jobs = len(video_sets[args.set[0]]['sources']) * len(run.quality)
 
 #a logging message just to get the regex progress bar on the AWCY site started...
 rd_print('0 out of',total_num_of_jobs,'finished.')
@@ -114,34 +120,6 @@ slots = []
 #set up our instances and their free job slots
 for machine in machines:
     slots.extend(machine.get_slots())
-
-
-#Make a list of the bits of work we need to do.
-#We pack the stack ordered by filesize ASC, quality ASC (aka. -v DESC)
-#so we pop the hardest encodes first,
-#for more efficient use of the AWS machines' time.
-
-video_filenames = video_sets[args.set[0]]['sources']
-
-run = Run()
-run.runid = str(args.runid)
-run.quality = quality
-run.set = args.set[0]
-run.codec = args.codec
-run.bindir = args.bindir
-run.save_encode = args.save_encode
-run.extra_options = extra_options
-
-if args.mode == 'metric':
-    work_items = create_rdwork(run, video_filenames)
-elif args.mode == 'ab':
-    if video_sets[args.set[0]]['type'] == 'video':
-        print("mode `ab` isn't supported for videos. Skipping.")
-    else:
-        work_items = create_abwork(run, video_filenames)
-else:
-    print('Unsupported -mode parameter.')
-    sys.exit(1)
 
 if len(slots) < 1:
     rd_print('All AWS machines are down.')

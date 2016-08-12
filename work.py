@@ -8,8 +8,26 @@ from utility import get_time, rd_print
 def shellquote(s):
     return "'" + s.replace("'", "'\"'\"'") + "'"
 
+#set up Codec:QualityRange dictionary
+quality_presets = {
+    "daala": [3,5,7,11,16,25,37,55,81,122,181],
+    "x264": list(range(1,52,5)),
+    "x265": list(range(5,52,5)),
+    "x265-rt": list(range(5,52,5)),
+    "vp8": list(range(12,64,5)),
+    "vp9": list(range(12,64,5)),
+    "vp10": [8,20,32,43,55,63],
+    "vp10-rt": [8,20,32,43,55,63],
+    "av1": [8,20,32,43,55,63],
+    "av1-rt": [8,20,32,43,55,63],
+    "thor": list(range(7,43,3)),
+    "thor-rt": list(range(7,43,3))
+}
+
 class Run:
-    def __init__(self):
+    def __init__(self, codec):
+        self.codec = codec
+        self.quality = quality_presets[codec]
         pass
 
 class RDWork:
