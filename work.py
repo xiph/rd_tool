@@ -8,6 +8,10 @@ from utility import get_time, rd_print
 def shellquote(s):
     return "'" + s.replace("'", "'\"'\"'") + "'"
 
+class Run:
+    def __init__(self):
+        pass
+
 class RDWork:
     def __init__(self):
         self.no_delete = False
@@ -79,6 +83,25 @@ class RDWork:
     def get_name(self):
         return self.filename + ' with quality ' + str(self.quality)
 
+def create_rdwork(run, video_filenames):
+    work_items = []
+    for filename in video_filenames:
+        for q in sorted(run.quality, reverse = True):
+            work = RDWork()
+            work.quality = q
+            work.runid = run.runid
+            work.codec = run.codec
+            work.bindir = run.bindir
+            work.set = run.set
+            work.filename = filename
+            work.extra_options = run.extra_options
+            if run.save_encode:
+                work.no_delete = True
+                if work.codec == 'av1':
+                    work.copy_back_files.append('.ivf')
+            work_items.append(work)
+    return work_items
+
 class ABWork:
     def __init__(self):
         self.failed = False
@@ -115,3 +138,19 @@ class ABWork:
             self.failed = True
     def get_name(self):
         return self.filename + ' with bpp ' + str(self.bpp)
+
+def create_abwork(run, video_filenames):
+    work_items = []
+    bits_per_pixel = [x/10.0 for x in range(1, 11)]
+    for filename in video_filenames:
+        for bpp in bits_per_pixel:
+            work = ABWork()
+            work.bpp = bpp
+            work.codec = run.codec
+            work.bindir = run.bindir
+            work.runid = run.runid
+            work.set = run.set
+            work.filename = filename
+            work.extra_options = run.extra_options
+            work_items.append(work)
+    return work_items

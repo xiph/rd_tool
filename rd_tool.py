@@ -123,39 +123,22 @@ for machine in machines:
 
 video_filenames = video_sets[args.set[0]]['sources']
 
+run = Run()
+run.runid = str(args.runid)
+run.quality = quality
+run.set = args.set[0]
+run.codec = args.codec
+run.bindir = args.bindir
+run.save_encode = args.save_encode
+run.extra_options = extra_options
+
 if args.mode == 'metric':
-    for filename in video_filenames:
-        for q in sorted(quality, reverse = True):
-            work = RDWork()
-            work.quality = q
-            work.runid = str(args.runid)
-            work.codec = args.codec
-            work.bindir = args.bindir
-            work.set = args.set[0]
-            work.filename = filename
-            work.extra_options = extra_options
-            if args.save_encode:
-                work.no_delete = True
-                if work.codec == 'av1':
-                    work.copy_back_files.append('.ivf')
-            work_items.append(work)
+    work_items = create_rdwork(run, video_filenames)
 elif args.mode == 'ab':
     if video_sets[args.set[0]]['type'] == 'video':
-        bits_per_pixel = [0.01]
         print("mode `ab` isn't supported for videos. Skipping.")
     else:
-        bits_per_pixel = [x/10.0 for x in range(1, 11)]
-        for filename in video_filenames:
-            for bpp in bits_per_pixel:
-                work = ABWork()
-                work.bpp = bpp
-                work.codec = args.codec
-                work.bindir = args.bindir
-                work.runid = str(args.runid)
-                work.set = args.set[0]
-                work.filename = filename
-                work.extra_options = extra_options
-                work_items.append(work)
+        work_items = create_abwork(run, video_filenames)
 else:
     print('Unsupported -mode parameter.')
     sys.exit(1)
