@@ -71,7 +71,7 @@ class RDWork:
             command += 'EXTRA_OPTIONS="'+work.extra_options + '" '
             if self.no_delete:
                 command += 'NO_DELETE=1 '
-            command += '/rd_tool/metrics_gather.sh '+shellquote(input_path)
+            command += slot.work_root + '/rd_tool/metrics_gather.sh '+shellquote(input_path)
             slot.start_shell(command)
             (stdout, stderr) = slot.gather()
             for file in self.copy_back_files:
