@@ -128,7 +128,8 @@ class RDWork:
             slot.start_shell(command)
             (stdout, stderr) = slot.gather()
             for file in self.copy_back_files:
-                slot.get_file(slot.work_root+'/'+work.filename+'-'+str(work.quality)+file,'../runs/'+work.runid+'/'+work.set+'/')
+                if slot.get_file(slot.work_root+'/'+work.filename+'-'+str(work.quality)+file,'../runs/'+work.runid+'/'+work.set+'/') != 0:
+                    rd_print('Failed to copy back '+work.filename+'-'+str(work.quality)+file+', continuing anyway')
             self.parse(stdout, stderr)
         except Exception as e:
             rd_print(e)

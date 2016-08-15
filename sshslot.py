@@ -17,6 +17,14 @@ binaries = {
   'thor': ['build/Thorenc','build/Thordec']
 }
 
+# Finding files such as `this_(that)` requires `'` be placed on both
+# sides of the quote so the `()` are both captured. Files such as
+# `du_Parterre_d'Eau` must be converted into
+#`'du_Parterre_d'"'"'Eau'
+#                ^^^ Required to make sure the `'` is captured.
+def shellquote(s):
+    return "'" + s.replace("'", "'\"'\"'") + "'"
+
 class Machine:
     def __init__(self,host,user='ec2-user',cores=32,work_root='/home/ec2-user',port=22,media_path='/mnt/media'):
         self.host = host
@@ -55,16 +63,16 @@ class Slot:
         self.busy = False
     def setup(self,codec,bindir):
         time.sleep(1)
-        self.check_shell('mkdir -p '+self.work_root)
+        self.check_shell('mkdir -p '+shellquote(self.work_root))
         time.sleep(1)
         if self.machine.rsync('./',self.work_root+'/rd_tool/') != 0:
             print(get_time(),'Couldn\'t set up machine '+self.machine.host)
             raise RuntimeError
         time.sleep(1)
-        self.check_shell('rm -rf '+self.work_root+'/'+codec)
+        self.check_shell('rm -rf '+shellquote(self.work_root+'/'+codec))
         for binary in binaries[codec]:
             time.sleep(1)
-            self.check_shell('mkdir -p '+self.work_root+'/'+codec+'/'+os.path.dirname(binary));
+            self.check_shell('mkdir -p '+shellquote(self.work_root+'/'+codec+'/'+os.path.dirname(binary)));
             time.sleep(1)
             if self.machine.rsync(bindir+'/'+binary,self.work_root+'/'+codec+'/'+binary) != 0:
                 print(get_time(),'Couldn\'t upload codec binary '+binary+'to '+self.machine.host)
@@ -74,7 +82,7 @@ class Slot:
             self.machine.user+'@'+self.machine.host,
             command.encode("utf-8")], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     def get_file(self, remote, local):
-        subprocess.call(['scp','-i','daala.pem','-P',self.machine.port,self.machine.user+'@'+self.machine.host+':'+remote,local])
+        return subprocess.call(['scp','-i','daala.pem','-P',self.machine.port,self.machine.user+'@'+self.machine.host+':'+shellquote(remote),local])
     def check_shell(self, command):
         return subprocess.check_output(['ssh','-i','daala.pem','-p',self.machine.port,'-o',' StrictHostKeyChecking=no',
            self.machine.user+'@'+self.machine.host,
