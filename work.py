@@ -1,4 +1,6 @@
 from utility import get_time, rd_print
+import subprocess
+import sys
 
 # Finding files such as `this_(that)` requires `'` be placed on both
 # sides of the quote so the `()` are both captured. Files such as
@@ -31,7 +33,37 @@ class Run:
         self.runid = get_time()
         self.extra_options = ''
         self.save_encode = False
-        pass
+        self.work_items = []
+        self.prefix = './'
+
+class RDRun(Run):
+    def reduce(self):
+        rd_print('Logging results...')
+        print(self.work_items)
+        self.work_items.sort(key=lambda work: work.quality)
+        for work in self.work_items:
+            if not work.failed:
+                print(self.prefix+'/'+work.filename+'-daala.out')
+                f = open((self.prefix+'/'+work.filename+'-daala.out').encode('utf-8'),'a')
+                f.write(str(work.quality)+' ')
+                f.write(str(work.pixels)+' ')
+                f.write(str(work.size)+' ')
+                f.write(str(work.metric['psnr'][0])+' ')
+                f.write(str(work.metric['psnrhvs'][0])+' ')
+                f.write(str(work.metric['ssim'][0])+' ')
+                f.write(str(work.metric['fastssim'][0])+' ')
+                f.write(str(work.metric['ciede2000'])+' ')
+                f.write(str(work.metric['psnr'][1])+' ')
+                f.write(str(work.metric['psnr'][2])+' ')
+                f.write(str(work.metric['apsnr'][0])+' ')
+                f.write(str(work.metric['apsnr'][1])+' ')
+                f.write(str(work.metric['apsnr'][2])+' ')
+                f.write(str(work.metric['msssim'][0])+' ')
+                f.write(str(work.metric['encodetime'])+' ')
+                f.write('\n')
+                f.close()
+        subprocess.call('OUTPUT="'+self.prefix+'/'+'total" "'+sys.path[0]+'/rd_average.sh" "'+self.prefix+'/*.out"',
+          shell=True)
 
 class RDWork:
     def __init__(self):

@@ -69,7 +69,10 @@ if args.set[0] not in video_sets:
 
 video_filenames = video_sets[args.set[0]]['sources']
 
-run = Run(args.codec)
+if args.mode == 'metric':
+    run = RDRun(args.codec)
+else:
+    run = Run(args.codec)
 run.runid = str(args.runid)
 if args.qualities:
     run.quality = args.qualities
@@ -77,6 +80,7 @@ run.set = args.set[0]
 run.bindir = args.bindir
 run.save_encode = args.save_encode
 run.extra_options = extra_options
+run.prefix = args.prefix
 
 if args.mode == 'metric':
     work_items = create_rdwork(run, video_filenames)
@@ -88,6 +92,7 @@ elif args.mode == 'ab':
 else:
     print('Unsupported -mode parameter.')
     sys.exit(1)
+run.work_items = list(work_items)
 
 total_num_of_jobs = len(video_sets[args.set[0]]['sources']) * len(run.quality)
 
@@ -128,29 +133,6 @@ if len(slots) < 1:
 work_done = scheduler.run(work_items, slots)
 
 if args.mode == 'metric':
-    rd_print('Logging results...')
-    work_done.sort(key=lambda work: work.quality)
-    for work in work_done:
-        if not work.failed:
-            f = open((args.prefix+'/'+work.filename+'-daala.out').encode('utf-8'),'a')
-            f.write(str(work.quality)+' ')
-            f.write(str(work.pixels)+' ')
-            f.write(str(work.size)+' ')
-            f.write(str(work.metric['psnr'][0])+' ')
-            f.write(str(work.metric['psnrhvs'][0])+' ')
-            f.write(str(work.metric['ssim'][0])+' ')
-            f.write(str(work.metric['fastssim'][0])+' ')
-            f.write(str(work.metric['ciede2000'])+' ')
-            f.write(str(work.metric['psnr'][1])+' ')
-            f.write(str(work.metric['psnr'][2])+' ')
-            f.write(str(work.metric['apsnr'][0])+' ')
-            f.write(str(work.metric['apsnr'][1])+' ')
-            f.write(str(work.metric['apsnr'][2])+' ')
-            f.write(str(work.metric['msssim'][0])+' ')
-            f.write(str(work.metric['encodetime'])+' ')
-            f.write('\n')
-            f.close()
-    subprocess.call('OUTPUT="'+args.prefix+'/'+'total" "'+sys.path[0]+'/rd_average.sh" "'+args.prefix+'/*.out"',
-      shell=True)
+    run.reduce()
 
 rd_print('Done!')
