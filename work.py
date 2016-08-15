@@ -43,7 +43,6 @@ class RDRun(Run):
         self.work_items.sort(key=lambda work: work.quality)
         for work in self.work_items:
             if not work.failed:
-                print(self.prefix+'/'+work.filename+'-daala.out')
                 f = open((self.prefix+'/'+work.filename+'-daala.out').encode('utf-8'),'a')
                 f.write(str(work.quality)+' ')
                 f.write(str(work.pixels)+' ')
@@ -69,6 +68,7 @@ class RDWork:
     def __init__(self):
         self.no_delete = False
         self.failed = False
+        self.done = False
         self.copy_back_files = ['-stdout.txt']
     def parse(self, stdout, stderr):
         self.raw = stdout
@@ -131,6 +131,7 @@ class RDWork:
                 if slot.get_file(slot.work_root+'/'+work.filename+'-'+str(work.quality)+file,'../runs/'+work.runid+'/'+work.set+'/') != 0:
                     rd_print('Failed to copy back '+work.filename+'-'+str(work.quality)+file+', continuing anyway')
             self.parse(stdout, stderr)
+            self.done = True
         except Exception as e:
             rd_print(e)
             self.failed = True

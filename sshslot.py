@@ -54,6 +54,7 @@ class Slot:
         self.work_root = machine.work_root + '/slot' + str(num)
         self.p = None
         self.busy = False
+        self.work = None
     def gather(self):
         return self.p.communicate()
     def execute(self, work):
