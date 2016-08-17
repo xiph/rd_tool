@@ -1,12 +1,33 @@
 rd_tool
 =======
 
-rd_tool.py is a script for running Daala RD collection across a series of either local or Amazon AWS nodes.
+rd_tool.py is a script for collecting rate-distortion curves across a series of either local or Amazon AWS nodes.
+
+This script is run by arewecompressedyet.com, but can also be run locally to produce the same data.
 
 Dependencies
 ============
 
 You will need Python 3.4 or later, as well as [boto3](https://github.com/boto/boto3).
+
+Node dependencies
+=================
+
+Individual build machines do not need Python, but do need bash. Each machine
+should be configured with a user and work_root (such as that user's home
+directory). This work directory must be populated with a folder called
+daalatool, which needs to contain a checkout of Daala git with the tools built:
+
+```
+git clone https://git.xiph.org/?p=daala.git daalatool
+cd daalatool
+./autogen.sh
+./configure.sh --disable-player
+make tools -j4
+```
+
+rd_tool will automatically create one slot directory per core, and upload
+codec binaries into that directory.
 
 Using AWS nodes
 ===============
@@ -27,7 +48,8 @@ You can specify all of the machines you want to use in a JSON file:
     "user": "thomas",
     "cores": 4,
     "port": 22,
-    "work_root": "/home/thomas/tmp"
+    "work_root": "/home/thomas/tmp",
+    "media_path": "/home/thomas/sets"
   },
   {
     ...
@@ -36,15 +58,21 @@ You can specify all of the machines you want to use in a JSON file:
 
 ```
 
-Specify this configuration on the command line with --machineconf.
+Specify this configuration on the command line with -machineconf.
 
 Builds
 ======
 
-rd_tool expects prebuilt binaries, in folders named $CODEC one level above the
-directory of the tool.
+Specify the path to the git checkout of thetested codec with the -bindir
+argument. rd_tool.py expects to find prebuilt binaries of the codec - it will
+not build the codec automatically.
 
 Output files
 ============
 
-Output files are written into the current directory.
+Output files are written into the current directory. The format of the .out
+files is one quantizer per line, of the format
+
+<quantizer> <number of pixels> <file size in bytes> <metric1> <metric2> ...
+
+See RDRun.reduce() in work.py for an up-to-date list of metrics.
