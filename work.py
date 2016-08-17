@@ -39,7 +39,6 @@ class Run:
 class RDRun(Run):
     def reduce(self):
         rd_print('Logging results...')
-        print(self.work_items)
         self.work_items.sort(key=lambda work: int(work.quality))
         for work in self.work_items:
             if not work.failed:
