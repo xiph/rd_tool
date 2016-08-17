@@ -7,7 +7,7 @@ import sys
 
 def run(work_items, slots):
     retries = 0
-    max_retries = 50
+    max_retries = 5000
     free_slots = slots
     taken_slots = []
     work_done = []
