@@ -38,7 +38,7 @@ class RunSubmitHandler(tornado.web.RequestHandler):
         run = RDRun(info['codec'])
         run.runid = run_id
         run.rundir = config['runs'] + '/' + run_id
-        run.set = info['set']
+        run.set = info['task']
         run.bindir = config['codecs'] + '/' + info['codec']
         if 'quality' in info:
           run.quality = info['quality']
