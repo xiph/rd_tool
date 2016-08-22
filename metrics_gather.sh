@@ -152,7 +152,7 @@ av1)
   ;;
 av1-rt)
   $($TIMER $AOMENC --codec=av1 --ivf --frame-parallel=0 --tile-columns=0 --cpu-used=0 --passes=1 --threads=1 --kf-min-dist=$KFINT --kf-max-dist=$KFINT --lag-in-frames=0 --end-usage=q --cq-level=$x -o $BASENAME.ivf $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
-  $AOMDEC --codec=av1 -o $BASENAME.ivf $BASENAME.ivf
+  $AOMDEC --codec=av1 -o $BASENAME.y4m $BASENAME.ivf
   SIZE=$(stat -c %s $BASENAME.ivf)
   ;;
 thor)
