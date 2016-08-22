@@ -151,7 +151,7 @@ def create_rdwork(run, video_filenames):
             work.extra_options = run.extra_options
             if run.save_encode:
                 work.no_delete = True
-                if work.codec == 'av1':
+                if work.codec == 'av1' or work.codec == 'av1-rt':
                     work.copy_back_files.append('.ivf')
             work_items.append(work)
     return work_items
