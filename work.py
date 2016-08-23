@@ -35,10 +35,11 @@ class Run:
         self.save_encode = False
         self.work_items = []
         self.prefix = './'
+        self.log = None
 
 class RDRun(Run):
     def reduce(self):
-        rd_print('Logging results...')
+        rd_print(self.log,'Logging results...')
         self.work_items.sort(key=lambda work: int(work.quality))
         for work in self.work_items:
             if not work.failed:
@@ -63,7 +64,11 @@ class RDRun(Run):
         subprocess.call('OUTPUT="'+self.prefix+'/'+'total" "'+sys.path[0]+'/rd_average.sh" "'+self.prefix+'/*.out"',
           shell=True)
 
-class RDWork:
+class Work:
+    def __init__(self):
+        self.log = None
+
+class RDWork(Work):
     def __init__(self):
         self.no_delete = False
         self.failed = False
@@ -105,11 +110,11 @@ class RDWork:
             self.metric['encodetime'] = split[53]
             self.failed = False
         except IndexError:
-            rd_print('Decoding result for '+self.filename+' at quality '+str(self.quality)+' failed!')
-            rd_print('stdout:')
-            rd_print(stdout.decode('utf-8'))
-            rd_print('stderr:')
-            rd_print(stderr.decode('utf-8'))
+            rd_print(self.log,'Decoding result for '+self.filename+' at quality '+str(self.quality)+' failed!')
+            rd_print(self.log,'stdout:')
+            rd_print(self.log,stdout.decode('utf-8'))
+            rd_print(self.log,'stderr:')
+            rd_print(self.log,stderr.decode('utf-8'))
             self.failed = True
     def execute(self, slot):
         try:
@@ -128,7 +133,7 @@ class RDWork:
             (stdout, stderr) = slot.gather()
             for file in self.copy_back_files:
                 if slot.get_file(slot.work_root+'/'+work.filename+'-'+str(work.quality)+file,'../runs/'+work.runid+'/'+work.set+'/') != 0:
-                    rd_print('Failed to copy back '+work.filename+'-'+str(work.quality)+file+', continuing anyway')
+                    rd_print(self.log,'Failed to copy back '+work.filename+'-'+str(work.quality)+file+', continuing anyway')
             self.parse(stdout, stderr)
             self.done = True
         except Exception as e:
@@ -142,6 +147,7 @@ def create_rdwork(run, video_filenames):
     for filename in video_filenames:
         for q in sorted(run.quality, reverse = True):
             work = RDWork()
+            work.log = run.log
             work.quality = q
             work.runid = run.runid
             work.codec = run.codec
@@ -156,7 +162,7 @@ def create_rdwork(run, video_filenames):
             work_items.append(work)
     return work_items
 
-class ABWork:
+class ABWork(Work):
     def __init__(self):
         self.failed = False
     def execute(self, slot):
@@ -184,11 +190,11 @@ class ABWork:
             slot.get_file(remote_file, local_file)
             self.failed = False
         except IndexError:
-            rd_print('Encoding and copying', filename, 'at bpp', str(self.bpp), 'failed')
-            rd_print('stdout:')
-            rd_print(stdout.decode('utf-8'))
-            rd_print('stderr:')
-            rd_print(stderr.decode('utf-8'))
+            rd_print(self.log,'Encoding and copying', filename, 'at bpp', str(self.bpp), 'failed')
+            rd_print(self.log, 'stdout:')
+            rd_print(self.log, stdout.decode('utf-8'))
+            rd_print(self.log, 'stderr:')
+            rd_print(self.log, stderr.decode('utf-8'))
             self.failed = True
     def get_name(self):
         return self.filename + ' with bpp ' + str(self.bpp)
@@ -199,6 +205,7 @@ def create_abwork(run, video_filenames):
     for filename in video_filenames:
         for bpp in bits_per_pixel:
             work = ABWork()
+            work.log = run.log
             work.bpp = bpp
             work.codec = run.codec
             work.bindir = run.bindir

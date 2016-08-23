@@ -33,6 +33,7 @@ class Machine:
         self.work_root = work_root
         self.port = str(port)
         self.media_path = media_path
+        self.log = None
     def rsync(self, local, remote):
         return subprocess.call(['rsync', '-r', '-e', "ssh -i daala.pem -o StrictHostKeyChecking=no -p "+str(self.port), local, self.user + '@' + self.host + ':' + remote])
     def check_shell(self, command):
@@ -44,17 +45,18 @@ class Machine:
         #by doing the machines in the inner loop,
         #we end up with heavy jobs split across machines better
         for i in range(0,self.cores):
-            slots.append(Slot(self, i))
+            slots.append(Slot(self, i, self.log))
         return slots
 
 #the job slots we can fill
 class Slot:
-    def __init__(self, machine, num):
+    def __init__(self, machine, num, log):
         self.machine = machine
         self.work_root = machine.work_root + '/slot' + str(num)
         self.p = None
         self.busy = False
         self.work = None
+        self.log = log
     def gather(self):
         return self.p.communicate()
     def execute(self, work):
@@ -67,7 +69,7 @@ class Slot:
         self.check_shell('mkdir -p '+shellquote(self.work_root))
         time.sleep(1)
         if self.machine.rsync('./',self.work_root+'/rd_tool/') != 0:
-            print(get_time(),'Couldn\'t set up machine '+self.machine.host)
+            rd_print(self.log,'Couldn\'t set up machine '+self.machine.host)
             raise RuntimeError
         time.sleep(1)
         self.check_shell('rm -rf '+shellquote(self.work_root+'/'+codec))
@@ -76,7 +78,7 @@ class Slot:
             self.check_shell('mkdir -p '+shellquote(self.work_root+'/'+codec+'/'+os.path.dirname(binary)));
             time.sleep(1)
             if self.machine.rsync(bindir+'/'+binary,self.work_root+'/'+codec+'/'+binary) != 0:
-                print(get_time(),'Couldn\'t upload codec binary '+binary+'to '+self.machine.host)
+                rd_print(self.log,'Couldn\'t upload codec binary '+binary+'to '+self.machine.host)
                 raise RuntimeError
     def start_shell(self, command):
         self.p = subprocess.Popen(['ssh','-i','daala.pem','-p',self.machine.port,'-o',' StrictHostKeyChecking=no',

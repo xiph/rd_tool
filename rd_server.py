@@ -9,6 +9,7 @@ import argparse
 import sshslot
 import threading
 from work import *
+from utility import *
 
 video_sets_f = codecs.open('sets.json','r',encoding='utf-8')
 video_sets = json.load(video_sets_f)
@@ -33,11 +34,14 @@ class RunSubmitHandler(tornado.web.RequestHandler):
         run_id = self.get_query_argument('run_id')
         rundir = config['runs'] + '/' + run_id
         info_file_path = rundir + '/info.json'
+        log_file_path = rundir + '/output.txt'
         info_file = open(info_file_path, 'r')
+        log_file = open(log_file_path, 'a')
         info = json.load(info_file)
         run = RDRun(info['codec'])
         run.runid = run_id
         run.rundir = config['runs'] + '/' + run_id
+        run.log = log_file
         run.set = info['task']
         run.bindir = config['codecs'] + '/' + info['codec']
         if 'quality' in info:
@@ -106,10 +110,10 @@ def scheduler_tick():
         if slot.busy == False and slot.work != None:
             if slot.work.failed == False:
                 work_done.append(slot.work)
-                print(get_time(),len(work_done),'finished.')
+                rd_print(slot.work.log,len(work_done),'finished.')
             else:
                 retries = retries + 1
-                print(get_time(),'Retrying work...',retries,'of',max_retries,'retries.')
+                rd_print(slot.work.log,'Retrying work...',retries,'of',max_retries,'retries.')
                 work_list.append(slot.work)
             slot.work = None
             taken_slots.remove(slot)
@@ -119,7 +123,7 @@ def scheduler_tick():
             slot = free_slots.pop()
             work = work_list.pop()
             slot.work = work
-            print(get_time(),'Encoding',work.get_name(),'on',slot.machine.host)
+            rd_print(slot.work.log,'Encoding',work.get_name(),'on',slot.machine.host)
             work_thread = threading.Thread(target=slot.execute, args=(work,))
             work_thread.daemon = True
             slot.busy = True
@@ -133,7 +137,7 @@ def scheduler_tick():
         if done:
             run_list.remove(run)
             run.reduce()
-            print(get_time(),'Finished '+run.runid)
+            rd_print(run.log,'Finished '+run.runid)
     tornado.ioloop.IOLoop.current().call_later(1,scheduler_tick)
 
 if __name__ == "__main__":

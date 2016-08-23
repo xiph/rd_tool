@@ -13,7 +13,7 @@ import sshslot
 from work import *
 
 if 'DAALA_ROOT' not in os.environ:
-    rd_print("Please specify the DAALA_ROOT environment variable to use this tool.")
+    rd_print(None,"Please specify the DAALA_ROOT environment variable to use this tool.")
     sys.exit(1)
 
 daala_root = os.environ['DAALA_ROOT']
@@ -50,16 +50,16 @@ aws_group_name = args.awsgroup
 
 #check we have the codec in our codec-qualities dictionary
 if args.codec not in quality_presets:
-    rd_print('Invalid codec. Valid codecs are:')
+    rd_print(None,'Invalid codec. Valid codecs are:')
     for q in quality_presets:
-        rd_print(q)
+        rd_print(None,q)
     sys.exit(1)
 
 #check we have the set name in our sets-filenames dictionary
 if args.set[0] not in video_sets:
-    rd_print('Specified invalid set '+args.set[0]+'. Available sets are:')
+    rd_print(None,'Specified invalid set '+args.set[0]+'. Available sets are:')
     for video_set in video_sets:
-        rd_print(video_set)
+        rd_print(None,video_set)
     sys.exit(1)
 
 #Make a list of the bits of work we need to do.
@@ -97,7 +97,7 @@ run.work_items = list(work_items)
 total_num_of_jobs = len(video_sets[args.set[0]]['sources']) * len(run.quality)
 
 #a logging message just to get the regex progress bar on the AWCY site started...
-rd_print('0 out of',total_num_of_jobs,'finished.')
+rd_print(None,'0 out of',total_num_of_jobs,'finished.')
 
 #how many AWS instances do we want to spin up?
 #The assumption is each machine can deal with 18 threads,
@@ -108,7 +108,7 @@ num_instances_to_use = (31 + total_num_of_jobs) // 18
 max_num_instances_to_use = int(args.machines)
 
 if num_instances_to_use > max_num_instances_to_use:
-    rd_print('Ideally, we should use',num_instances_to_use,
+    rd_print(None,'Ideally, we should use',num_instances_to_use,
         'instances, but the max is',max_num_instances_to_use,'.')
     num_instances_to_use = max_num_instances_to_use
 
@@ -127,7 +127,7 @@ for machine in machines:
     slots.extend(machine.get_slots())
 
 if len(slots) < 1:
-    rd_print('All AWS machines are down.')
+    rd_print(None,'All AWS machines are down.')
     sys.exit(1)
 
 work_done = scheduler.run(work_items, slots)
@@ -135,4 +135,4 @@ work_done = scheduler.run(work_items, slots)
 if args.mode == 'metric':
     run.reduce()
 
-rd_print('Done!')
+rd_print(None,'Done!')

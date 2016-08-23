@@ -7,5 +7,7 @@ from datetime import datetime
 def get_time():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
 
-def rd_print(*args, **kwargs):
+def rd_print(log, *args, **kwargs):
     print(get_time(), *args, **kwargs)
+    if log:
+        print(get_time(), *args, **kwargs, file=log, flush=True)
