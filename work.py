@@ -1,4 +1,4 @@
-from utility import get_time, rd_print
+from utility import *
 import subprocess
 import sys
 

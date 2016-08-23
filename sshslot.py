@@ -1,4 +1,4 @@
-from utility import get_time
+from utility import *
 import subprocess
 import sys
 import os
