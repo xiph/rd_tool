@@ -67,7 +67,9 @@ class RunListHandler(tornado.web.RequestHandler):
             run_json = {}
             run_json['run_id'] = run.runid
             run_json['completed'] = 0
+            run_json['total'] = 0
             for work in run.work_items:
+                run_json['total'] += 1
                 if work.done:
                     run_json['completed'] += 1
             runs.append(run_json)
