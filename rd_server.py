@@ -8,6 +8,7 @@ import json
 import argparse
 import sshslot
 import threading
+import awsremote
 from work import *
 from utility import *
 
@@ -80,11 +81,14 @@ def main():
     parser = argparse.ArgumentParser(description='Run AWCY scheduler daemon.')
     parser.add_argument('-machineconf')
     parser.add_argument('-port',default=4000)
+    parser.add_argument('-awsgroup', default='AOM Test')
     args = parser.parse_args()
     if args.machineconf:
         machineconf = json.load(open(args.machineconf, 'r'))
         for m in machineconf:
             machines.append(sshslot.Machine(m['host'],m['user'],m['cores'],m['work_root'],str(m['port']),m['media_path']))
+    else:
+        machines = awsremote.get_machines(3, args.awsgroup)
     for machine in machines:
         slots.extend(machine.get_slots())
     free_slots = slots
