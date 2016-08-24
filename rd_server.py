@@ -129,7 +129,7 @@ def scheduler_tick():
     if len(work_list) != 0:
         if len(free_slots) != 0:
             slot = free_slots.pop()
-            work = work_list.pop()
+            work = work_list.pop(0)
             slot.work = work
             rd_print(slot.work.log,'Encoding',work.get_name(),'on',slot.machine.host)
             work_thread = threading.Thread(target=slot.execute, args=(work,))
