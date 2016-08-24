@@ -10,4 +10,4 @@ def get_time():
 def rd_print(log, *args, **kwargs):
     print(get_time(), *args, **kwargs)
     if log:
-        print(file=log, flush=True, get_time(), *args, **kwargs)
+        print(get_time(), file=log, flush=True, *args, **kwargs)
