@@ -45,6 +45,8 @@ class RunSubmitHandler(tornado.web.RequestHandler):
         run.log = log_file
         run.set = info['task']
         run.bindir = config['codecs'] + '/' + info['codec']
+        run.prefix = run.rundir + '/' + run.set
+        os.mkdir(run.prefix)
         if 'quality' in info:
           run.quality = info['quality']
         if 'extra_options' in info:
