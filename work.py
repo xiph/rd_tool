@@ -68,13 +68,13 @@ class Work:
     def __init__(self):
         self.log = None
         self.retries = 0
+        self.done = False
+        self.failed = False
 
 class RDWork(Work):
     def __init__(self):
         super().__init__()
         self.no_delete = False
-        self.failed = False
-        self.done = False
         self.copy_back_files = ['-stdout.txt']
     def parse(self, stdout, stderr):
         self.raw = stdout
