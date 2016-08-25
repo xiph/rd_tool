@@ -34,6 +34,7 @@ class Machine:
         self.port = str(port)
         self.media_path = media_path
         self.log = None
+        self.slots = []
     def rsync(self, local, remote):
         return subprocess.call(['rsync', '-r', '-e', "ssh -i daala.pem -o StrictHostKeyChecking=no -p "+str(self.port), local, self.user + '@' + self.host + ':' + remote])
     def check_shell(self, command):
@@ -46,7 +47,10 @@ class Machine:
         #we end up with heavy jobs split across machines better
         for i in range(0,self.cores):
             slots.append(Slot(self, i, self.log))
+        self.slots = slots
         return slots
+    def get_name(self):
+        return self.host
 
 #the job slots we can fill
 class Slot:

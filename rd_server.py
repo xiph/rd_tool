@@ -78,8 +78,26 @@ class RunListHandler(tornado.web.RequestHandler):
             runs.append(run_json)
         self.write(json.dumps(runs))
 
+class MachineUsageHandler(tornado.web.RequestHandler):
+    def get(self):
+        global machines
+        machine_usage = []
+        for machine in machines:
+            machine_json = {}
+            slot_in_use = []
+            for slot in machine.slots:
+                if slot.work:
+                    slot_in_use.append(slot.work.get_name())
+                else:
+                    slot_in_use.append('None')
+            machine_json['name'] = machine.get_name()
+            machine_json['slots'] = slot_in_use
+            machine_usage.append(machine_json)
+        self.write(json.dumps(machine_usage))
+
 def main():
     global free_slots
+    global machines
     parser = argparse.ArgumentParser(description='Run AWCY scheduler daemon.')
     parser.add_argument('-machineconf')
     parser.add_argument('-port',default=4000)
@@ -87,7 +105,6 @@ def main():
     args = parser.parse_args()
     if args.machineconf:
         machineconf = json.load(open(args.machineconf, 'r'))
-        machines = []
         for m in machineconf:
             machines.append(sshslot.Machine(m['host'],m['user'],m['cores'],m['work_root'],str(m['port']),m['media_path']))
     else:
@@ -99,6 +116,7 @@ def main():
         [
             (r"/work_list.json", WorkListHandler),
             (r"/run_list.json", RunListHandler),
+            (r"/machine_usage.json", MachineUsageHandler),
             (r"/submit", RunSubmitHandler),
         ],
         static_path=os.path.join(os.path.dirname(__file__), "static"),
