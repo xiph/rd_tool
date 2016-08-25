@@ -67,9 +67,11 @@ class RDRun(Run):
 class Work:
     def __init__(self):
         self.log = None
+        self.retries = 0
 
 class RDWork(Work):
     def __init__(self):
+        super().__init__()
         self.no_delete = False
         self.failed = False
         self.done = False

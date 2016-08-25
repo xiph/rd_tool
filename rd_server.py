@@ -87,6 +87,7 @@ def main():
     args = parser.parse_args()
     if args.machineconf:
         machineconf = json.load(open(args.machineconf, 'r'))
+        machines = []
         for m in machineconf:
             machines.append(sshslot.Machine(m['host'],m['user'],m['cores'],m['work_root'],str(m['port']),m['media_path']))
     else:
@@ -109,20 +110,21 @@ def main():
     scheduler_tick()
     ioloop.start()
 
-retries = 0
-max_retries = 50
-
 def scheduler_tick():
     global free_slots
+    max_retries = 50
     for slot in taken_slots:
         if slot.busy == False and slot.work != None:
             if slot.work.failed == False:
                 work_done.append(slot.work)
                 rd_print(slot.work.log,len(work_done),'finished.')
-            else:
-                retries = retries + 1
-                rd_print(slot.work.log,'Retrying work...',retries,'of',max_retries,'retries.')
+            elif slot.work.retries < max_retries:
+                slot.work.retries += 1
+                rd_print(slot.work.log,'Retrying work...',slot.work.retries,'of',max_retries,'retries.')
                 work_list.append(slot.work)
+            else:
+                work_done.append(slot.work)
+                rd_print(slot.work.get_name(),'given up on.')
             slot.work = None
             taken_slots.remove(slot)
             free_slots.append(slot)
