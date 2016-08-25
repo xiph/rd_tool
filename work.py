@@ -137,7 +137,6 @@ class RDWork(Work):
                 if slot.get_file(slot.work_root+'/'+work.filename+'-'+str(work.quality)+file,'../runs/'+work.runid+'/'+work.set+'/') != 0:
                     rd_print(self.log,'Failed to copy back '+work.filename+'-'+str(work.quality)+file+', continuing anyway')
             self.parse(stdout, stderr)
-            self.done = True
         except Exception as e:
             rd_print(e)
             self.failed = True
