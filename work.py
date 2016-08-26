@@ -138,7 +138,7 @@ class RDWork(Work):
                     rd_print(self.log,'Failed to copy back '+work.filename+'-'+str(work.quality)+file+', continuing anyway')
             self.parse(stdout, stderr)
         except Exception as e:
-            rd_print(e)
+            rd_print(self.log, e)
             self.failed = True
     def get_name(self):
         return self.filename + ' with quality ' + str(self.quality)
