@@ -165,6 +165,7 @@ def create_rdwork(run, video_filenames):
 
 class ABWork(Work):
     def __init__(self):
+        super().__init__()
         self.failed = False
     def execute(self, slot):
         work = self
