@@ -54,8 +54,9 @@ class RunSubmitHandler(tornado.web.RequestHandler):
         run_list.append(run)
         video_filenames = video_sets[run.set]['sources']
         run.work_items = create_rdwork(run, video_filenames)
-        if info['ab_compare']:
-            run.work_items.extend(create_abwork(run, video_filenames))
+        if 'ab_compare' in info:
+            if info['ab_compare']:
+                run.work_items.extend(create_abwork(run, video_filenames))
         work_list.extend(run.work_items)
         self.write(run_id)
 
