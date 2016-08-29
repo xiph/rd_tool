@@ -171,7 +171,11 @@ def scheduler_tick():
                 done = False
         if done:
             run_list.remove(run)
-            run.reduce()
+            try:
+                run.reduce()
+            except e:
+                rd_print(run.log,e)
+                rd_print(run.log,'Failed to run reduce step on '+run.runid)
             rd_print(run.log,'Finished '+run.runid)
     tornado.ioloop.IOLoop.current().call_later(1,scheduler_tick)
 
