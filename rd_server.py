@@ -64,6 +64,7 @@ class RunSubmitHandler(tornado.web.RequestHandler):
                 abrun.set = info['task']
                 abrun.bindir = config['codecs'] + '/' + info['codec']
                 abrun.prefix = run.rundir + '/' + run.set
+                run_list.append(abrun)
                 abrun.work_items.extend(create_abwork(abrun, video_filenames))
                 work_list.extend(abrun.work_items)
                 pass
