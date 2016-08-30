@@ -200,6 +200,8 @@ class ABWork(Work):
             self.failed = True
     def get_name(self):
         return self.filename + ' with bpp ' + str(self.bpp)
+    def gather(self):
+        pass
 
 def create_abwork(run, video_filenames):
     work_items = []

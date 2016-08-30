@@ -54,12 +54,19 @@ class RunSubmitHandler(tornado.web.RequestHandler):
         run_list.append(run)
         video_filenames = video_sets[run.set]['sources']
         run.work_items = create_rdwork(run, video_filenames)
+        work_list.extend(run.work_items)
         if 'ab_compare' in info:
             if info['ab_compare']:
-                #these need to be added to a separate run
-                #run.work_items.extend(create_abwork(run, video_filenames))
+                abrun = ABRun(info['codec'])
+                abrun.runid = run_id
+                abrun.rundir = config['runs'] + '/' + run_id
+                abrun.log = log_file
+                abrun.set = info['task']
+                abrun.bindir = config['codecs'] + '/' + info['codec']
+                abrun.prefix = run.rundir + '/' + run.set
+                abrun.work_items.extend(create_abwork(abrun, video_filenames))
+                work_list.extend(abrun.work_items)
                 pass
-        work_list.extend(run.work_items)
         self.write(run_id)
 
 class WorkListHandler(tornado.web.RequestHandler):
