@@ -64,6 +64,10 @@ class RDRun(Run):
         subprocess.call('OUTPUT="'+self.prefix+'/'+'total" "'+sys.path[0]+'/rd_average.sh" "'+self.prefix+'/*.out"',
           shell=True)
 
+class ABRun(Run):
+    def reduce(self):
+        pass
+
 class Work:
     def __init__(self):
         self.log = None
@@ -200,8 +204,6 @@ class ABWork(Work):
             self.failed = True
     def get_name(self):
         return self.filename + ' with bpp ' + str(self.bpp)
-    def gather(self):
-        pass
 
 def create_abwork(run, video_filenames):
     work_items = []
