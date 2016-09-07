@@ -51,6 +51,9 @@ class RunSubmitHandler(tornado.web.RequestHandler):
           run.quality = info['quality']
         if 'extra_options' in info:
           run.extra_options = info['extra_options']
+        if 'save_encode' in info:
+            if info['save_encode']:
+                run.save_encode = True
         run_list.append(run)
         video_filenames = video_sets[run.set]['sources']
         run.work_items = create_rdwork(run, video_filenames)
