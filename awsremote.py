@@ -99,10 +99,10 @@ def get_machines(num_instances_to_use, aws_group_name):
                     pass
                 else:
                     print(instance_id, 'in state',state,', not usable')
-                    return False
+                    return []
             except IndexError:
                 print(instance_id, 'not queryable yet')
-                return False
+                return []
             sleep(3)
     for instance_id in instance_ids:
         print(get_time(),'Waiting for instance',instance_id,'to report OK...')
@@ -113,7 +113,7 @@ def get_machines(num_instances_to_use, aws_group_name):
                     break
             except IndexError:
                 print(get_time(),'Instance',instance_id,'disappeared!')
-                return False
+                return []
             sleep(3)
     for instance_id in instance_ids:
         machines.append(Machine(ip_address_of(instance_id, ec2)))
