@@ -126,10 +126,8 @@ def main():
         machineconf = json.load(open(args.machineconf, 'r'))
         for m in machineconf:
             machines.append(sshslot.Machine(m['host'],m['user'],m['cores'],m['work_root'],str(m['port']),m['media_path']))
-    else:
-        machines = awsremote.get_machines(3, args.awsgroup)
-    for machine in machines:
-        slots.extend(machine.get_slots())
+        for machine in machines:
+            slots.extend(machine.get_slots())
     free_slots = slots
     app = tornado.web.Application(
         [
