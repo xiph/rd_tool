@@ -161,11 +161,10 @@ def machine_tick():
         free_slots = slots
     # stop all machines if nothing is running
     slots_busy = False
-    if not len(work_list):
-        for slot in slots:
-            if slot.busy:
-                slots_busy = True
-    if not slots_busy:
+    for slot in slots:
+        if slot.busy:
+            slots_busy = True
+    if not slots_busy and not len(work_list):
         rd_print(None, "Stopping all machines.")
         machines = []
         slots = []
