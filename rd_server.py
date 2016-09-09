@@ -22,6 +22,7 @@ free_slots = []
 work_list = []
 run_list = []
 work_done = []
+args = {}
 
 config = {
   'runs': '../runs/',
@@ -114,6 +115,8 @@ class MachineUsageHandler(tornado.web.RequestHandler):
 def main():
     global free_slots
     global machines
+    global slots
+    global args
     parser = argparse.ArgumentParser(description='Run AWCY scheduler daemon.')
     parser.add_argument('-machineconf')
     parser.add_argument('-port',default=4000)
@@ -141,12 +144,41 @@ def main():
         )
     app.listen(args.port)
     ioloop = tornado.ioloop.IOLoop.current()
+    if not args.machineconf:
+        machine_tick()
     scheduler_tick()
     ioloop.start()
+
+def machine_tick():
+    global slots
+    global free_slots
+    global machines
+    # start all machines if we don't have any but have work queued
+    # this will intentionally block any scheduling
+    if len(work_list) and not len(machines):
+        rd_print(None, "Starting machines.")
+        machines = awsremote.get_machines(3, args.awsgroup)
+        for machine in machines:
+            slots.extend(machine.get_slots())
+        free_slots = slots
+    # stop all machines if nothing is running
+    slots_busy = False
+    if not len(work_list):
+        for slot in slots:
+            if slot.busy:
+                slots_busy = True
+    if not slots_busy:
+        rd_print(None, "Stopping all machines.")
+        machines = []
+        slots = []
+        free_slots = []
+        awsremote.stop_machines(args.awsgroup)
+    tornado.ioloop.IOLoop.current().call_later(60, machine_tick)
 
 def scheduler_tick():
     global free_slots
     max_retries = 50
+    # look for completed work
     for slot in taken_slots:
         if slot.busy == False and slot.work != None:
             if slot.work.failed == False:
@@ -164,6 +196,7 @@ def scheduler_tick():
             slot.work = None
             taken_slots.remove(slot)
             free_slots.append(slot)
+    # fill empty slots with new work
     if len(work_list) != 0:
         if len(free_slots) != 0:
             slot = free_slots.pop()
@@ -175,6 +208,7 @@ def scheduler_tick():
             slot.busy = True
             work_thread.start()
             taken_slots.append(slot)
+    # find runs where all work has been completed
     for run in run_list:
         done = True
         for work in run.work_items:
