@@ -8,6 +8,7 @@ import json
 import argparse
 import sshslot
 import threading
+import time
 import awsremote
 from work import *
 from utility import *
@@ -143,34 +144,35 @@ def main():
     app.listen(args.port)
     ioloop = tornado.ioloop.IOLoop.current()
     if not args.machineconf:
-        machine_tick()
+        machine_thread = threading.Thread(target=machine_allocator,daemon=True)
+        machine_thread.start()
     scheduler_tick()
     ioloop.start()
 
-def machine_tick():
+def machine_allocator():
     global slots
     global free_slots
     global machines
-    # start all machines if we don't have any but have work queued
-    # this will intentionally block any scheduling
-    if len(work_list) and not len(machines):
-        rd_print(None, "Starting machines.")
-        machines = awsremote.get_machines(3, args.awsgroup)
-        for machine in machines:
-            slots.extend(machine.get_slots())
-        free_slots = slots
-    # stop all machines if nothing is running
-    slots_busy = False
-    for slot in slots:
-        if slot.busy:
-            slots_busy = True
-    if not slots_busy and not len(work_list):
-        rd_print(None, "Stopping all machines.")
-        machines = []
-        slots = []
-        free_slots = []
-        awsremote.stop_machines(args.awsgroup)
-    tornado.ioloop.IOLoop.current().call_later(60, machine_tick)
+    while 1:
+        # start all machines if we don't have any but have work queued
+        if len(work_list) and not len(machines):
+            rd_print(None, "Starting machines.")
+            machines = awsremote.get_machines(3, args.awsgroup)
+            for machine in machines:
+                slots.extend(machine.get_slots())
+            free_slots = slots
+        # stop all machines if nothing is running
+        slots_busy = False
+        for slot in slots:
+            if slot.busy:
+                slots_busy = True
+        if not slots_busy and not len(work_list):
+            rd_print(None, "Stopping all machines.")
+            machines = []
+            slots = []
+            free_slots = []
+            awsremote.stop_machines(args.awsgroup)
+        time.sleep(60)
 
 def scheduler_tick():
     global free_slots
