@@ -42,6 +42,7 @@ class RunSubmitHandler(tornado.web.RequestHandler):
         log_file = open(log_file_path, 'a')
         info = json.load(info_file)
         run = RDRun(info['codec'])
+        run.info = info
         run.runid = run_id
         run.rundir = config['runs'] + '/' + run_id
         run.log = log_file
@@ -89,6 +90,7 @@ class RunListHandler(tornado.web.RequestHandler):
             run_json['run_id'] = run.runid
             run_json['completed'] = 0
             run_json['total'] = 0
+            run_json['info'] = run.info
             for work in run.work_items:
                 run_json['total'] += 1
                 if work.done:

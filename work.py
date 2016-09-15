@@ -28,6 +28,7 @@ quality_presets = {
 
 class Run:
     def __init__(self, codec):
+        self.info = {}
         self.codec = codec
         self.quality = quality_presets[codec]
         self.runid = get_time()
