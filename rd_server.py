@@ -122,6 +122,7 @@ def main():
     parser.add_argument('-machineconf')
     parser.add_argument('-port',default=4000)
     parser.add_argument('-awsgroup', default='AOM Test')
+    parser.add_argument('-max-machines', default=3)
     args = parser.parse_args()
     if args.machineconf:
         machineconf = json.load(open(args.machineconf, 'r'))
@@ -157,7 +158,7 @@ def machine_allocator():
         # start all machines if we don't have any but have work queued
         if len(work_list) and not len(machines):
             rd_print(None, "Starting machines.")
-            machines = awsremote.get_machines(3, args.awsgroup)
+            machines = awsremote.get_machines(args.max_machines, args.awsgroup)
             for machine in machines:
                 slots.extend(machine.get_slots())
             free_slots = slots
