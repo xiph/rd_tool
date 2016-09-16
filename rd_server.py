@@ -184,6 +184,8 @@ def scheduler_tick():
     global free_slots
     global work_list
     global run_list
+    global work_done
+    global taken_slots
     max_retries = 50
     # look for completed work
     for slot in taken_slots:
