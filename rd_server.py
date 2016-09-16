@@ -156,6 +156,8 @@ def machine_allocator():
     global slots
     global free_slots
     global machines
+    global work_list
+    global run_list
     while 1:
         # start all machines if we don't have any but have work queued
         if len(work_list) and not len(machines):
@@ -164,12 +166,13 @@ def machine_allocator():
             for machine in machines:
                 slots.extend(machine.get_slots())
             free_slots = slots
+            time.sleep(60*10) # don't shut down for a tleast 10 minutes
         # stop all machines if nothing is running
         slots_busy = False
         for slot in slots:
             if slot.busy:
                 slots_busy = True
-        if not slots_busy and not len(work_list):
+        if not slots_busy and not len(work_list) and not len(run_list):
             rd_print(None, "Stopping all machines.")
             machines = []
             slots = []
@@ -179,6 +182,8 @@ def machine_allocator():
 
 def scheduler_tick():
     global free_slots
+    global work_list
+    global run_list
     max_retries = 50
     # look for completed work
     for slot in taken_slots:
