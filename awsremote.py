@@ -50,12 +50,15 @@ def get_instances_in_group(autoscale, aws_group_name):
     return instances
 
 def stop_machines(aws_group_name):
-    ec2 = boto3.client('ec2');
-    autoscale = boto3.client('autoscaling');
-    autoscale.set_desired_capacity(
-        AutoScalingGroupName = aws_group_name,
-        DesiredCapacity = 0
-    )
+    try:
+        ec2 = boto3.client('ec2');
+        autoscale = boto3.client('autoscaling');
+        autoscale.set_desired_capacity(
+            AutoScalingGroupName = aws_group_name,
+            DesiredCapacity = 0
+        )
+    except Exception as e:
+        print(get_time(),e)
 
 def get_machines(num_instances_to_use, aws_group_name):
     machines = []
