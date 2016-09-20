@@ -47,7 +47,7 @@ class RunSubmitHandler(tornado.web.RequestHandler):
         run.rundir = config['runs'] + '/' + run_id
         run.log = log_file
         run.set = info['task']
-        run.bindir = 'runs/' + run.runid + '/x86_64/'
+        run.bindir = run.rundir + '/x86_64/'
         run.prefix = run.rundir + '/' + run.set
         os.mkdir(run.prefix)
         if 'quality' in info:
