@@ -81,7 +81,7 @@ class WorkListHandler(tornado.web.RequestHandler):
         self.set_header("Content-Type", "application/json")
         self.write(json.dumps([w.get_name() for w in work_list]))
 
-class RunListHandler(tornado.web.RequestHandler):
+class RunStatusHandler(tornado.web.RequestHandler):
     def get(self):
         self.set_header("Content-Type", "application/json")
         runs = []
@@ -136,7 +136,7 @@ def main():
     app = tornado.web.Application(
         [
             (r"/work_list.json", WorkListHandler),
-            (r"/run_list.json", RunListHandler),
+            (r"/run_status.json", RunStatusHandler),
             (r"/machine_usage.json", MachineUsageHandler),
             (r"/submit", RunSubmitHandler),
         ],
