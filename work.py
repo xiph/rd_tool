@@ -145,6 +145,9 @@ class RDWork(Work):
         except Exception as e:
             rd_print(self.log, e)
             self.failed = True
+    def cancel(self):
+        self.failed = True
+        self.done = True
     def get_name(self):
         return self.filename + ' with quality ' + str(self.quality)
 
@@ -203,6 +206,9 @@ class ABWork(Work):
             rd_print(self.log, 'stderr:')
             rd_print(self.log, stderr.decode('utf-8'))
             self.failed = True
+    def cancel(self):
+        self.failed = True
+        self.done = True
     def get_name(self):
         return self.filename + ' with bpp ' + str(self.bpp)
 

@@ -30,6 +30,21 @@ config = {
   'codecs': '../'
 }
 
+class CancelHandler(tornado.web.RequestHandler):
+    def get(self):
+        global work_list
+        global work_done
+        run_id = self.get_query_argument('run_id')
+        for work in work_list[:]:
+            if work.runid == run_id:
+                work_list.remove(work)
+                work.cancel()
+                work_done.append(work)
+            else:
+                print(work.runid)
+        print(len(work_list))
+        self.write('ok')
+
 class RunSubmitHandler(tornado.web.RequestHandler):
     def get(self):
         global work_list
@@ -139,6 +154,7 @@ def main():
             (r"/run_status.json", RunStatusHandler),
             (r"/machine_usage.json", MachineUsageHandler),
             (r"/submit", RunSubmitHandler),
+            (r"/cancel", CancelHandler)
         ],
         static_path=os.path.join(os.path.dirname(__file__), "static"),
         xsrf_cookies=True,
