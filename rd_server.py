@@ -65,8 +65,9 @@ class RunSubmitHandler(tornado.web.RequestHandler):
         run.bindir = run.rundir + '/x86_64/'
         run.prefix = run.rundir + '/' + run.set
         os.mkdir(run.prefix)
-        if 'quality' in info:
-          run.quality = info['quality']
+        if 'qualities' in info:
+          if info['qualities'] != '':
+              run.quality = info['qualities'].split()
         if 'extra_options' in info:
           run.extra_options = info['extra_options']
         if 'save_encode' in info:
