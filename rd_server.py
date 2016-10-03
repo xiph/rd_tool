@@ -30,11 +30,19 @@ config = {
   'codecs': '../'
 }
 
+def lookup_run_by_id(run_id):
+    for run in run_list:
+        if run.runid == run_id:
+            return run
+    return None
+
 class CancelHandler(tornado.web.RequestHandler):
     def get(self):
         global work_list
         global work_done
         run_id = self.get_query_argument('run_id')
+        run = lookup_run_by_id(run_id)
+        run.cancel()
         for work in work_list[:]:
             if work.runid == run_id:
                 work_list.remove(work)
@@ -73,6 +81,8 @@ class RunSubmitHandler(tornado.web.RequestHandler):
         if 'save_encode' in info:
             if info['save_encode']:
                 run.save_encode = True
+        run.status = 'running'
+        run.write_status()
         run_list.append(run)
         video_filenames = video_sets[run.set]['sources']
         run.work_items = create_rdwork(run, video_filenames)
@@ -91,6 +101,7 @@ class RunSubmitHandler(tornado.web.RequestHandler):
                 work_list.extend(abrun.work_items)
                 pass
         self.write(run_id)
+
 
 class WorkListHandler(tornado.web.RequestHandler):
     def get(self):

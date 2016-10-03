@@ -37,11 +37,24 @@ class Run:
         self.work_items = []
         self.prefix = './'
         self.log = None
+        self.rundir = None
+        self.status = 'running'
+        self.work_items = []
+    def write_status(self):
+        f = open(self.rundir+'/status.txt','w')
+        f.write(self.status)
+        f.close()
+    def cancel(self):
+        self.status = 'cancelled'
+        self.write_status()
+        for work in self.work_items:
+            work.cancel()
 
 class RDRun(Run):
     def reduce(self):
         rd_print(self.log,'Logging results...')
         self.work_items.sort(key=lambda work: int(work.quality))
+        any_work_failed = False
         for work in self.work_items:
             if not work.failed:
                 f = open((self.prefix+'/'+work.filename+'-daala.out').encode('utf-8'),'a')
@@ -62,8 +75,15 @@ class RDRun(Run):
                 f.write(str(work.metric['encodetime'])+' ')
                 f.write('\n')
                 f.close()
+            else:
+                any_work_failed = True
         subprocess.call('OUTPUT="'+self.prefix+'/'+'total" "'+sys.path[0]+'/rd_average.sh" "'+self.prefix+'/*.out"',
           shell=True)
+        if any_work_failed:
+            self.status = 'failed'
+        else:
+            self.status = 'finished'
+        self.write_status()
 
 class ABRun(Run):
     def reduce(self):
@@ -75,6 +95,9 @@ class Work:
         self.retries = 0
         self.done = False
         self.failed = False
+    def cancel(self):
+        self.failed = True
+        self.done = True
 
 class RDWork(Work):
     def __init__(self):
@@ -145,9 +168,6 @@ class RDWork(Work):
         except Exception as e:
             rd_print(self.log, e)
             self.failed = True
-    def cancel(self):
-        self.failed = True
-        self.done = True
     def get_name(self):
         return self.filename + ' with quality ' + str(self.quality)
 
