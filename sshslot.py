@@ -66,7 +66,11 @@ class Slot:
     def execute(self, work):
         self.busy = True
         self.work = work
-        work.execute(self)
+        try:
+            self.work.execute(self)
+        except Exception as e:
+            rd_print(self.log, e)
+            self.work.failed = True
         self.busy = False
     def setup(self,codec,bindir):
         time.sleep(1)
