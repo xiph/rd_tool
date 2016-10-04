@@ -82,7 +82,7 @@ class RDRun(Run):
         if any_work_failed:
             self.status = 'failed'
         else:
-            self.status = 'finished'
+            self.status = 'completed'
         self.write_status()
 
 class ABRun(Run):
