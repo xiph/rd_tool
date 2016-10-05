@@ -72,7 +72,10 @@ class RunSubmitHandler(tornado.web.RequestHandler):
         run.set = info['task']
         run.bindir = run.rundir + '/x86_64/'
         run.prefix = run.rundir + '/' + run.set
-        os.mkdir(run.prefix)
+        try:
+            os.mkdir(run.prefix)
+        except FileExistsError:
+            pass
         if 'qualities' in info:
           if info['qualities'] != '':
               run.quality = info['qualities'].split()
