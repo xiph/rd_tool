@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import boto3
-from utility import get_time
+from utility import *
 from time import sleep
 import subprocess
 import sys
@@ -58,7 +58,7 @@ def stop_machines(aws_group_name):
             DesiredCapacity = 0
         )
     except Exception as e:
-        print(get_time(),e)
+        rd_print(None,e)
 
 def get_machines(num_instances_to_use, aws_group_name):
     machines = []
@@ -69,11 +69,11 @@ def get_machines(num_instances_to_use, aws_group_name):
     #how many machines are currently running?
     instances = get_instances_in_group(autoscale, aws_group_name)
     num_instances = len(instances)
-    print(get_time(),'Number of instances online:', num_instances)
+    rd_print(None,'Number of instances online:', num_instances)
 
     #switch on more machines if we need them
     if num_instances < num_instances_to_use:
-        print(get_time(),'Launching instances...')
+        rd_print(None,'Launching instances...')
         autoscale.set_desired_capacity(
             AutoScalingGroupName = aws_group_name,
             DesiredCapacity = num_instances_to_use
@@ -83,20 +83,20 @@ def get_machines(num_instances_to_use, aws_group_name):
         while num_instances < num_instances_to_use:
             instances = get_instances_in_group(autoscale, aws_group_name)
             num_instances = len(instances)
-            print(get_time(),'Number of instances online:', num_instances)
+            rd_print(None,'Number of instances online:', num_instances)
             sleep(3)
 
     #grab instance IDs
     instance_ids = [i['InstanceId'] for i in instances]
-    print(get_time(),"These instances are online:",instance_ids)
+    rd_print(None,"These instances are online:",instance_ids)
 
     for instance_id in instance_ids:
-        print(get_time(),'Waiting for instance',instance_id,'to boot...')
+        rd_print(None,'Waiting for instance',instance_id,'to boot...')
         while True:
             try:
                 state = state_name_of(instance_id, ec2)
                 if state == 'running':
-                    print(get_time(),instance_id, 'is running!')
+                    rd_print(None,instance_id, 'is running!')
                     break
                 elif state == 'pending':
                     pass
@@ -108,14 +108,14 @@ def get_machines(num_instances_to_use, aws_group_name):
                 return []
             sleep(3)
     for instance_id in instance_ids:
-        print(get_time(),'Waiting for instance',instance_id,'to report OK...')
+        rd_print(None,'Waiting for instance',instance_id,'to report OK...')
         while True:
             try:
                 if status_of(instance_id, ec2) == 'ok':
-                    print(get_time(),instance_id,'reported OK!')
+                    rd_print(None,instance_id,'reported OK!')
                     break
             except IndexError:
-                print(get_time(),'Instance',instance_id,'disappeared!')
+                rd_print(None,'Instance',instance_id,'disappeared!')
                 return []
             sleep(3)
     for instance_id in instance_ids:
