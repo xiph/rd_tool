@@ -40,6 +40,7 @@ class CancelHandler(tornado.web.RequestHandler):
         global work_list
         global work_done
         run_id = self.get_query_argument('run_id')
+        rd_print(None,'Cancelling '+run_id)
         run = lookup_run_by_id(run_id)
         run.cancel()
         for work in work_list[:]:
