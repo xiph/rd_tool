@@ -18,7 +18,6 @@ video_sets = json.load(video_sets_f)
 
 machines = []
 slots = []
-taken_slots = []
 free_slots = []
 work_list = []
 run_list = []
@@ -218,10 +217,9 @@ def scheduler_tick():
     global work_list
     global run_list
     global work_done
-    global taken_slots
     max_retries = 50
     # look for completed work
-    for slot in taken_slots:
+    for slot in slots:
         if slot.busy == False and slot.work != None:
             if slot.work.failed == False:
                 slot.work.done = True
@@ -237,7 +235,6 @@ def scheduler_tick():
                 work_done.append(slot.work)
                 rd_print(slot.work.get_name(),'given up on.')
             slot.work = None
-            taken_slots.remove(slot)
             free_slots.append(slot)
     # fill empty slots with new work
     if len(work_list) != 0:
@@ -250,7 +247,6 @@ def scheduler_tick():
             work_thread.daemon = True
             slot.busy = True
             work_thread.start()
-            taken_slots.append(slot)
     # find runs where all work has been completed
     for run in run_list:
         done = True
