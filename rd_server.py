@@ -234,7 +234,7 @@ def scheduler_tick():
             else:
                 slot.work.done = True
                 work_done.append(slot.work)
-                rd_print(slot.work.get_name(),'given up on.')
+                rd_print(slot.work.log,slot.work.get_name(),'given up on.')
             slot.work = None
             free_slots.append(slot)
     # fill empty slots with new work
