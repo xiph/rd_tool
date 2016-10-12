@@ -162,7 +162,7 @@ def main():
             machines.append(sshslot.Machine(m['host'],m['user'],m['cores'],m['work_root'],str(m['port']),m['media_path']))
         for machine in machines:
             slots.extend(machine.get_slots())
-        free_slots = slots
+        free_slots.extend(slots)
     app = tornado.web.Application(
         [
             (r"/work_list.json", WorkListHandler),
@@ -198,6 +198,7 @@ def machine_allocator():
                 machines = awsremote.get_machines(args.max_machines, args.awsgroup)
             for machine in machines:
                 slots.extend(machine.get_slots())
+                free_slots.extend(slots)
             free_slots = slots
             time.sleep(60*10) # don't shut down for a tleast 10 minutes
         # stop all machines if nothing is running
