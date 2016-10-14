@@ -126,7 +126,7 @@ def get_slots(machines):
     slots = []
     #by doing the machines in the inner loop,
     #we end up with heavy jobs split across machines better
-    for i in range(0,32):
+    for i in range(0,18):
         for machine in machines:
             slots.append(Slot(machine))
     return slots
