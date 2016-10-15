@@ -26,7 +26,7 @@ def shellquote(s):
     return "'" + s.replace("'", "'\"'\"'") + "'"
 
 class Machine:
-    def __init__(self,host,user='ec2-user',cores=32,work_root='/home/ec2-user',port=22,media_path='/mnt/media'):
+    def __init__(self,host,user='ec2-user',cores=18,work_root='/home/ec2-user',port=22,media_path='/mnt/media'):
         self.host = host
         self.user = user
         self.cores = cores
