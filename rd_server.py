@@ -155,7 +155,7 @@ def main():
     parser.add_argument('-machineconf')
     parser.add_argument('-port',default=4000)
     parser.add_argument('-awsgroup', default='AOM Test')
-    parser.add_argument('-max-machines', default=3)
+    parser.add_argument('-max-machines', default=3, type=int)
     args = parser.parse_args()
     if args.machineconf:
         machineconf = json.load(open(args.machineconf, 'r'))
