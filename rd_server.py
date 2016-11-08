@@ -42,6 +42,9 @@ class CancelHandler(tornado.web.RequestHandler):
         run_id = self.get_query_argument('run_id')
         rd_print(None,'Cancelling '+run_id)
         run = lookup_run_by_id(run_id)
+        if not run:
+            self.write('run_id not found')
+            return
         run.cancel()
         for work in work_list[:]:
             if work.runid == run_id:
