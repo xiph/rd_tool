@@ -5,16 +5,17 @@ import os
 import time
 
 binaries = {
-  'daala':['examples/encoder_example'],
-  'x264': ['x264'],
-  'x265': ['build/linux/x265'],
-  'vp8': ['vpxenc','vpxdec'],
-  'vp9': ['vpxenc','vpxdec'],
-  'vp10': ['vpxenc','vpxdec'],
-  'vp10-rt': ['vpxenc','vpxdec'],
-  'av1': ['aomenc','aomdec'],
-  'av1-rt': ['aomenc','aomdec'],
-  'thor': ['build/Thorenc','build/Thordec']
+    'daala':['examples/encoder_example'],
+    'x264': ['x264'],
+    'x265': ['build/linux/x265'],
+    'vp8': ['vpxenc','vpxdec'],
+    'vp9': ['vpxenc','vpxdec'],
+    'vp10': ['vpxenc','vpxdec'],
+    'vp10-rt': ['vpxenc','vpxdec'],
+    'av1': ['aomenc','aomdec'],
+    'av1-rt': ['aomenc','aomdec'],
+    'thor': ['build/Thorenc','build/Thordec','config_HDB16_high_efficiency.txt','config_LDB_high_efficiency.txt'],
+    'thor-rt': ['build/Thorenc','build/Thordec','config_HDB16_high_efficiency.txt','config_LDB_high_efficiency.txt']
 }
 
 # Finding files such as `this_(that)` requires `'` be placed on both
