@@ -105,7 +105,9 @@ daala)
     exit 1
   fi
   SIZE=$(stat -c %s "$BASENAME.ogv")
-  mv "00000000out-$BASENAME.y4m" "$BASENAME.y4m"
+  #mv "00000000out-$BASENAME.y4m" "$BASENAME.y4m"
+  rm -f "00000000out-$BASENAME.y4m"
+  "$DUMP_VIDEO" "$BASENAME.ogv" -o "$BASENAME.y4m"
   ;;
 x264)
   $($TIMER $X264 --dump-yuv $BASENAME.yuv --preset placebo --min-keyint $KFINT --keyint $KFINT --no-scenecut --crf=$x -o $BASENAME.x264 $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
