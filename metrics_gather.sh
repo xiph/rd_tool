@@ -17,8 +17,12 @@ export X264="$WORK_ROOT/x264/x264"
 export X265="$WORK_ROOT/x265/build/linux/x265"
 export VPXENC="$WORK_ROOT/$CODEC/vpxenc"
 export VPXDEC="$WORK_ROOT/$CODEC/vpxdec"
-export AOMENC="$WORK_ROOT/$CODEC/aomenc"
-export AOMDEC="$WORK_ROOT/$CODEC/aomdec"
+if [ -z "$AOMENC" ]; then
+  export AOMENC="$WORK_ROOT/$CODEC/aomenc"
+fi
+if [ -z "$AOMDEC" ]; then
+  export AOMDEC="$WORK_ROOT/$CODEC/aomdec"
+fi
 if [ -z "$THORENC" ]; then
   export THORENC="$WORK_ROOT/$CODEC/build/Thorenc"
 fi
@@ -174,18 +178,43 @@ esac
 
 FRAMES=$(cat "$BASENAME-psnr.out" | grep ^0 | wc -l)
 PIXELS=$(($WIDTH*$HEIGHT*$FRAMES))
+
+echo "$x" "$PIXELS" "$SIZE"
+
 PSNR=$(cat "$BASENAME-psnr.out" | grep Total)
+
+echo "$PSNR"
+
 APSNR=$(cat "$BASENAME-psnr.out" | grep Frame-averaged)
 PSNRHVS=$("$DUMP_PSNRHVS" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
+
+echo "$PSNRHVS"
+
 SSIM=$("$DUMP_SSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
+
+echo "$SSIM"
+
 FASTSSIM=$("$DUMP_FASTSSIM" -c "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
+
+echo "$FASTSSIM"
+
 CIEDE=$("$DUMP_CIEDE" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
+
+echo "$CIEDE"
+
+echo "$APSNR"
+
 MSSSIM=$("$DUMP_MSSSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
+
+echo "$MSSSIM"
+
 if [ -e "$TIMEROUT" ]; then
   ENCTIME=$(awk '/seconds/ { s+=$4 } END { printf "%.2f", s }' "$TIMEROUT")
 else
   ENCTIME=0
 fi
+
+echo "$ENCTIME"
 
 if [ ! "$NO_DELETE" ]; then
   rm -f "$BASENAME.y4m" "$BASENAME.yuv" "$BASENAME.ogv" "$BASENAME.x264" "$BASENAME.x265" "$BASENAME.vpx" "$BASENAME.ivf" "$TIMEROUT" "$BASENAME-enc.out" "$BASENAME-psnr.out" "$BASENAME.thor" 2> /dev/null
@@ -193,12 +222,7 @@ fi
 
 rm -f pid
 
-echo "$x" "$PIXELS" "$SIZE"
-echo "$PSNR"
-echo "$PSNRHVS"
-echo "$SSIM"
-echo "$FASTSSIM"
-echo "$CIEDE"
-echo "$APSNR"
-echo "$MSSSIM"
-echo "$ENCTIME"
+
+
+
+
