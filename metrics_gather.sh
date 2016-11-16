@@ -198,9 +198,14 @@ FASTSSIM=$("$DUMP_FASTSSIM" -c "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total
 
 echo "$FASTSSIM"
 
-CIEDE=$("$DUMP_CIEDE" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
+CIEDE=$("$DUMP_CIEDE" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total) || true
 
-echo "$CIEDE"
+if [ -z "$CIEDE" ]; then
+    # CIEDE2000 doesn't yet support 4:4:4
+    echo Total: 0
+else
+    echo "$CIEDE"
+fi
 
 echo "$APSNR"
 
