@@ -91,6 +91,16 @@ rm "$BASENAME.out" 2> /dev/null || true
 
 WIDTH="$(head -1 $FILE | cut -d\  -f 2 | tr -d 'W')"
 HEIGHT="$(head -1 $FILE | cut -d\  -f 3 | tr -d 'H')"
+CHROMA="$(head -1 $FILE | cut -d\  -f 7 | tr -d 'C')"
+DEPTH=8
+case $CHROMA in
+444p10)
+  DEPTH=10
+  ;;
+420p10)
+  DEPTH=10
+  ;;
+esac
 
 # used for libvpx vbr
 RATE=$(echo $x*$WIDTH*$HEIGHT*30/1000 | bc)
@@ -98,6 +108,7 @@ RATE=$(echo $x*$WIDTH*$HEIGHT*30/1000 | bc)
 KFINT=1000
 TIMEROUT=$BASENAME-enctime.out
 TIMER='time -v --output='"$TIMEROUT"
+AOMDEC_OPTS=
 
 case $CODEC in
 daala)
@@ -153,12 +164,18 @@ vp10-rt)
   ;;
 av1)
   $($TIMER $AOMENC --codec=$CODEC --ivf --frame-parallel=0 --tile-columns=0 --auto-alt-ref=2 --cpu-used=0 --passes=2 --threads=1 --kf-min-dist=$KFINT --kf-max-dist=$KFINT --lag-in-frames=25 --end-usage=q --cq-level=$x -o $BASENAME.ivf $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
-  $AOMDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.ivf
+  if $AOMDEC --help 2>&1 | grep output-bit-depth > /dev/null; then
+    AOMDEC_OPTS=--output-bit-depth=$DEPTH
+  fi
+  $AOMDEC --codec=$CODEC $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf
   SIZE=$(stat -c %s $BASENAME.ivf)
   ;;
 av1-rt)
   $($TIMER $AOMENC --codec=av1 --ivf --frame-parallel=0 --tile-columns=0 --cpu-used=0 --passes=1 --threads=1 --kf-min-dist=$KFINT --kf-max-dist=$KFINT --lag-in-frames=0 --end-usage=q --cq-level=$x -o $BASENAME.ivf $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
-  $AOMDEC --codec=av1 -o $BASENAME.y4m $BASENAME.ivf
+  if $AOMDEC --help 2>&1 | grep output-bit-depth > /dev/null; then
+    AOMDEC_OPTS=--output-bit-depth=$DEPTH
+  fi
+  $AOMDEC --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf
   SIZE=$(stat -c %s $BASENAME.ivf)
   ;;
 thor)
