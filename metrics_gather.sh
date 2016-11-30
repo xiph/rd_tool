@@ -65,6 +65,14 @@ if [ -z "$DUMP_CIEDE" ]; then
   export DUMP_CIEDE="$DAALATOOL_ROOT/tools/dump_ciede2000.py"
 fi
 
+if [ -z "$VMAF_ROOT" ]; then
+  export VMAF_ROOT="$DAALATOOL_ROOT/../vmaf"
+fi
+
+if [ -z "$VMAFOSSEXEC" ]; then
+  export VMAFOSSEXEC="$VMAF_ROOT/wrapper/vmafossexec"
+fi
+
 if [ -z "$YUV2YUV4MPEG" ]; then
   export YUV2YUV4MPEG="$DAALATOOL_ROOT/tools/yuv2yuv4mpeg"
 fi
@@ -237,6 +245,27 @@ else
 fi
 
 echo "$ENCTIME"
+
+rm -f ref dis
+mkfifo ref
+mkfifo dis
+FORMAT=yuv420p
+case $CHROMA in
+420p10)
+  FORMAT=yuv444p10le
+  ;;
+444p10)
+  FORMAT=yuv444p10le
+  ;;
+444)
+  FORMAT=yuv444p
+  ;;
+esac
+"$DAALATOOL_ROOT/tools/y4m2yuv" "$FILE" -o ref &
+"$DAALATOOL_ROOT/tools/y4m2yuv" "$BASENAME.y4m" -o dis &
+VMAF=$("$VMAFOSSEXEC" $FORMAT $WIDTH $HEIGHT ref dis "$VMAF_ROOT/resource/model/nflxall_vmafv4.pkl" | tail -n 1)
+
+echo "$VMAF"
 
 if [ ! "$NO_DELETE" ]; then
   rm -f "$BASENAME.y4m" "$BASENAME.yuv" "$BASENAME.ogv" "$BASENAME.x264" "$BASENAME.x265" "$BASENAME.vpx" "$BASENAME.ivf" "$TIMEROUT" "$BASENAME-enc.out" "$BASENAME-psnr.out" "$BASENAME.thor" 2> /dev/null
