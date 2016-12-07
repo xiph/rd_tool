@@ -79,7 +79,7 @@ class Slot:
         time.sleep(1)
         if self.machine.rsync('./',self.work_root+'/rd_tool/') != 0:
             rd_print(self.log,'Couldn\'t set up machine '+self.machine.host)
-            raise RuntimeError
+            raise RuntimeError('Couldn\t set up machine')
         time.sleep(1)
         self.check_shell('rm -rf '+shellquote(self.work_root+'/'+codec))
         for binary in binaries[codec]:
@@ -88,7 +88,7 @@ class Slot:
             time.sleep(1)
             if self.machine.rsync(bindir+'/'+binary,self.work_root+'/'+codec+'/'+binary) != 0:
                 rd_print(self.log,'Couldn\'t upload codec binary '+binary+'to '+self.machine.host)
-                raise RuntimeError
+                raise RuntimeError('Couldn\'t upload codec binary')
     def start_shell(self, command):
         self.p = subprocess.Popen(['ssh','-i','daala.pem','-p',self.machine.port,'-o',' StrictHostKeyChecking=no',
             self.machine.user+'@'+self.machine.host,
