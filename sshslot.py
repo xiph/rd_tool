@@ -93,6 +93,11 @@ class Slot:
         self.p = subprocess.Popen(['ssh','-i','daala.pem','-p',self.machine.port,'-o',' StrictHostKeyChecking=no',
             self.machine.user+'@'+self.machine.host,
             command.encode("utf-8")], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    def kill(self):
+        try:
+            self.p.kill()
+        except Exception as e:
+            rd_print(self.log,"Couldn't cancel work item",e)
     def get_file(self, remote, local):
         return subprocess.call(['scp','-i','daala.pem','-P',self.machine.port,self.machine.user+'@'+self.machine.host+':'+shellquote(remote),local])
     def check_shell(self, command):
