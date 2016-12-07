@@ -239,7 +239,7 @@ MSSSIM=$("$DUMP_MSSSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 echo "$MSSSIM"
 
 if [ -e "$TIMEROUT" ]; then
-  ENCTIME=$(awk '/seconds/ { s+=$4 } END { printf "%.2f", s }' "$TIMEROUT")
+  ENCTIME=$(awk '/User/ { s=$4 } END { printf "%.2f", s }' "$TIMEROUT")
 else
   ENCTIME=0
 fi
