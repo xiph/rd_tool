@@ -168,7 +168,14 @@
         "ducks_take_off_1080p50_60f.y4m",
         "life_1080p30_60f.y4m",
         "rush_hour_1080p25_60f.y4m",
-        "touchdown_pass_1080p_60f.y4m"
+        "touchdown_pass_1080p_60f.y4m",
+        "Netflix_Aerial_1920x1080_60fps_8bit_420_60f.y4m",
+        "Netflix_Boat_1920x1080_60fps_8bit_420_60f.y4m",
+        "Netflix_Crosswalk_1920x1080_60fps_8bit_420_60f.y4m",
+        "Netflix_FoodMarket_1920x1080_60fps_8bit_420_60f.y4m",
+        "Netflix_PierSeaside_1920x1080_60fps_8bit_420_60f.y4m",
+        "Netflix_SquareAndTimelapse_1920x1080_60fps_8bit_420_60f.y4m",
+        "Netflix_TunnelFlag_1920x1080_60fps_8bit_420_60f.y4m"
       ],
       "1080p-screen": [
         "DOTA2_60f_420.y4m",
@@ -180,14 +187,20 @@
         "dark70p_60f.y4m",
         "gipsrestat720p_60f.y4m",
         "vidyo1_720p_60fps_60f.y4m",
-        "vidyo4_720p_60fps_60f.y4m"
+        "vidyo4_720p_60fps_60f.y4m",
+        "Netflix_DrivingPOV_1280x720_60fps_8bit_420_60f.y4m",
+        "Netflix_RollerCoaster_1280x720_60fps_8bit_420_60f.y4m",
+        "KristenAndSara_1280x720_60f.y4m"
+
       ],
       "360p": [
         "blue_sky_360p_60f.y4m",
         "kirland360p_60f.y4m",
         "niklas360p_60f.y4m",
         "red_kayak_360p_60f.y4m",
-        "thaloundeskmtg360p_60f.y4m"
+        "thaloundeskmtg360p_60f.y4m",
+        "shields_640x360_60f.y4m",
+        "speed_bag_640x360_60f.y4m"
       ]
     },
     "sources": [
