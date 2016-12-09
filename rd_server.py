@@ -142,12 +142,27 @@ class MachineUsageHandler(tornado.web.RequestHandler):
             for slot in machine.slots:
                 if slot.work:
                     slot_in_use.append(slot.work.get_name())
+                elif slot.busy:
+                    slot_in_use.append('busy with no work')
                 else:
                     slot_in_use.append('None')
             machine_json['name'] = machine.get_name()
             machine_json['slots'] = slot_in_use
             machine_usage.append(machine_json)
         self.write(json.dumps(machine_usage))
+
+class FreeSlotsHandler(tornado.web.RequestHandler):
+    def get(self):
+        global free_slots
+        slot_text = []
+        for slot in free_slots:
+            if slot.work:
+                slot_text.append(slot.work.get_name())
+            elif slot.busy:
+                slot_text.append('busy with no work')
+            else:
+                slot_text.append('None')
+        self.write(json.dumps(slot_text))
 
 def main():
     global free_slots
@@ -172,6 +187,7 @@ def main():
             (r"/work_list.json", WorkListHandler),
             (r"/run_status.json", RunStatusHandler),
             (r"/machine_usage.json", MachineUsageHandler),
+            (r"/free_slots.json", FreeSlotsHandler),
             (r"/submit", RunSubmitHandler),
             (r"/cancel", CancelHandler)
         ],
