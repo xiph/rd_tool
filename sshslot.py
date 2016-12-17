@@ -77,6 +77,8 @@ class Slot:
         time.sleep(1)
         self.check_shell('mkdir -p '+shellquote(self.work_root))
         time.sleep(1)
+        self.check_shell('rm -f '+shellquote(self.work_root)+'/*.y4m '+shellquote(self.work_root)+'/*.ivf')
+        time.sleep(1)
         if self.machine.rsync('./',self.work_root+'/rd_tool/') != 0:
             rd_print(self.log,'Couldn\'t set up machine '+self.machine.host)
             raise RuntimeError('Couldn\t set up machine')
