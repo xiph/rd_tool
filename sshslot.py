@@ -81,7 +81,7 @@ class Slot:
         time.sleep(1)
         if self.machine.rsync('./',self.work_root+'/rd_tool/') != 0:
             rd_print(self.log,'Couldn\'t set up machine '+self.machine.host)
-            raise RuntimeError('Couldn\t set up machine')
+            raise RuntimeError('Couldn\'t copy tools to machine (out of disk space?)')
         time.sleep(1)
         self.check_shell('rm -rf '+shellquote(self.work_root+'/'+codec))
         for binary in binaries[codec]:
