@@ -4,6 +4,9 @@ set -e
 
 export LD_LIBRARY_PATH=/usr/local/lib/
 
+#3GB RAM limit
+ulimit -v 3000000
+
 if [ -z "$WORK_ROOT" ]; then
   export WORK_ROOT=/home/ec2-user
 fi
