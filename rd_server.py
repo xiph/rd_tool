@@ -238,7 +238,7 @@ def scheduler_tick():
     global work_list
     global run_list
     global work_done
-    max_retries = 10
+    max_retries = 5
     # look for completed work
     for slot in slots:
         if slot.busy == False and slot.work != None:
