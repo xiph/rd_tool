@@ -159,7 +159,7 @@ vp9)
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
 vp9-rt)
-  $($TIMER $VPXENC --codec=vp9 --frame-parallel=0 --tile-columns=0 -cpu-used=0 --threads=1 --kf-min-dist=$KFINT --kf-max-dist=$KFINT -p 1 --lag-in-frames=0 --end-usage=q --cq-level=$x -o $BASENAME.vpx $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
+  $($TIMER $VPXENC --codec=vp9 --ivf --frame-parallel=0 --tile-columns=0 --cpu-used=0 --threads=1 --kf-min-dist=$KFINT --kf-max-dist=$KFINT -p 1 --lag-in-frames=0 --end-usage=q --cq-level=$x -o $BASENAME.vpx $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
   $VPXDEC --codec=vp9 -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
   ;;
