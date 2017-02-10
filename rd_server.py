@@ -164,6 +164,12 @@ class FreeSlotsHandler(tornado.web.RequestHandler):
                 slot_text.append('None')
         self.write(json.dumps(slot_text))
 
+class ExecuteTick(tornado.web.RequestHandler):
+    def get(self):
+        scheduler_tick()
+        self.write('ok')
+
+
 def main():
     global free_slots
     global machines
@@ -189,7 +195,8 @@ def main():
             (r"/machine_usage.json", MachineUsageHandler),
             (r"/free_slots.json", FreeSlotsHandler),
             (r"/submit", RunSubmitHandler),
-            (r"/cancel", CancelHandler)
+            (r"/cancel", CancelHandler),
+            (r"/execute_tick",ExecuteTick)
         ],
         static_path=os.path.join(os.path.dirname(__file__), "static"),
         xsrf_cookies=True,
