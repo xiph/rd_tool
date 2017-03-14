@@ -160,6 +160,13 @@
       "WITCHER3_0_120f.y4m"
     ]
   },
+  "ice": {
+    "type": "video",
+    "framerate": 60,
+    "sources": [
+      "ice_4cif.y4m"
+    ]
+  },
   "objective-1-fast": {
     "type": "video",
     "categories": {
