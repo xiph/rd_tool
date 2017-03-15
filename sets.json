@@ -485,7 +485,95 @@
       "vidyo4_720p_60fps_120f.y4m",
       "water_hdr_amazon_360p.y4m",
       "wikipedia_420.y4m"
-    ]
+    ],
+    "categories": {
+      "2160p": [
+        "Netflix_BarScene_4096x2160_60fps_10bit_420_60f.y4m",
+        "Netflix_BoxingPractice_4096x2160_60fps_10bit_420_60f.y4m",
+        "Netflix_Dancers_4096x2160_60fps_10bit_420_60f.y4m",
+        "Netflix_Narrator_4096x2160_60fps_10bit_420_60f.y4m",
+        "Netflix_RitualDance_4096x2160_60fps_10bit_420_60f.y4m",
+        "Netflix_ToddlerFountain_4096x2160_60fps_10bit_420_60f.y4m",
+        "Netflix_WindAndNature_4096x2160_60fps_10bit_420_60f.y4m",
+        "street_hdr_amazon_2160p.y4m"
+      ],
+      "1080p": [
+        "aspen_1080p_60f.y4m",
+        "crowd_run_1080p50_60f.y4m",
+        "ducks_take_off_1080p50_60f.y4m",
+        "guitar_hdr_amazon_1080p.y4m",
+        "life_1080p30_60f.y4m",
+        "Netflix_Aerial_1920x1080_60fps_8bit_420_60f.y4m",
+        "Netflix_Boat_1920x1080_60fps_8bit_420_60f.y4m",
+        "Netflix_Crosswalk_1920x1080_60fps_8bit_420_60f.y4m",
+        "Netflix_FoodMarket_1920x1080_60fps_8bit_420_60f.y4m",
+        "Netflix_PierSeaside_1920x1080_60fps_8bit_420_60f.y4m",
+        "Netflix_SquareAndTimelapse_1920x1080_60fps_8bit_420_60f.y4m",
+        "Netflix_TunnelFlag_1920x1080_60fps_8bit_420_60f.y4m",
+        "old_town_cross_1080p50_60f.y4m",
+        "pan_hdr_amazon_1080p.y4m",
+        "park_joy_1080p50_60f.y4m",
+        "pedestrian_area_1080p25_60f.y4m",
+        "rush_field_cuts_1080p_60f.y4m",
+        "rush_hour_1080p25_60f.y4m",
+        "seaplane_hdr_amazon_1080p.y4m",
+        "station2_1080p25_60f.y4m",
+        "touchdown_pass_1080p_60f.y4m"
+      ],
+      "1080p-screen": [
+        "CSGO_60f.y4m",
+        "DOTA2_60f_420.y4m",
+        "EuroTruckSimulator2_60f.y4m",
+        "Hearthstone_60f.y4m",
+        "MINECRAFT_60f_420.y4m",
+        "STARCRAFT_60f_420.y4m",
+        "wikipedia_420.y4m",
+        "pvq_slideshow.y4m"
+      ],
+      "720p": [
+        "boat_hdr_amazon_720p.y4m",
+        "dark720p_120f.y4m",
+        "FourPeople_1280x720_60_120f.y4m",
+        "gipsrestat720p_120f.y4m",
+        "Johnny_1280x720_60_120f.y4m",
+        "KristenAndSara_1280x720_60_120f.y4m",
+        "Netflix_DinnerScene_1280x720_60fps_8bit_420_120f.y4m",
+        "Netflix_DrivingPOV_1280x720_60fps_8bit_420_120f.y4m",
+        "Netflix_FoodMarket2_1280x720_60fps_8bit_420_120f.y4m",
+        "Netflix_RollerCoaster_1280x720_60fps_8bit_420_120f.y4m",
+        "Netflix_Tango_1280x720_60fps_8bit_420_120f.y4m",
+        "rain_hdr_amazon_720p.y4m",
+        "vidyo1_720p_60fps_120f.y4m",
+        "vidyo3_720p_60fps_120f.y4m",
+        "vidyo4_720p_60fps_120f.y4m"
+      ],
+      "360p": [
+        "blue_sky_360p_120f.y4m",
+        "controlled_burn_640x360_120f.y4m",
+        "desktop2360p_120f.y4m",
+        "kirland360p_120f.y4m",
+        "mmstationary360p_120f.y4m",
+        "niklas360p_120f.y4m",
+        "rain2_hdr_amazon_360p.y4m",
+        "red_kayak_360p_120f.y4m",
+        "riverbed_360p25_120f.y4m",
+        "shields2_640x360_120f.y4m",
+        "snow_mnt_640x360_120f.y4m",
+        "speed_bag_640x360_120f.y4m",
+        "stockholm_640x360_120f.y4m",
+        "tacomanarrows360p_120f.y4m",
+        "thaloundeskmtg360p_120f.y4m",
+        "water_hdr_amazon_360p.y4m"
+      ],
+      "240p": [
+        "bqfree_240p_120f.y4m",
+        "bqhighway_240p_120f.y4m",
+        "bqzoom_240p_120f.y4m",
+        "chairlift_240p_120f.y4m",
+        "dirtbike_240p_120f.y4m",
+        "mozzoom_240p_120f.y4m"
+      ]
+    }
   },
   "objective-2-fast": {
     "type": "video",
