@@ -118,7 +118,9 @@ RATE=$(echo $x*$WIDTH*$HEIGHT*30/1000 | bc)
 
 KFINT=1000
 TIMEROUT=$BASENAME-enctime.out
+TIMERDECOUT=$BASENAME-dectime.out
 TIMER='time -v --output='"$TIMEROUT"
+TIMERDEC='time -v --output='"$TIMERDECOUT"
 AOMDEC_OPTS=
 
 case $CODEC in
@@ -178,7 +180,7 @@ av1)
   if $AOMDEC --help 2>&1 | grep output-bit-depth > /dev/null; then
     AOMDEC_OPTS=--output-bit-depth=$DEPTH
   fi
-  $AOMDEC --codec=$CODEC $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf
+  $($TIMERDEC $AOMDEC --codec=$CODEC $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf)
   SIZE=$(stat -c %s $BASENAME.ivf)
   ;;
 av1-rt)
@@ -186,7 +188,7 @@ av1-rt)
   if $AOMDEC --help 2>&1 | grep output-bit-depth > /dev/null; then
     AOMDEC_OPTS=--output-bit-depth=$DEPTH
   fi
-  $AOMDEC --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf
+  $($TIMERDEC $AOMDEC --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf)
   SIZE=$(stat -c %s $BASENAME.ivf)
   ;;
 thor)
@@ -269,6 +271,14 @@ esac
 VMAF=$("$VMAFOSSEXEC" $FORMAT $WIDTH $HEIGHT ref dis "$VMAF_ROOT/resource/model/nflxall_vmafv4.pkl" | tail -n 1)
 
 echo "$VMAF"
+
+if [ -e "$TIMERDECOUT" ]; then
+  DECTIME=$(awk '/User/ { s=$4 } END { printf "%.2f", s }' "$TIMERDECOUT")
+else
+  DECTIME=0
+fi
+
+echo "$DECTIME"
 
 if [ ! "$NO_DELETE" ]; then
   rm -f "$BASENAME.y4m" "$BASENAME.yuv" "$BASENAME.ogv" "$BASENAME.x264" "$BASENAME.x265" "$BASENAME.vpx" "$BASENAME.ivf" "$TIMEROUT" "$BASENAME-enc.out" "$BASENAME-psnr.out" "$BASENAME.thor" 2> /dev/null
