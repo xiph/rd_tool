@@ -98,6 +98,7 @@ class Work:
         self.retries = 0
         self.done = False
         self.failed = False
+        self.runid = ''
     def cancel(self):
         self.failed = True
         self.done = True
@@ -174,7 +175,7 @@ class RDWork(Work):
             rd_print(self.log, 'Exception while running',self.get_name(),e)
             self.failed = True
     def get_name(self):
-        return self.filename + ' with quality ' + str(self.quality)
+        return self.filename + ' with quality ' + str(self.quality) + ' for run ' + self.runid
 
 def create_rdwork(run, video_filenames):
     work_items = []
