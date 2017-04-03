@@ -99,6 +99,7 @@ class Work:
         self.done = False
         self.failed = False
         self.runid = ''
+        self.slot = None
     def cancel(self):
         self.failed = True
         self.done = True
@@ -154,6 +155,7 @@ class RDWork(Work):
             self.failed = True
     def execute(self, slot):
         try:
+            self.slot = slot
             slot.setup(self.codec,self.bindir)
             work = self
             input_path = slot.machine.media_path+'/'+work.set+'/'+work.filename
@@ -171,11 +173,19 @@ class RDWork(Work):
                 if slot.get_file(slot.work_root+'/'+work.filename+'-'+str(work.quality)+file,'../runs/'+work.runid+'/'+work.set+'/') != 0:
                     rd_print(self.log,'Failed to copy back '+work.filename+'-'+str(work.quality)+file+', continuing anyway')
             self.parse(stdout, stderr)
+            self.slot = None
         except Exception as e:
             rd_print(self.log, 'Exception while running',self.get_name(),e)
             self.failed = True
     def get_name(self):
         return self.filename + ' with quality ' + str(self.quality) + ' for run ' + self.runid
+    def cancel(self):
+        if self.done:
+            rd_print(self.log, 'Tried to cancel work item that was already complete')
+        else:
+            self.slot.kill()
+        self.failed = True
+        self.done = True
 
 def create_rdwork(run, video_filenames):
     work_items = []
