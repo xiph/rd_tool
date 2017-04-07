@@ -75,10 +75,15 @@ class Slot:
         self.busy = False
     def setup(self,codec,bindir):
         time.sleep(1)
-        self.check_shell('mkdir -p '+shellquote(self.work_root))
-        time.sleep(1)
-        self.check_shell('rm -f '+shellquote(self.work_root)+'/*.y4m '+shellquote(self.work_root)+'/*.ivf')
-        time.sleep(1)
+        try:
+            self.check_shell('mkdir -p '+shellquote(self.work_root))
+            time.sleep(1)
+            self.check_shell('rm -f '+shellquote(self.work_root)+'/*.y4m '+shellquote(self.work_root)+'/*.ivf')
+            time.sleep(1)
+        except subprocess.CalledProcessError as e:
+            rd_print(self.log,e.output)
+            rd_print(self.log,'Couldn\'t connect to machine '+self.machine.host)
+            raise RuntimeError('This is a bug with AWCY. Likely this machine has gone unreachable.')
         if self.machine.rsync('./',self.work_root+'/rd_tool/') != 0:
             rd_print(self.log,'Couldn\'t set up machine '+self.machine.host)
             raise RuntimeError('Couldn\'t copy tools to machine (out of disk space?)')
