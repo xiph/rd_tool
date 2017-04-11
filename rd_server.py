@@ -285,7 +285,7 @@ def scheduler_tick():
             run_list.remove(run)
             try:
                 run.reduce()
-            except e:
+            except Exception as e:
                 rd_print(run.log,e)
                 rd_print(run.log,'Failed to run reduce step on '+run.runid)
             rd_print(run.log,'Finished '+run.runid)
