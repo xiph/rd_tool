@@ -289,6 +289,7 @@ def scheduler_tick():
                 rd_print(run.log,e)
                 rd_print(run.log,'Failed to run reduce step on '+run.runid)
             rd_print(run.log,'Finished '+run.runid)
+            run.finish()
     tornado.ioloop.IOLoop.current().call_later(1,scheduler_tick)
 
 if __name__ == "__main__":

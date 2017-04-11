@@ -50,6 +50,9 @@ class Run:
         self.write_status()
         for work in self.work_items:
             work.cancel()
+    def finish(self):
+        if self.log:
+            self.log.close()
 
 class RDRun(Run):
     def reduce(self):
