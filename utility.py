@@ -11,4 +11,7 @@ def get_time():
 def rd_print(log, *args, **kwargs):
     print(get_time(), *args, flush=True, **kwargs)
     if log:
-        print(get_time(), file=log, flush=True, *args, **kwargs)
+        try:
+            print(get_time(), file=log, flush=True, *args, **kwargs)
+        except:
+            pass
