@@ -252,7 +252,7 @@ def scheduler_tick():
             if slot.work.failed == False:
                 slot.work.done = True
                 work_done.append(slot.work)
-                rd_print(slot.work.log,len(work_done),'finished.')
+                rd_print(slot.work.log,slot.work.get_name(),'finished.')
             elif slot.work.retries < max_retries:
                 slot.work.retries += 1
                 rd_print(slot.work.log,'Retrying work ',slot.work.get_name(),'...',slot.work.retries,'of',max_retries,'retries.')
