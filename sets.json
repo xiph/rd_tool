@@ -785,6 +785,16 @@
       "vidyo4_720p_60fps_250f.y4m"
     ]
   },
+  "subjective-wip": {
+    "type": "video",
+    "sources": [
+      "MINECRAFT_420_300f.y4m",
+      "Netflix_Crosswalk_1920x1080_30fps_8bit_420_300f.y4m",
+      "Netflix_TunnelFlag_1920x1080_30fps_8bit_420_300f.y4m",
+      "sintel_trailer_cut1.y4m",
+      "vidyo1_720p_30fps_300f.y4m"
+    ]
+  },
   "ntt-short-1": {
     "type": "video",
     "anchor": "vp9-anchor-ntt-short-1f",
