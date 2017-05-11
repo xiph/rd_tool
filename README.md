@@ -19,10 +19,10 @@ directory). This work directory must be populated with a folder called
 daalatool, which needs to contain a checkout of Daala git with the tools built:
 
 ```
-git clone https://git.xiph.org/?p=daala.git daalatool
+git clone https://git.xiph.org/daala.git daalatool
 cd daalatool
 ./autogen.sh
-./configure.sh --disable-player
+./configure --disable-player
 make tools -j4
 ```
 
