@@ -269,12 +269,8 @@ def scheduler_tick():
         if len(free_slots) != 0:
             slot = free_slots.pop()
             work = work_list.pop(0)
-            slot.work = work
-            rd_print(slot.work.log,'Encoding',work.get_name(),'on',slot.machine.host)
-            work_thread = threading.Thread(target=slot.execute, args=(work,))
-            work_thread.daemon = True
-            slot.busy = True
-            work_thread.start()
+            rd_print(work.log,'Encoding',work.get_name(),'on',slot.machine.host)
+            slot.start_work(work)
     # find runs where all work has been completed
     for run in run_list:
         done = True

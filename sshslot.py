@@ -2,6 +2,7 @@ from utility import *
 import subprocess
 import sys
 import os
+import threading
 import time
 
 binaries = {
@@ -64,9 +65,13 @@ class Slot:
         self.log = log
     def gather(self):
         return self.p.communicate()
-    def execute(self, work):
-        self.busy = True
+    def start_work(self, work):
         self.work = work
+        work_thread = threading.Thread(target=self.execute, args=(work,))
+        work_thread.daemon = True
+        self.busy = True
+        work_thread.start()
+    def execute(self, work):
         try:
             self.work.execute(self)
         except Exception as e:

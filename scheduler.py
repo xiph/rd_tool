@@ -39,12 +39,8 @@ def run(work_items, slots):
             if len(free_slots) != 0:
                 slot = free_slots.pop()
                 work = work_items.pop()
-                slot.work = work
                 print(get_time(),'Encoding',work.get_name(),'on',slot.machine.host)
-                work_thread = threading.Thread(target=slot.execute, args=(work,))
-                work_thread.daemon = True
-                slot.busy = True
-                work_thread.start()
+                slot.start_work(work)
                 taken_slots.append(slot)
         sleep(0.2)
     return work_done
