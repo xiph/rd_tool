@@ -273,7 +273,7 @@ if [ -f "$VMAFOSSEXEC" ]; then
 
   echo "$VMAF"
 else
-  echo 0
+  echo 0 0 0 0
 fi
 
 if [ -e "$TIMERDECOUT" ]; then

@@ -10,6 +10,11 @@ Dependencies
 
 You will need Python 3.4 or later, as well as [boto3](https://github.com/boto/boto3).
 
+On Ubuntu, install with:
+```
+sudo apt install python3-tornado python3-boto3
+```
+
 Node dependencies
 =================
 
@@ -17,6 +22,10 @@ Individual build machines do not need Python, but do need bash. Each machine
 should be configured with a user and work_root (such as that user's home
 directory). This work directory must be populated with a folder called
 daalatool, which needs to contain a checkout of Daala git with the tools built:
+
+```
+sudo apt install autoconf libogg-dev libjpeg-dev libpng-dev check
+```
 
 ```
 git clone https://git.xiph.org/daala.git daalatool
