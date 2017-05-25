@@ -251,26 +251,30 @@ fi
 
 echo "$ENCTIME"
 
-rm -f ref dis
-mkfifo ref
-mkfifo dis
-FORMAT=yuv420p
-case $CHROMA in
-420p10)
-  FORMAT=yuv444p10le
-  ;;
-444p10)
-  FORMAT=yuv444p10le
-  ;;
-444)
-  FORMAT=yuv444p
-  ;;
-esac
-"$DAALATOOL_ROOT/tools/y4m2yuv" "$FILE" -o ref &
-"$DAALATOOL_ROOT/tools/y4m2yuv" "$BASENAME.y4m" -o dis &
-VMAF=$("$VMAFOSSEXEC" $FORMAT $WIDTH $HEIGHT ref dis "$VMAF_ROOT/resource/model/nflxall_vmafv4.pkl" | tail -n 1)
+if [ -f "$VMAFOSSEXEC" ]; then
+  rm -f ref dis
+  mkfifo ref
+  mkfifo dis
+  FORMAT=yuv420p
+  case $CHROMA in
+      420p10)
+          FORMAT=yuv444p10le
+          ;;
+      444p10)
+          FORMAT=yuv444p10le
+          ;;
+      444)
+          FORMAT=yuv444p
+          ;;
+  esac
+  "$DAALATOOL_ROOT/tools/y4m2yuv" "$FILE" -o ref &
+  "$DAALATOOL_ROOT/tools/y4m2yuv" "$BASENAME.y4m" -o dis &
+  VMAF=$("$VMAFOSSEXEC" $FORMAT $WIDTH $HEIGHT ref dis "$VMAF_ROOT/resource/model/nflxall_vmafv4.pkl" | tail -n 1)
 
-echo "$VMAF"
+  echo "$VMAF"
+else
+  echo 0
+fi
 
 if [ -e "$TIMERDECOUT" ]; then
   DECTIME=$(awk '/User/ { s=$4 } END { printf "%.2f", s }' "$TIMERDECOUT")
