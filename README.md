@@ -24,7 +24,7 @@ directory). This work directory must be populated with a folder called
 daalatool, which needs to contain a checkout of Daala git with the tools built:
 
 ```
-sudo apt install autoconf libogg-dev libjpeg-dev libpng-dev check
+sudo apt install autoconf libogg-dev libjpeg-dev libpng-dev check python3-numpy python3-scipy
 ```
 
 ```

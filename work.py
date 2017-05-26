@@ -55,6 +55,25 @@ class Run:
             self.log.close()
 
 class RDRun(Run):
+    def write_line(self, f, work):
+        f.write(str(work.quality)+' ')
+        f.write(str(work.pixels)+' ')
+        f.write(str(work.size)+' ')
+        f.write(str(work.metric['psnr'][0])+' ')
+        f.write(str(work.metric['psnrhvs'][0])+' ')
+        f.write(str(work.metric['ssim'][0])+' ')
+        f.write(str(work.metric['fastssim'][0])+' ')
+        f.write(str(work.metric['ciede2000'])+' ')
+        f.write(str(work.metric['psnr'][1])+' ')
+        f.write(str(work.metric['psnr'][2])+' ')
+        f.write(str(work.metric['apsnr'][0])+' ')
+        f.write(str(work.metric['apsnr'][1])+' ')
+        f.write(str(work.metric['apsnr'][2])+' ')
+        f.write(str(work.metric['msssim'][0])+' ')
+        f.write(str(work.metric['encodetime'])+' ')
+        f.write(str(work.metric['vmaf'])+' ')
+        f.write(str(work.metric['decodetime'])+' ')
+        f.write('\n')
     def reduce(self):
         rd_print(self.log,'Logging results...')
         self.work_items.sort(key=lambda work: int(work.quality))
@@ -62,24 +81,7 @@ class RDRun(Run):
         for work in self.work_items:
             if not work.failed:
                 f = open((self.prefix+'/'+work.filename+'-daala.out').encode('utf-8'),'a')
-                f.write(str(work.quality)+' ')
-                f.write(str(work.pixels)+' ')
-                f.write(str(work.size)+' ')
-                f.write(str(work.metric['psnr'][0])+' ')
-                f.write(str(work.metric['psnrhvs'][0])+' ')
-                f.write(str(work.metric['ssim'][0])+' ')
-                f.write(str(work.metric['fastssim'][0])+' ')
-                f.write(str(work.metric['ciede2000'])+' ')
-                f.write(str(work.metric['psnr'][1])+' ')
-                f.write(str(work.metric['psnr'][2])+' ')
-                f.write(str(work.metric['apsnr'][0])+' ')
-                f.write(str(work.metric['apsnr'][1])+' ')
-                f.write(str(work.metric['apsnr'][2])+' ')
-                f.write(str(work.metric['msssim'][0])+' ')
-                f.write(str(work.metric['encodetime'])+' ')
-                f.write(str(work.metric['vmaf'])+' ')
-                f.write(str(work.metric['decodetime'])+' ')
-                f.write('\n')
+                self.write_line(f, work)
                 f.close()
             else:
                 any_work_failed = True
