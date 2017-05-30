@@ -55,34 +55,13 @@ class Run:
             self.log.close()
 
 class RDRun(Run):
-    def write_line(self, f, work):
-        f.write(str(work.quality)+' ')
-        f.write(str(work.pixels)+' ')
-        f.write(str(work.size)+' ')
-        f.write(str(work.metric['psnr'][0])+' ')
-        f.write(str(work.metric['psnrhvs'][0])+' ')
-        f.write(str(work.metric['ssim'][0])+' ')
-        f.write(str(work.metric['fastssim'][0])+' ')
-        f.write(str(work.metric['ciede2000'])+' ')
-        f.write(str(work.metric['psnr'][1])+' ')
-        f.write(str(work.metric['psnr'][2])+' ')
-        f.write(str(work.metric['apsnr'][0])+' ')
-        f.write(str(work.metric['apsnr'][1])+' ')
-        f.write(str(work.metric['apsnr'][2])+' ')
-        f.write(str(work.metric['msssim'][0])+' ')
-        f.write(str(work.metric['encodetime'])+' ')
-        f.write(str(work.metric['vmaf'])+' ')
-        f.write(str(work.metric['decodetime'])+' ')
-        f.write('\n')
     def reduce(self):
         rd_print(self.log,'Logging results...')
         self.work_items.sort(key=lambda work: int(work.quality))
         any_work_failed = False
         for work in self.work_items:
             if not work.failed:
-                f = open((self.prefix+'/'+work.filename+'-daala.out').encode('utf-8'),'a')
-                self.write_line(f, work)
-                f.close()
+                pass
             else:
                 any_work_failed = True
         subprocess.call('OUTPUT="'+self.prefix+'/'+'total" "'+sys.path[0]+'/rd_average.sh" "'+self.prefix+'/*.out"',
@@ -158,6 +137,27 @@ class RDWork(Work):
             rd_print(self.log,'stderr:')
             rd_print(self.log,stderr.decode('utf-8'))
             self.failed = True
+    def get_line(self, work):
+        f = ''
+        f += (str(work.quality)+' ')
+        f += (str(work.pixels)+' ')
+        f += (str(work.size)+' ')
+        f += (str(work.metric['psnr'][0])+' ')
+        f += (str(work.metric['psnrhvs'][0])+' ')
+        f += (str(work.metric['ssim'][0])+' ')
+        f += (str(work.metric['fastssim'][0])+' ')
+        f += (str(work.metric['ciede2000'])+' ')
+        f += (str(work.metric['psnr'][1])+' ')
+        f += (str(work.metric['psnr'][2])+' ')
+        f += (str(work.metric['apsnr'][0])+' ')
+        f += (str(work.metric['apsnr'][1])+' ')
+        f += (str(work.metric['apsnr'][2])+' ')
+        f += (str(work.metric['msssim'][0])+' ')
+        f += (str(work.metric['encodetime'])+' ')
+        f += (str(work.metric['vmaf'])+' ')
+        f += (str(work.metric['decodetime'])+' ')
+        f += ('\n')
+        return f
     def execute(self, slot):
         try:
             self.slot = slot
@@ -178,6 +178,21 @@ class RDWork(Work):
                 if slot.get_file(slot.work_root+'/'+work.filename+'-'+str(work.quality)+file,'../runs/'+work.runid+'/'+work.set+'/') != 0:
                     rd_print(self.log,'Failed to copy back '+work.filename+'-'+str(work.quality)+file+', continuing anyway')
             self.parse(stdout, stderr)
+            filename = ('../runs/'+self.runid+'/'+work.set+'/'+self.filename+'-daala.out').encode('utf-8')
+            try:
+                with open(filename,'r') as f:
+                    lines = f.readlines()
+            except IOError:
+                lines = []
+            new_line = self.get_line(work)
+            for line in lines:
+                if new_line.split()[0] == line.split()[0]:
+                    rd_print(self.log, 'Data already exists in out file, not writing',self.get_name())
+            lines.append(self.get_line(work))
+            lines.sort(key=lambda x: int(x.split()[0]))
+            with open(filename,'w') as f:
+                for line in lines:
+                    f.write(line)
             self.slot = None
         except Exception as e:
             rd_print(self.log, 'Exception while running',self.get_name(),e)
