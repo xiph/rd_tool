@@ -202,7 +202,7 @@ class RDWork(Work):
     def cancel(self):
         if self.done:
             rd_print(self.log, 'Tried to cancel work item that was already complete')
-        else:
+        elif self.slot:
             self.slot.kill()
         self.failed = True
         self.done = True
