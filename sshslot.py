@@ -67,6 +67,7 @@ class Slot:
         return self.p.communicate()
     def start_work(self, work):
         self.work = work
+        work.record_start_time()
         work_thread = threading.Thread(target=self.execute, args=(work,))
         work_thread.daemon = True
         self.busy = True

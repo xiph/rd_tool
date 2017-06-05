@@ -1,6 +1,8 @@
 from utility import *
 import subprocess
 import sys
+import time
+from estimator import *
 
 # Finding files such as `this_(that)` requires `'` be placed on both
 # sides of the quote so the `()` are both captured. Files such as
@@ -41,6 +43,9 @@ class Run:
         self.rundir = None
         self.status = 'running'
         self.work_items = []
+        self.estimator = Estimator()
+        self.completed = 0
+        self.eta = 0
     def write_status(self):
         f = open(self.rundir+'/status.txt','w')
         f.write(self.status)
@@ -53,6 +58,7 @@ class Run:
     def finish(self):
         if self.log:
             self.log.close()
+        self.estimator.finish()
 
 class RDRun(Run):
     def reduce(self):
@@ -84,9 +90,18 @@ class Work:
         self.failed = False
         self.runid = ''
         self.slot = None
+        self.start_time = 0
+        self.run = None
     def cancel(self):
         self.failed = True
         self.done = True
+    def record_start_time(self):
+        self.start_time = time.perf_counter()
+    def update_estimator(self):
+        elapsed = time.perf_counter() - self.start_time
+        self.run.estimator.update(self, elapsed)
+    def estimate_time(self):
+        return self.run.estimator.get_estimate(self)
 
 class RDWork(Work):
     def __init__(self):
@@ -212,6 +227,7 @@ def create_rdwork(run, video_filenames):
     for filename in video_filenames:
         for q in sorted(run.quality, reverse = True):
             work = RDWork()
+            work.run = run
             work.log = run.log
             work.quality = q
             work.runid = run.runid
@@ -274,6 +290,7 @@ def create_abwork(run, video_filenames):
     for filename in video_filenames:
         for bpp in bits_per_pixel:
             work = ABWork()
+            work.run = run
             work.log = run.log
             work.bpp = bpp
             work.codec = run.codec

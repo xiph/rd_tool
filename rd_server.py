@@ -3,18 +3,20 @@
 import tornado.ioloop
 import tornado.web
 import os
-import codecs
 import json
 import argparse
 import sshslot
 import threading
 import time
 import awsremote
+from queue import PriorityQueue
 from work import *
 from utility import *
+from estimator import *
 
-video_sets_f = codecs.open('sets.json','r',encoding='utf-8')
+video_sets_f = open('sets.json','r',encoding='utf-8')
 video_sets = json.load(video_sets_f)
+video_sets_f.close()
 
 machines = []
 slots = []
@@ -81,7 +83,7 @@ class RunSubmitHandler(tornado.web.RequestHandler):
             pass
         if 'qualities' in info:
           if info['qualities'] != '':
-              run.quality = info['qualities'].split()
+              run.quality = list(map(int, info['qualities'].split()))
         if 'extra_options' in info:
           run.extra_options = info['extra_options']
         if 'save_encode' in info:
@@ -91,6 +93,10 @@ class RunSubmitHandler(tornado.web.RequestHandler):
         run.write_status()
         run_list.append(run)
         video_filenames = video_sets[run.set]['sources']
+        if 'collect_estimate_times' in info and info['collect_estimate_times']:
+            run.estimator = RDDataCollector(run, video_filenames)
+        else:
+            run.estimator = RDEstimator(run)
         run.work_items = create_rdwork(run, video_filenames)
         work_list.extend(run.work_items)
         if False:
@@ -118,10 +124,12 @@ class WorkListHandler(tornado.web.RequestHandler):
 class RunStatusHandler(tornado.web.RequestHandler):
     def get(self):
         self.set_header("Content-Type", "application/json")
+        current_time = time.perf_counter()
         runs = []
         for run in run_list:
             run_json = {}
             run_json['run_id'] = run.runid
+            run_json['eta'] = max(0, run.eta - current_time)
             run_json['completed'] = 0
             run_json['total'] = 0
             run_json['info'] = run.info
@@ -240,11 +248,20 @@ def machine_allocator():
             awsremote.stop_machines(args.awsgroup)
         time.sleep(60)
 
+class KeyedEntry:
+    def __init__(self, key, data):
+        self.key = key
+        self.data = data
+    def __lt__(self, other):
+        return self.key < other.key
+
 def scheduler_tick():
     global free_slots
     global work_list
     global run_list
     global work_done
+    active_slots = []
+    update_simulation = False
     max_retries = 5
     # look for completed work
     for slot in slots:
@@ -252,6 +269,9 @@ def scheduler_tick():
             if slot.work.failed == False:
                 slot.work.done = True
                 work_done.append(slot.work)
+                slot.work.run.completed += 1
+                slot.work.update_estimator()
+                update_simulation = True
                 rd_print(slot.work.log,slot.work.get_name(),'finished.')
             elif slot.work.retries < max_retries:
                 slot.work.retries += 1
@@ -261,9 +281,49 @@ def scheduler_tick():
             else:
                 slot.work.done = True
                 work_done.append(slot.work)
+                slot.work.run.completed += 1
                 rd_print(slot.work.log,slot.work.get_name(),'given up on.')
             slot.work = None
             free_slots.append(slot)
+        elif slot.work != None:
+            active_slots.append(slot)
+    # update the simulation to find etas for runs
+    if update_simulation:
+        sim_queue = PriorityQueue()
+        sim_completed = {}
+        for run in run_list:
+            sim_completed[id(run)] = run.completed
+        current_time = time.perf_counter()
+        # load in progress work into the queue
+        for slot in active_slots:
+            work = slot.work
+            remaining = max(0, work.estimate_time() - (current_time - work.start_time))
+            sim_queue.put(KeyedEntry(remaining, work))
+        sim_work_list = list(work_list)
+        # fill any free slots
+        for i in range(0, min(len(free_slots), len(sim_work_list))):
+            work = sim_work_list.pop(0)
+            sim_queue.put(KeyedEntry(work.estimate_time(), work))
+        # go through the simulation's main loop until there is no work to add to empty slots
+        while len(sim_work_list) != 0:
+            finished = sim_queue.get()
+            sim_time = finished.key
+            work = finished.data
+            run = work.run
+            sim_completed[id(run)] += 1
+            if sim_completed[id(run)] == len(run.work_items):
+                run.eta = current_time + sim_time
+            new_work = sim_work_list.pop(0)
+            sim_queue.put(KeyedEntry(sim_time + new_work.estimate_time(), new_work))
+        # go through the simulation's main loop until all the slots are empty
+        while not sim_queue.empty():
+            finished = sim_queue.get()
+            sim_time = finished.key
+            work = finished.data
+            run = work.run
+            sim_completed[id(run)] += 1
+            if sim_completed[id(run)] == len(run.work_items):
+                run.eta = current_time + sim_time
     # fill empty slots with new work
     if len(work_list) != 0:
         if len(free_slots) != 0:
