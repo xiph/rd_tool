@@ -93,7 +93,7 @@ class RunSubmitHandler(tornado.web.RequestHandler):
         run.write_status()
         run_list.append(run)
         video_filenames = video_sets[run.set]['sources']
-        if 'collect_estimate_times' in info and info['collect_estimate_times']:
+        if 'profile_set' in info and info['profile_set']:
             run.estimator = RDDataCollector(run, video_filenames)
         else:
             run.estimator = RDEstimator(run)

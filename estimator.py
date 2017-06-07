@@ -3,6 +3,7 @@ import os
 import threading
 import warnings
 from numpy.polynomial import polynomial as poly
+from utility import rd_print
 
 # A global lock used to preventing estimator data files from being read and written to a the same time.
 estimator_file_lock = threading.Lock()
@@ -69,7 +70,6 @@ class RDDataCollector(RDEstimator):
         super().__init__(run)
         collected_data = {}
         for filename in video_filenames:
-            #todo: use sorted array on the other side
             collected_data[filename] = {}
         self.collected_data = collected_data
         self.longest_work = 0.0
@@ -92,8 +92,12 @@ class RDDataCollector(RDEstimator):
         with estimator_file_lock:
             try:
                 os.makedirs(os.path.dirname(output_filename), exist_ok=True)
-                output_file = open(output_filename,'w',encoding='utf-8')
-                json.dump(data_json, output_file)
+                try:
+                    output_file = open(output_filename,'w',encoding='utf-8')
+                    json.dump(data_json, output_file)
+                except Exception as e:
+                    raise
+                finally:
+                    output_file.close()
             except Exception as e:
-                pass
-        output_file.close()
+                rd_print(run.log,'Failed to save estimator data on '+run.runid)
