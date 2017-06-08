@@ -49,7 +49,6 @@ class CancelHandler(tornado.web.RequestHandler):
         for work in work_list[:]:
             if work.runid == run_id:
                 work_list.remove(work)
-                work.cancel()
                 work_done.append(work)
             else:
                 print(work.runid)
