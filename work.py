@@ -137,7 +137,8 @@ class RDWork(Work):
             rd_print(self.log,'stderr:')
             rd_print(self.log,stderr.decode('utf-8'))
             self.failed = True
-    def get_line(self, work):
+    def get_line(self):
+        work = self
         f = ''
         f += (str(work.quality)+' ')
         f += (str(work.pixels)+' ')
@@ -178,25 +179,27 @@ class RDWork(Work):
                 if slot.get_file(slot.work_root+'/'+work.filename+'-'+str(work.quality)+file,'../runs/'+work.runid+'/'+work.set+'/') != 0:
                     rd_print(self.log,'Failed to copy back '+work.filename+'-'+str(work.quality)+file+', continuing anyway')
             self.parse(stdout, stderr)
-            filename = ('../runs/'+self.runid+'/'+work.set+'/'+self.filename+'-daala.out').encode('utf-8')
-            try:
-                with open(filename,'r') as f:
-                    lines = f.readlines()
-            except IOError:
-                lines = []
-            new_line = self.get_line(work)
-            for line in lines:
-                if new_line.split()[0] == line.split()[0]:
-                    rd_print(self.log, 'Data already exists in out file, not writing',self.get_name())
-            lines.append(self.get_line(work))
-            lines.sort(key=lambda x: int(x.split()[0]))
-            with open(filename,'w') as f:
-                for line in lines:
-                    f.write(line)
             self.slot = None
         except Exception as e:
             rd_print(self.log, 'Exception while running',self.get_name(),e)
             self.failed = True
+    def write_results(self):
+        filename = ('../runs/'+self.runid+'/'+self.set+'/'+self.filename+'-daala.out').encode('utf-8')
+        try:
+            with open(filename,'r') as f:
+                lines = f.readlines()
+        except IOError:
+            lines = []
+        new_line = self.get_line()
+        for line in lines:
+            if new_line.split()[0] == line.split()[0]:
+                rd_print(self.log, 'Data already exists in out file, not writing',self.get_name())
+                return
+        lines.append(new_line)
+        lines.sort(key=lambda x: int(x.split()[0]))
+        with open(filename,'w') as f:
+            for line in lines:
+                f.write(line)
     def get_name(self):
         return self.filename + ' with quality ' + str(self.quality) + ' for run ' + self.runid
     def cancel(self):

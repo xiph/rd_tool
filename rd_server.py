@@ -250,6 +250,11 @@ def scheduler_tick():
         if slot.busy == False and slot.work != None:
             if slot.work.failed == False:
                 slot.work.done = True
+                try:
+                    slot.work.write_results()
+                except Exception as e:
+                    rd_print(None, e)
+                    rd_print('Failed to write results for work item',slot.work.get_name())
                 work_done.append(slot.work)
                 rd_print(slot.work.log,slot.work.get_name(),'finished.')
             elif slot.work.retries < max_retries:
