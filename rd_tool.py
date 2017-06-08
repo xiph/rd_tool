@@ -75,7 +75,7 @@ else:
     run = Run(args.codec)
 run.runid = str(args.runid)
 if args.qualities:
-    run.quality = args.qualities
+    run.quality = list(map(int, args.qualities))
 run.set = args.set[0]
 run.bindir = args.bindir
 run.save_encode = args.save_encode
