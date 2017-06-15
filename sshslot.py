@@ -54,6 +54,31 @@ class Machine:
     def get_name(self):
         return self.host
 
+class SlotProcess:
+    def __init__(self, log):
+        self.p = None
+        self.can_kill = threading.Event()
+        self.log = log
+    def kill(self):
+        # wait until there is actually a process to kill
+        success = self.can_kill.wait(20)
+        if not success:
+            rd_print(self.log,"Waited too long for process to kill.")
+            if self.p:
+                rd_print(self.log,"Will try to kill anyway.")
+            else:
+                rd_print(self.log,"Aborting kill.")
+                return
+        try:
+            self.p.kill()
+        except Exception as e:
+            rd_print(self.log,"Couldn't cancel work item",e)
+    def communicate(self):
+        return self.p.communicate()
+    def shell(self, args):
+        self.p = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.can_kill.set()
+
 #the job slots we can fill
 class Slot:
     def __init__(self, machine, num, log):
@@ -63,17 +88,24 @@ class Slot:
         self.busy = False
         self.work = None
         self.log = log
+        self.can_kill = None
     def gather(self):
         return self.p.communicate()
     def start_work(self, work):
         self.work = work
-        work_thread = threading.Thread(target=self.execute, args=(work,))
+        work.slot = self
+        self.p = SlotProcess(self.log)
+        work_thread = threading.Thread(target=self.execute)
         work_thread.daemon = True
         self.busy = True
         work_thread.start()
-    def execute(self, work):
+    def clear_work(self):
+        if self.work:
+            self.work.slot = None
+            self.work = None
+    def execute(self):
         try:
-            self.work.execute(self)
+            self.work.execute()
         except Exception as e:
             rd_print(self.log, e)
             self.work.failed = True
@@ -102,14 +134,12 @@ class Slot:
                 rd_print(self.log,'Couldn\'t upload codec binary '+binary+'to '+self.machine.host)
                 raise RuntimeError('Couldn\'t upload codec binary')
     def start_shell(self, command):
-        self.p = subprocess.Popen(['ssh','-i','daala.pem','-p',self.machine.port,'-o',' StrictHostKeyChecking=no',
-            self.machine.user+'@'+self.machine.host,
-            command.encode("utf-8")], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        self.p.shell(['ssh','-i','daala.pem','-p',self.machine.port,'-o',' StrictHostKeyChecking=no', self.machine.user+'@'+self.machine.host,
+            command.encode("utf-8")])
     def kill(self):
-        try:
-            self.p.kill()
-        except Exception as e:
-            rd_print(self.log,"Couldn't cancel work item",e)
+        kill_thread = threading.Thread(target=self.p.kill)
+        kill_thread.daemon = True
+        kill_thread.start()
     def get_file(self, remote, local):
         return subprocess.call(['scp','-i','daala.pem','-P',self.machine.port,self.machine.user+'@'+self.machine.host+':'+shellquote(remote),local])
     def check_shell(self, command):

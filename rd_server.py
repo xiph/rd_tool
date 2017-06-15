@@ -10,6 +10,7 @@ import sshslot
 import threading
 import time
 import awsremote
+import queue
 from work import *
 from utility import *
 
@@ -23,6 +24,7 @@ work_list = []
 run_list = []
 work_done = []
 args = {}
+scheduler_tasks = queue.Queue()
 
 config = {
   'runs': '../runs/',
@@ -35,15 +37,30 @@ def lookup_run_by_id(run_id):
             return run
     return None
 
+class SchedulerTask:
+    def get(self):
+        pass
+
 class CancelHandler(tornado.web.RequestHandler):
     def get(self):
+        global scheduler_tasks
+        run_id = self.get_query_argument('run_id')
+        task = CancelTask()
+        task.run_id = run_id
+        scheduler_tasks.put(task)
+        self.write('ok')
+
+class CancelTask(SchedulerTask):
+    def __init__(self):
+        self.run_id = None
+    def run(self):
         global work_list
         global work_done
-        run_id = self.get_query_argument('run_id')
+        run_id = self.run_id
         rd_print(None,'Cancelling '+run_id)
         run = lookup_run_by_id(run_id)
         if not run:
-            self.write('run_id not found')
+            rd_print(None,'Could not cancel '+run_id+'. run_id not found.')
             return
         run.cancel()
         for work in work_list[:]:
@@ -51,15 +68,25 @@ class CancelHandler(tornado.web.RequestHandler):
                 work_list.remove(work)
                 work_done.append(work)
             else:
-                print(work.runid)
-        print(len(work_list))
-        self.write('ok')
+                rd_print(None, work.runid)
+        rd_print(None, len(work_list))
 
 class RunSubmitHandler(tornado.web.RequestHandler):
     def get(self):
+        global scheduler_tasks
+        run_id = self.get_query_argument('run_id')
+        task = SubmitTask()
+        task.run_id = run_id
+        scheduler_tasks.put(task)
+        self.write('ok')
+
+class SubmitTask(SchedulerTask):
+    def __init__(self):
+        self.run_id = None
+    def run(self):
         global work_list
         global run_list
-        run_id = self.get_query_argument('run_id')
+        run_id = self.run_id
         rundir = config['runs'] + '/' + run_id
         info_file_path = rundir + '/info.json'
         log_file_path = rundir + '/output.txt'
@@ -106,8 +133,6 @@ class RunSubmitHandler(tornado.web.RequestHandler):
                     abrun.work_items.extend(create_abwork(abrun, video_filenames))
                     work_list.extend(abrun.work_items)
                     pass
-        self.write(run_id)
-
 
 class WorkListHandler(tornado.web.RequestHandler):
     def get(self):
@@ -244,7 +269,16 @@ def scheduler_tick():
     global work_list
     global run_list
     global work_done
+    global scheduler_tasks
     max_retries = 5
+    # run queued up tasks
+    while not scheduler_tasks.empty():
+        task = scheduler_tasks.get()
+        try:
+            task.run()
+        except Exception as e:
+            rd_print(None,e)
+            rd_print(None,'Task failed.')
     # look for completed work
     for slot in slots:
         if slot.busy == False and slot.work != None:
@@ -257,7 +291,7 @@ def scheduler_tick():
                     rd_print('Failed to write results for work item',slot.work.get_name())
                 work_done.append(slot.work)
                 rd_print(slot.work.log,slot.work.get_name(),'finished.')
-            elif slot.work.retries < max_retries:
+            elif slot.work.retries < max_retries and not slot.work.run.cancelled:
                 slot.work.retries += 1
                 rd_print(slot.work.log,'Retrying work ',slot.work.get_name(),'...',slot.work.retries,'of',max_retries,'retries.')
                 slot.work.failed = False
@@ -266,7 +300,7 @@ def scheduler_tick():
                 slot.work.done = True
                 work_done.append(slot.work)
                 rd_print(slot.work.log,slot.work.get_name(),'given up on.')
-            slot.work = None
+            slot.clear_work()
             free_slots.append(slot)
     # fill empty slots with new work
     if len(work_list) != 0:
