@@ -24,6 +24,7 @@ def run(work_items, slots):
                     retries = retries + 1
                     print(get_time(),'Retrying work...',retries,'of',max_retries,'retries.')
                     work_items.append(slot.work)
+                slot.clear_work()
                 taken_slots.remove(slot)
                 free_slots.append(slot)
 

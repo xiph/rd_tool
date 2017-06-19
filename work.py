@@ -41,6 +41,7 @@ class Run:
         self.rundir = None
         self.status = 'running'
         self.work_items = []
+        self.cancelled = False
     def write_status(self):
         f = open(self.rundir+'/status.txt','w')
         f.write(self.status)
@@ -48,6 +49,7 @@ class Run:
     def cancel(self):
         self.status = 'cancelled'
         self.write_status()
+        self.cancelled = True
         for work in self.work_items:
             work.cancel()
     def finish(self):
@@ -78,6 +80,7 @@ class ABRun(Run):
 
 class Work:
     def __init__(self):
+        self.run = None
         self.log = None
         self.retries = 0
         self.done = False
@@ -159,9 +162,9 @@ class RDWork(Work):
         f += (str(work.metric['decodetime'])+' ')
         f += ('\n')
         return f
-    def execute(self, slot):
+    def execute(self):
         try:
-            self.slot = slot
+            slot = self.slot
             slot.setup(self.codec,self.bindir)
             work = self
             input_path = slot.machine.media_path+'/'+work.set+'/'+work.filename
@@ -179,7 +182,6 @@ class RDWork(Work):
                 if slot.get_file(slot.work_root+'/'+work.filename+'-'+str(work.quality)+file,'../runs/'+work.runid+'/'+work.set+'/') != 0:
                     rd_print(self.log,'Failed to copy back '+work.filename+'-'+str(work.quality)+file+', continuing anyway')
             self.parse(stdout, stderr)
-            self.slot = None
         except Exception as e:
             rd_print(self.log, 'Exception while running',self.get_name(),e)
             self.failed = True
@@ -203,18 +205,19 @@ class RDWork(Work):
     def get_name(self):
         return self.filename + ' with quality ' + str(self.quality) + ' for run ' + self.runid
     def cancel(self):
-        if self.done:
-            rd_print(self.log, 'Tried to cancel work item that was already complete')
-        elif self.slot:
+        if self.slot:
             self.slot.kill()
-        self.failed = True
-        self.done = True
+            self.failed = True
+        elif not self.done:
+            self.failed = True
+            self.done = True
 
 def create_rdwork(run, video_filenames):
     work_items = []
     for filename in video_filenames:
         for q in sorted(run.quality, reverse = True):
             work = RDWork()
+            work.run = run
             work.log = run.log
             work.quality = q
             work.runid = run.runid
@@ -234,7 +237,8 @@ class ABWork(Work):
     def __init__(self):
         super().__init__()
         self.failed = False
-    def execute(self, slot):
+    def execute(self):
+        slot = self.slot
         work = self
         input_path = slot.machine.media_path +'/' + work.set + '/' + work.filename
 
@@ -277,6 +281,7 @@ def create_abwork(run, video_filenames):
     for filename in video_filenames:
         for bpp in bits_per_pixel:
             work = ABWork()
+            work.run = run
             work.log = run.log
             work.bpp = bpp
             work.codec = run.codec
