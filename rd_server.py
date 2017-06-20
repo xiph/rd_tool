@@ -117,6 +117,7 @@ class SubmitTask(SchedulerTask):
         run.write_status()
         run_list.append(run)
         video_filenames = video_sets[run.set]['sources']
+        run.set_type = video_sets[run.set].get('type', 'undef')
         run.work_items = create_rdwork(run, video_filenames)
         work_list.extend(run.work_items)
         if False:
@@ -264,6 +265,12 @@ def machine_allocator():
             awsremote.stop_machines(args.awsgroup)
         time.sleep(60)
 
+def find_image_work(items, default = None):
+    for work in items:
+        if work.run.set_type == 'image':
+            return work
+    return default
+
 def scheduler_tick():
     global free_slots
     global work_list
@@ -306,7 +313,16 @@ def scheduler_tick():
     if len(work_list) != 0:
         if len(free_slots) != 0:
             slot = free_slots.pop()
-            work = work_list.pop(0)
+            work = work_list[0]
+            # search for image work if there is only one slot available
+            # allows prioritizing image runs without making scheduler the bottleneck
+            if len(free_slots) == 0:
+                try:
+                    work = find_image_work(work_list, work)
+                except Exception as e:
+                    rd_print(None, e)
+                    rd_print(None, 'Finding image work failed.')
+            work_list.remove(work)
             rd_print(work.log,'Encoding',work.get_name(),'on',slot.machine.host)
             slot.start_work(work)
     # find runs where all work has been completed
