@@ -806,6 +806,12 @@
       "vidyo1_720p_30fps_300f.y4m"
     ]
   },
+  "just-sintel": {
+    "type": "video",
+    "sources": [
+      "sintel_trailer_cut1.y4m"
+    ]
+  },
   "ntt-short-1": {
     "type": "video",
     "anchor": "vp9-anchor-ntt-short-1f",
