@@ -121,7 +121,7 @@ TIMEROUT=$BASENAME-enctime.out
 TIMERDECOUT=$BASENAME-dectime.out
 TIMER='time -v --output='"$TIMEROUT"
 TIMERDEC='time -v --output='"$TIMERDECOUT"
-AOMDEC_OPTS=
+AOMDEC_OPTS='-S'
 
 case $CODEC in
 daala)
