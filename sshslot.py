@@ -8,6 +8,7 @@ import time
 binaries = {
     'daala':['examples/encoder_example','examples/dump_video'],
     'x264': ['x264'],
+    'x264-rt': ['x264'],
     'x265': ['build/linux/x265'],
     'x265-rt': ['build/linux/x265'],
     'vp8': ['vpxenc','vpxdec'],
