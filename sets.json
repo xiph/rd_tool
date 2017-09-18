@@ -812,6 +812,16 @@
       "sintel_trailer_cut1.y4m"
     ]
   },
+  "cracks": {
+    "type": "video",
+    "sources": [
+      "Cracks_04689_1920x1080_60fps_8bit_mono_60f.y4m",
+      "Cracks_05650_1920x1080_60fps_8bit_mono_60f.y4m",
+      "Cracks_07323_1920x1080_60fps_8bit_mono_60f.y4m",
+      "Cracks_14112_1920x1080_60fps_8bit_mono_60f.y4m",
+      "Cracks_14999_1920x1080_60fps_8bit_mono_60f.y4m"
+    ]
+  },
   "ntt-short-1": {
     "type": "video",
     "anchor": "vp9-anchor-ntt-short-1f",
