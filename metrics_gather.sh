@@ -178,7 +178,7 @@ vp10-rt)
 av1)
   $($TIMER $AOMENC --codec=$CODEC --ivf --frame-parallel=0 --tile-columns=0 --auto-alt-ref=2 --cpu-used=0 --passes=2 --threads=1 --kf-min-dist=$KFINT --kf-max-dist=$KFINT --lag-in-frames=25 --end-usage=q --cq-level=$x --test-decode=fatal -o $BASENAME.ivf $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
   if $AOMDEC --help 2>&1 | grep output-bit-depth > /dev/null; then
-    AOMDEC_OPTS=--output-bit-depth=$DEPTH
+    AOMDEC_OPTS+=' --output-bit-depth=$DEPTH'
   fi
   $($TIMERDEC $AOMDEC --codec=$CODEC $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf)
   SIZE=$(stat -c %s $BASENAME.ivf)
@@ -186,7 +186,7 @@ av1)
 av1-rt)
   $($TIMER $AOMENC --codec=av1 --ivf --frame-parallel=0 --tile-columns=0 --cpu-used=0 --passes=1 --threads=1 --kf-min-dist=$KFINT --kf-max-dist=$KFINT --lag-in-frames=0 --end-usage=q --cq-level=$x --test-decode=fatal -o $BASENAME.ivf $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
   if $AOMDEC --help 2>&1 | grep output-bit-depth > /dev/null; then
-    AOMDEC_OPTS=--output-bit-depth=$DEPTH
+    AOMDEC_OPTS+=' --output-bit-depth=$DEPTH'
   fi
   $($TIMERDEC $AOMDEC --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf)
   SIZE=$(stat -c %s $BASENAME.ivf)
