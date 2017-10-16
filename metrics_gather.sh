@@ -7,6 +7,11 @@ export LD_LIBRARY_PATH=/usr/local/lib/
 #3GB RAM limit
 ulimit -v 3000000
 
+#enable core dumps (warning - uses up to 3GB per slot!)
+#requires /proc/sys/kernel/core_pattern = core
+#switch to using gdb at some point
+ulimit -S -c unlimited
+
 if [ -z "$WORK_ROOT" ]; then
   export WORK_ROOT=/home/ec2-user
 fi
@@ -203,6 +208,9 @@ thor-rt)
   SIZE=$(stat -c %s $BASENAME.thor)
   ;;
 esac
+
+#rename core dumps to prevent more than 1 per slot on disk
+mv core.* core || true
 
 "$DUMP_PSNR" -a "$FILE" "$BASENAME.y4m" > "$BASENAME-psnr.out"
 
