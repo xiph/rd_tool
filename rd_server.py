@@ -256,7 +256,11 @@ def machine_allocator_tick():
         slots = []
         free_slots = []
         #awsremote.stop_machines(args.awsgroup)
-    updated_machines = awsremote.get_machines(args.max_machines, args.awsgroup)
+    try:
+        updated_machines = awsremote.get_machines(args.max_machines, args.awsgroup)
+    except:
+        tornado.ioloop.IOLoop.current().call_later(60,machine_allocator_tick)
+        return
     print(updated_machines)
     for m in machines:
         matching = [um for um in updated_machines if um.host == m.host]
@@ -278,7 +282,7 @@ def machine_allocator_tick():
             slots.extend(new_slots)
             free_slots.extend(new_slots)
             machines.append(um)
-    tornado.ioloop.IOLoop.current().call_later(10,machine_allocator_tick)
+    tornado.ioloop.IOLoop.current().call_later(60,machine_allocator_tick)
 
 def find_image_work(items, default = None):
     for work in items:
