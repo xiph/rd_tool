@@ -175,6 +175,7 @@ class MachineUsageHandler(tornado.web.RequestHandler):
             machine_json['slots'] = slot_in_use
             machine_usage.append(machine_json)
         self.write(json.dumps(machine_usage))
+        self.set_header("Content-Type", "application/json")
 
 class FreeSlotsHandler(tornado.web.RequestHandler):
     def get(self):
@@ -203,7 +204,7 @@ def main():
     parser = argparse.ArgumentParser(description='Run AWCY scheduler daemon.')
     parser.add_argument('-machineconf')
     parser.add_argument('-port',default=4000)
-    parser.add_argument('-awsgroup', default='AOM Test')
+    parser.add_argument('-awsgroup', default='nonexistent_group')
     parser.add_argument('-max-machines', default=3, type=int)
     args = parser.parse_args()
     if args.machineconf:
@@ -230,40 +231,54 @@ def main():
     app.listen(args.port)
     ioloop = tornado.ioloop.IOLoop.current()
     if not args.machineconf:
-        machine_thread = threading.Thread(target=machine_allocator,daemon=True)
-        machine_thread.start()
+        machine_allocator_tick()
     scheduler_tick()
     ioloop.start()
 
-def machine_allocator():
+def machine_allocator_tick():
     global slots
     global free_slots
     global machines
     global work_list
     global run_list
-    while 1:
-        # start all machines if we don't have any but have work queued
-        if len(work_list) and not len(machines):
-            rd_print(None, "Starting machines.")
-            machines = []
-            while not machines:
-                machines = awsremote.get_machines(args.max_machines, args.awsgroup)
-            for machine in machines:
-                slots.extend(machine.get_slots())
-            free_slots.extend(slots)
-            time.sleep(60*10) # don't shut down for a tleast 10 minutes
-        # stop all machines if nothing is running
-        slots_busy = False
-        for slot in slots:
-            if slot.busy:
-                slots_busy = True
-        if not slots_busy and not len(work_list) and not len(run_list):
-            rd_print(None, "Stopping all machines.")
-            machines = []
-            slots = []
-            free_slots = []
-            awsremote.stop_machines(args.awsgroup)
-        time.sleep(60)
+    # start all machines if we don't have any but have work queued
+    if len(work_list) and not len(machines):
+        rd_print(None, "Starting machines.")
+        #awsgroup.start_machines(args.max_machines, args.awsgroup)
+    # stop all machines if nothing is running
+    slots_busy = False
+    for slot in slots:
+        if slot.busy:
+            slots_busy = True
+    if not slots_busy and not len(work_list) and not len(run_list):
+        rd_print(None, "Stopping all machines.")
+        machines = []
+        slots = []
+        free_slots = []
+        #awsremote.stop_machines(args.awsgroup)
+    updated_machines = awsremote.get_machines(args.max_machines, args.awsgroup)
+    print(updated_machines)
+    for m in machines:
+        matching = [um for um in updated_machines if um.host == m.host]
+        if len(matching) == 0:
+            rd_print(None, "Machine disappeared: " + m.get_name())
+            for s in m.slots:
+                slots.remove(s)
+                try:
+                    free_slots.remove(s)
+                except:
+                    pass
+            machines.remove(m)
+    for um in updated_machines:
+        print(um, um.get_name())
+        matching = [m for m in machines if m.host == um.host]
+        if len(matching) == 0:
+            rd_print(None, "Machine appeared: " + um.get_name())
+            new_slots = um.get_slots()
+            slots.extend(new_slots)
+            free_slots.extend(new_slots)
+            machines.append(um)
+    tornado.ioloop.IOLoop.current().call_later(10,machine_allocator_tick)
 
 def find_image_work(items, default = None):
     for work in items:
@@ -272,6 +287,7 @@ def find_image_work(items, default = None):
     return default
 
 def scheduler_tick():
+    global slots
     global free_slots
     global work_list
     global run_list

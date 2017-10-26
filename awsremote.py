@@ -60,17 +60,7 @@ def stop_machines(aws_group_name):
     except Exception as e:
         rd_print(None,e)
 
-def get_machines(num_instances_to_use, aws_group_name):
-    machines = []
-    #connect to AWS
-    ec2 = boto3.client('ec2');
-    autoscale = boto3.client('autoscaling');
-
-    #how many machines are currently running?
-    instances = get_instances_in_group(autoscale, aws_group_name)
-    num_instances = len(instances)
-    rd_print(None,'Number of instances online:', num_instances)
-
+def start_machines(num_instances_to_use, aws_group_name):
     #switch on more machines if we need them
     if num_instances < num_instances_to_use:
         rd_print(None,'Launching instances...')
@@ -86,47 +76,37 @@ def get_machines(num_instances_to_use, aws_group_name):
             rd_print(None,'Number of instances online:', num_instances)
             sleep(3)
 
+def get_machines(num_instances_to_use, aws_group_name):
+    machines = []
+    #connect to AWS
+    ec2 = boto3.client('ec2');
+    autoscale = boto3.client('autoscaling');
+
+    #how many machines are currently running?
+    instances = get_instances_in_group(autoscale, aws_group_name)
+    num_instances = len(instances)
+    rd_print(None,'Number of instances online:', num_instances)
+
     #grab instance IDs
     instance_ids = [i['InstanceId'] for i in instances]
     rd_print(None,"These instances are online:",instance_ids)
-
+    running_instance_ids = []
     for instance_id in instance_ids:
-        rd_print(None,'Waiting for instance',instance_id,'to boot...')
-        while True:
-            try:
-                state = state_name_of(instance_id, ec2)
-                if state == 'running':
-                    rd_print(None,instance_id, 'is running!')
-                    break
-                elif state == 'pending':
-                    pass
-                else:
-                    print(instance_id, 'in state',state,', not usable')
-                    return []
-            except IndexError:
-                print(instance_id, 'not queryable yet')
-                return []
-            sleep(3)
-    for instance_id in instance_ids:
-        rd_print(None,'Waiting for instance',instance_id,'to report OK...')
-        while True:
-            try:
-                if status_of(instance_id, ec2) == 'ok':
-                    rd_print(None,instance_id,'reported OK!')
-                    break
-            except IndexError:
-                rd_print(None,'Instance',instance_id,'disappeared!')
-                return []
-            sleep(3)
-    for instance_id in instance_ids:
+        try:
+            state = state_name_of(instance_id, ec2)
+            if state == 'running':
+                rd_print(None,instance_id, 'is running!')
+                running_instance_ids.append(instance_id)
+        except IndexError:
+            print(instance_id, 'not queryable yet')
+    ok_instance_ids = []
+    for instance_id in running_instance_ids:
+        try:
+            if status_of(instance_id, ec2) == 'ok':
+                rd_print(None,instance_id,'reported OK!')
+                ok_instance_ids.append(instance_id)
+        except IndexError:
+            rd_print(None,'Instance',instance_id,'disappeared!')
+    for instance_id in ok_instance_ids:
         machines.append(Machine(ip_address_of(instance_id, ec2)))
     return machines
-
-def get_slots(machines):
-    slots = []
-    #by doing the machines in the inner loop,
-    #we end up with heavy jobs split across machines better
-    for i in range(0,18):
-        for machine in machines:
-            slots.append(Slot(machine))
-    return slots
