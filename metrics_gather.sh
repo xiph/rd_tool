@@ -10,7 +10,7 @@ ulimit -v 3000000
 #enable core dumps (warning - uses up to 3GB per slot!)
 #requires /proc/sys/kernel/core_pattern = core
 #switch to using gdb at some point
-ulimit -S -c unlimited
+#ulimit -S -c unlimited
 
 if [ -z "$WORK_ROOT" ]; then
   export WORK_ROOT=/home/ec2-user
