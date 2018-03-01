@@ -24,7 +24,8 @@ quality_presets = {
     "av1": [20,32,43,55,63],
     "av1-rt": [20,32,43,55,63],
     "thor": list(range(7,43,3)),
-    "thor-rt": list(range(7,43,3))
+    "thor-rt": list(range(7,43,3)),
+    "rav1e": [20*4,32*4,43*4,55*4,63*4]
 }
 
 class Run:

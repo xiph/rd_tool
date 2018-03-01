@@ -40,6 +40,9 @@ fi
 if [ -z "$THORDEC" ]; then
   export THORDEC="$(dirname $THORENC)/Thordec"
 fi
+if [ -z "$RAV1E" ]; then
+  export RAV1E="$WORK_ROOT/$CODEC/target/release/rav1e"
+fi
 if [ -z "$ENCODER_EXAMPLE" ]; then
   export ENCODER_EXAMPLE="$WORK_ROOT/daala/examples/encoder_example"
 fi
@@ -139,7 +142,7 @@ daala)
   fi
   SIZE=$(stat -c %s "$BASENAME.ogv")
   #mv "00000000out-$BASENAME.y4m" "$BASENAME.y4m"
-  rm -f "00000000out-$BASENAME.y4m"
+  rm -f "00000000ouhttps://video-dev.slack.com/messages/C0XKDDH5Y/t-$BASENAME.y4m"
   "$DUMP_VIDEO" "$BASENAME.ogv" -o "$BASENAME.y4m"
   ;;
 x264)
@@ -206,6 +209,10 @@ thor)
 thor-rt)
   $($TIMER $THORENC -qp $x -cf "$THORDIR/config_LDB_high_efficiency.txt" -if $FILE -of $BASENAME.thor -rf $BASENAME.y4m $EXTRA_OPTIONS > $BASENAME-enc.out)
   SIZE=$(stat -c %s $BASENAME.thor)
+  ;;
+rav1e)
+  $($TIMER $RAV1E $FILE --quantizer $x -o $BASENAME.ivf -r $BASENAME.y4m $EXTRA_OPTIONS > $BASENAME-enc.out)
+  SIZE=$(stat -c %s $BASENAME.ivf)
   ;;
 esac
 
