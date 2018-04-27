@@ -23,6 +23,8 @@ if [ -z "$DAALATOOL_ROOT" ]; then
 fi
 export X264="$WORK_ROOT/x264/x264"
 export X265="$WORK_ROOT/x265/build/linux/x265"
+export XVCENC="$WORK_ROOT/xvc/build/app/xvcenc"
+export XVCDEC="$WORK_ROOT/xvc/build/app/xvcdec"
 export VPXENC="$WORK_ROOT/$CODEC/vpxenc"
 export VPXDEC="$WORK_ROOT/$CODEC/vpxdec"
 if [ -z "$AOMENC" ]; then
@@ -157,6 +159,12 @@ x265)
 x265-rt)
   $($TIMER $X265 -r $BASENAME.y4m --preset slow --tune zerolatency --rc-lookahead 0 --bframes 0 --frame-threads 1 --min-keyint $KFINT --keyint $KFINT --no-scenecut --crf=$x --csv $BASENAME.csv -o $BASENAME.x265 $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
   SIZE=$(stat -c %s $BASENAME.x265)
+  ;;
+xvc)
+  $($TIMER $XVCENC -max-keypic-distance $KFINT -qp $x -output-file $BASENAME.xvc $EXTRA_OPTIONS -input-file $FILE > "$BASENAME-stdout.txt")
+  $($TIMERDEC $XVCDEC -output-bitdepth $DEPTH -dither 0 -output-file $BASENAME.yuv -bitstream-file $BASENAME.xvc >> $BASENAME-stdout.txt)
+  $YUV2YUV4MPEG $BASENAME -w$WIDTH -h$HEIGHT -an0 -ad0 -c420mpeg2
+  SIZE=$(stat -c %s $BASENAME.xvc)
   ;;
 vp8)
   $($TIMER $VPXENC --codec=$CODEC --threads=1 --cpu-used=0 --kf-min-dist=$KFINT --kf-max-dist=$KFINT --end-usage=cq --target-bitrate=100000 --cq-level=$x -o $BASENAME.vpx $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
@@ -300,7 +308,7 @@ fi
 echo "$DECTIME"
 
 if [ ! "$NO_DELETE" ]; then
-  rm -f "$BASENAME.y4m" "$BASENAME.yuv" "$BASENAME.ogv" "$BASENAME.x264" "$BASENAME.x265" "$BASENAME.vpx" "$BASENAME.ivf" "$TIMEROUT" "$BASENAME-enc.out" "$BASENAME-psnr.out" "$BASENAME.thor" 2> /dev/null
+  rm -f "$BASENAME.y4m" "$BASENAME.yuv" "$BASENAME.ogv" "$BASENAME.x264" "$BASENAME.x265" "$BASENAME.xvc" "$BASENAME.vpx" "$BASENAME.ivf" "$TIMEROUT" "$BASENAME-enc.out" "$BASENAME-psnr.out" "$BASENAME.thor" 2> /dev/null
 fi
 
 rm -f pid

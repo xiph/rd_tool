@@ -11,6 +11,7 @@ binaries = {
     'x264-rt': ['x264'],
     'x265': ['build/linux/x265'],
     'x265-rt': ['build/linux/x265'],
+    'xvc': ['build/app/xvcenc', 'build/app/xvcdec'],
     'vp8': ['vpxenc','vpxdec'],
     'vp9': ['vpxenc','vpxdec'],
     'vp9-rt': ['vpxenc','vpxdec'],

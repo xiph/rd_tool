@@ -16,6 +16,7 @@ quality_presets = {
     "x264": list(range(1,52,5)),
     "x265": list(range(5,52,5)),
     "x265-rt": list(range(5,52,5)),
+    "xvc": [20,25,30,35,40],
     "vp8": list(range(12,64,5)),
     "vp9": [20,32,43,55,63],
     "vp9-rt": [20,32,43,55,63],
@@ -231,6 +232,8 @@ def create_rdwork(run, video_filenames):
                 work.no_delete = True
                 if work.codec == 'av1' or work.codec == 'av1-rt':
                     work.copy_back_files.append('.ivf')
+                elif work.codec == 'xvc':
+                    work.copy_back_files.append('.xvc')
             work_items.append(work)
     return work_items
 
