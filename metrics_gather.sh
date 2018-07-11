@@ -144,7 +144,7 @@ daala)
   fi
   SIZE=$(stat -c %s "$BASENAME.ogv")
   #mv "00000000out-$BASENAME.y4m" "$BASENAME.y4m"
-  rm -f "00000000ouhttps://video-dev.slack.com/messages/C0XKDDH5Y/t-$BASENAME.y4m"
+  rm -f "00000000out-$BASENAME.y4m"
   "$DUMP_VIDEO" "$BASENAME.ogv" -o "$BASENAME.y4m"
   ;;
 x264)
