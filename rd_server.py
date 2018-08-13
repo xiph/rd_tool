@@ -26,6 +26,9 @@ work_done = []
 args = {}
 scheduler_tasks = queue.Queue()
 
+# For a hack to fix a bug.
+lost_slots = []
+
 config = {
   'runs': '../runs/',
   'codecs': '../'
@@ -241,6 +244,7 @@ def machine_allocator_tick():
     global machines
     global work_list
     global run_list
+    global lost_slots
     # start all machines if we don't have any but have work queued
     if len(work_list) and not len(machines):
         rd_print(None, "Starting machines.")
@@ -267,6 +271,10 @@ def machine_allocator_tick():
         if len(matching) == 0:
             rd_print(None, "Machine disappeared: " + m.get_name())
             for s in m.slots:
+                # Hack to stop work from getting lost.
+                if s.busy == True
+                    rd_print(None, "Lost " + s.work.get_name())
+                    lost_slots.append(s);
                 slots.remove(s)
                 try:
                     free_slots.remove(s)
@@ -297,6 +305,7 @@ def scheduler_tick():
     global run_list
     global work_done
     global scheduler_tasks
+    global lost_slots
     max_retries = 5
     # run queued up tasks
     while not scheduler_tasks.empty():
@@ -329,6 +338,31 @@ def scheduler_tick():
                 rd_print(slot.work.log,slot.work.get_name(),'given up on.')
             slot.clear_work()
             free_slots.append(slot)
+    #BEGINHACK
+    lost_slots_cpy = list(lost_slots)
+    for slot in lost_slots_cpy:
+        if slot.busy == False and slot.work != None:
+            if slot.work.failed == False:
+                slot.work.done = True
+                try:
+                    slot.work.write_results()
+                except Exception as e:
+                    rd_print(None, e)
+                    rd_print('Failed to write results for work item',slot.work.get_name())
+                work_done.append(slot.work)
+                rd_print(slot.work.log,slot.work.get_name(),'finished.')
+            elif slot.work.retries < max_retries and not slot.work.run.cancelled:
+                slot.work.retries += 1
+                rd_print(slot.work.log,'Retrying work ',slot.work.get_name(),'...',slot.work.retries,'of',max_retries,'retries.')
+                slot.work.failed = False
+                work_list.insert(0, slot.work)
+            else:
+                slot.work.done = True
+                work_done.append(slot.work)
+                rd_print(slot.work.log,slot.work.get_name(),'given up on.')
+            slot.clear_work()
+            lost_slots.remove(slot)
+    #ENDHACK
     # fill empty slots with new work
     if len(work_list) != 0:
         if len(free_slots) != 0:
