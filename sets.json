@@ -66,6 +66,22 @@
       "touchdown_pass_1080p_100f.y4m"
     ]
   },
+  "jpeg-xl-d-420": {
+    "type": "image",
+    "sources": [
+      "APPLE_BasketBallScreen_2560x1440p_60_8b_sRGB_444_000.y4m",
+      "HUAWEI_ScMap_1280x720p_60_8b_sRGB_444_000.y4m",
+      "RICHTER_ScreenContent_4096x2160p_15_8b_sRGB_444_0001.y4m"
+    ]
+  },
+  "jpeg-xl-d-444": {
+    "type": "image",
+    "sources": [
+      "APPLE_BasketBallScreen_2560x1440p_60_8b_sRGB_444_000.y4m",
+      "HUAWEI_ScMap_1280x720p_60_8b_sRGB_444_000.y4m",
+      "RICHTER_ScreenContent_4096x2160p_15_8b_sRGB_444_0001.y4m"
+    ]
+  },
   "length-test-1": {
     "type": "video",
     "width": 1024,
