@@ -14,7 +14,11 @@ import queue
 from work import *
 from utility import *
 
-video_sets_f = codecs.open('sets.json','r',encoding='utf-8')
+config_dir = os.getenv("CONFIG_DIR", os.getcwd())
+runs_dst_dir = os.getenv("RUNS_DST_DIR", os.path.join(os.getcwd(), "../runs"))
+codecs_src_dir = os.getenv("CODECS_SRC_DIR", os.path.join(os.getcwd(), ".."))
+
+video_sets_f = codecs.open(os.path.join(config_dir, 'sets.json'),'r',encoding='utf-8')
 video_sets = json.load(video_sets_f)
 
 machines = []
@@ -27,8 +31,8 @@ args = {}
 scheduler_tasks = queue.Queue()
 
 config = {
-  'runs': '../runs/',
-  'codecs': '../'
+  'runs': runs_dst_dir,
+  'codecs': codecs_src_dir,
 }
 
 def lookup_run_by_id(run_id):
