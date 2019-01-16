@@ -173,8 +173,9 @@ class RDWork(Work):
             slot.setup(self.codec,self.bindir)
             work = self
             input_path = slot.machine.media_path+'/'+work.set+'/'+work.filename
+            daalatool_dir = os.getenv("DAALATOOL_DIR", os.path.join(slot.machine.work_root, "daalatool"))
             command = 'WORK_ROOT="'+slot.work_root+'" '
-            command += 'DAALATOOL_ROOT="'+slot.machine.work_root+'/daalatool" '
+            command += 'DAALATOOL_ROOT="'+daalatool_dir+'"'
             command += ' x="'+str(work.quality) + '" '
             command += 'CODEC="'+work.codec+'" '
             command += 'EXTRA_OPTIONS="'+work.extra_options + '" '
