@@ -12,6 +12,11 @@ import scheduler
 import sshslot
 from work import *
 
+
+config_dir = os.getenv("CONFIG_DIR", os.getcwd())
+runs_dst_dir = os.getenv("RUNS_DST_DIR", os.path.join(os.getcwd(), "../runs"))
+codecs_src_dir = os.getenv("CODECS_SRC_DIR", os.path.join(os.getcwd(), ".."))
+
 if 'DAALA_ROOT' not in os.environ:
     rd_print(None,"Please specify the DAALA_ROOT environment variable to use this tool.")
     sys.exit(1)
@@ -26,7 +31,7 @@ if 'EXTRA_OPTIONS' in os.environ:
 work_items = []
 
 #load all the different sets and their filenames
-video_sets_f = codecs.open('sets.json','r',encoding='utf-8')
+video_sets_f = codecs.open(os.path.join(config_dir, 'sets.json'),'r',encoding='utf-8')
 video_sets = json.load(video_sets_f)
 
 parser = argparse.ArgumentParser(description='Collect RD curve data.')

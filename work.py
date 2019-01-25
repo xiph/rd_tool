@@ -1,6 +1,9 @@
 from utility import *
+import os
 import subprocess
 import sys
+
+runs_dst_dir = os.getenv("RUNS_DST_DIR", os.path.join(os.getcwd(), "../runs"))
 
 # Finding files such as `this_(that)` requires `'` be placed on both
 # sides of the quote so the `()` are both captured. Files such as
@@ -170,8 +173,9 @@ class RDWork(Work):
             slot.setup(self.codec,self.bindir)
             work = self
             input_path = slot.machine.media_path+'/'+work.set+'/'+work.filename
+            daalatool_dir = os.getenv("DAALATOOL_DIR", os.path.join(slot.machine.work_root, "daalatool"))
             command = 'WORK_ROOT="'+slot.work_root+'" '
-            command += 'DAALATOOL_ROOT="'+slot.machine.work_root+'/daalatool" '
+            command += 'DAALATOOL_ROOT="'+daalatool_dir+'"'
             command += ' x="'+str(work.quality) + '" '
             command += 'CODEC="'+work.codec+'" '
             command += 'EXTRA_OPTIONS="'+work.extra_options + '" '
@@ -181,14 +185,14 @@ class RDWork(Work):
             slot.start_shell(command)
             (stdout, stderr) = slot.gather()
             for file in self.copy_back_files:
-                if slot.get_file(slot.work_root+'/'+work.filename+'-'+str(work.quality)+file,'../runs/'+work.runid+'/'+work.set+'/') != 0:
+                if slot.get_file(slot.work_root+'/'+work.filename+'-'+str(work.quality)+file,runs_dst_dir+'/'+work.runid+'/'+work.set+'/') != 0:
                     rd_print(self.log,'Failed to copy back '+work.filename+'-'+str(work.quality)+file+', continuing anyway')
             self.parse(stdout, stderr)
         except Exception as e:
             rd_print(self.log, 'Exception while running',self.get_name(),e)
             self.failed = True
     def write_results(self):
-        filename = ('../runs/'+self.runid+'/'+self.set+'/'+self.filename+'-daala.out').encode('utf-8')
+        filename = (runs_dst_dir+'/'+self.runid+'/'+self.set+'/'+self.filename+'-daala.out').encode('utf-8')
         try:
             with open(filename,'r') as f:
                 lines = f.readlines()
@@ -260,8 +264,8 @@ class ABWork(Work):
             middle = self.runid + '/' + work.set + '/bpp_' + str(self.bpp)
 
             remote_file = slot.work_root+'/runs/' + middle + '/' + shellquote(filename)
-            local_folder = '../runs/' + middle
-            local_file = '../runs/' + middle + '/' + filename
+            local_folder = runs_dst_dir + '/' + middle
+            local_file = runs_dst_dir + '/' + middle + '/' + filename
 
             subprocess.Popen(['mkdir', '--parents', local_folder])
             slot.get_file(remote_file, local_file)
