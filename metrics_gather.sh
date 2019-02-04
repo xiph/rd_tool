@@ -5,7 +5,7 @@ set -e
 export LD_LIBRARY_PATH=/usr/local/lib/
 
 #3GB RAM limit
-ulimit -v 3000000
+#ulimit -v 3000000
 
 #enable core dumps (warning - uses up to 3GB per slot!)
 #requires /proc/sys/kernel/core_pattern = core
@@ -45,11 +45,15 @@ fi
 if [ -z "$RAV1E" ]; then
   export RAV1E="$WORK_ROOT/$CODEC/target/release/rav1e"
 fi
+if [ -z "$SVTAV1" ]; then
+  export SVTAV1="$WORK_ROOT/$CODEC/Bin/Release/SvtAv1EncApp"
+fi
 if [ -z "$ENCODER_EXAMPLE" ]; then
   export ENCODER_EXAMPLE="$WORK_ROOT/daala/examples/encoder_example"
 fi
 export YUV2YUV4MPEG="$DAALATOOL_ROOT/tools/yuv2yuv4mpeg"
-
+export Y4M2YUV="$DAALATOOL_ROOT/tools/y4m2yuv"
+export 
 if [ -z "$DUMP_VIDEO" ]; then
   export DUMP_VIDEO="$WORK_ROOT/daala/examples/dump_video"
 fi
@@ -220,6 +224,13 @@ thor-rt)
   ;;
 rav1e)
   $($TIMER $RAV1E $FILE --quantizer $x -o $BASENAME.ivf -r $BASENAME.y4m $EXTRA_OPTIONS > $BASENAME-enc.out)
+  SIZE=$(stat -c %s $BASENAME.ivf)
+  ;;
+svt-av1)
+  $Y4M2YUV $FILE -o $BASENAME-in.y4m
+  $($TIMER $SVTAV1 -i $FILE -q $x -o $BASENAME.yuv -b $BASENAME.ivf -w $WIDTH -h $HEIGHT $EXTRA_OPTIONS > $BASENAME-enc.out 2>&1)
+  rm $BASENAME-in.y4m
+  $YUV2YUV4MPEG $BASENAME -w$WIDTH -h$HEIGHT
   SIZE=$(stat -c %s $BASENAME.ivf)
   ;;
 esac
