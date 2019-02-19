@@ -222,7 +222,7 @@ thor-rt)
   SIZE=$(stat -c %s $BASENAME.thor)
   ;;
 rav1e)
-  $($TIMER $RAV1E $FILE --quantizer $x -o $BASENAME.ivf -r $BASENAME.y4m $EXTRA_OPTIONS > $BASENAME-enc.out)
+  $($TIMER $RAV1E $FILE --quantizer $x -o $BASENAME.ivf -r $BASENAME.y4m --threads 1 $EXTRA_OPTIONS > $BASENAME-enc.out)
   SIZE=$(stat -c %s $BASENAME.ivf)
   ;;
 svt-av1)
