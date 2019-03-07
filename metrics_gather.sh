@@ -226,10 +226,9 @@ rav1e)
   SIZE=$(stat -c %s $BASENAME.ivf)
   ;;
 svt-av1)
-  $Y4M2YUV $FILE -o $BASENAME-in.yuv > /dev/null
-  $($TIMER $SVTAV1 -i $BASENAME-in.yuv -enc-mode 0 -lp 1 -q $x -o $BASENAME.yuv -b $BASENAME.ivf -w $WIDTH -h $HEIGHT -intra-period $KFINT $EXTRA_OPTIONS > $BASENAME-enc.out 2>&1)
-  rm $BASENAME-in.yuv
+  $($TIMER $SVTAV1 -i $FILE -enc-mode 0 -lp 1 -q $x -o $BASENAME.yuv -b $BASENAME.ivf -w $WIDTH -h $HEIGHT -intra-period $KFINT $EXTRA_OPTIONS > $BASENAME-enc.out 2>&1)
   $YUV2YUV4MPEG $BASENAME -w$WIDTH -h$HEIGHT > /dev/null
+  rm $BASENAME.yuv
   SIZE=$(stat -c %s $BASENAME.ivf)
   ;;
 esac
