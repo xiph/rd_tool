@@ -226,7 +226,8 @@ rav1e)
   SIZE=$(stat -c %s $BASENAME.ivf)
   ;;
 svt-av1)
-  $($TIMER $SVTAV1 -i $FILE -enc-mode 0 -lp 1 -q $x -o $BASENAME.yuv -b $BASENAME.ivf -w $WIDTH -h $HEIGHT -intra-period $KFINT $EXTRA_OPTIONS > $BASENAME-enc.out 2>&1)
+  # svt-av1 has a max intra period of 255
+  $($TIMER $SVTAV1 -i $FILE -enc-mode 0 -lp 1 -q $x -o $BASENAME.yuv -b $BASENAME.ivf -w $WIDTH -h $HEIGHT -intra-period 255 $EXTRA_OPTIONS > $BASENAME-enc.out 2>&1)
   $YUV2YUV4MPEG $BASENAME -w$WIDTH -h$HEIGHT > /dev/null
   rm $BASENAME.yuv
   SIZE=$(stat -c %s $BASENAME.ivf)
