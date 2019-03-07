@@ -24,7 +24,7 @@ binaries = {
     'thor': ['build/Thorenc','build/Thordec','config_HDB16_high_efficiency.txt','config_LDB_high_efficiency.txt'],
     'thor-rt': ['build/Thorenc','build/Thordec','config_HDB16_high_efficiency.txt','config_LDB_high_efficiency.txt'],
     'rav1e': ['target/release/rav1e'],
-    'svt-av1': ['Bin/Release/SvtAv1EncApp']
+    'svt-av1': ['Bin/Release/SvtAv1EncApp', 'Bin/Release/libSvtAv1Enc.so']
 }
 
 # Finding files such as `this_(that)` requires `'` be placed on both
