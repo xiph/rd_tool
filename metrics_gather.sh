@@ -5,7 +5,7 @@ set -e
 export LD_LIBRARY_PATH=/usr/local/lib/
 
 #3GB RAM limit
-#ulimit -v 3000000
+ulimit -m 3000000
 
 #enable core dumps (warning - uses up to 3GB per slot!)
 #requires /proc/sys/kernel/core_pattern = core
