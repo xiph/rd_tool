@@ -78,7 +78,7 @@ if [ -z "$DUMP_MSSSIM" ]; then
 fi
 
 if [ -z "$DUMP_CIEDE" ]; then
-  export DUMP_CIEDE="$DAALATOOL_ROOT/tools/dump_ciede2000.py"
+  export DUMP_CIEDE="$DAALATOOL_ROOT/../dump_ciede2000/target/release/dump_ciede2000"
 fi
 
 if [ -z "$VMAF_ROOT" ]; then
@@ -262,14 +262,9 @@ FASTSSIM=$("$DUMP_FASTSSIM" -c "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total
 
 echo "$FASTSSIM"
 
-CIEDE=$("$DUMP_CIEDE" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total) || true
+CIEDE=$("$DUMP_CIEDE" --threads 1 "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 
-if [ -z "$CIEDE" ]; then
-    # CIEDE2000 doesn't yet support 4:4:4
-    echo Total: 0
-else
-    echo "$CIEDE"
-fi
+echo "$CIEDE"
 
 echo "$APSNR"
 
