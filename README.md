@@ -21,7 +21,8 @@ Node dependencies
 Individual build machines do not need Python, but do need bash. Each machine
 should be configured with a user and work_root (such as that user's home
 directory). This work directory must be populated with a folder called
-daalatool, which needs to contain a checkout of Daala git with the tools built:
+daalatool and dump\_ciede2000, which needs to contain a checkout of Daala
+and dump\_ciede git with the tools built:
 
 ```
 sudo apt install autoconf libogg-dev libjpeg-dev libpng-dev check python3-numpy python3-scipy
@@ -33,6 +34,27 @@ cd daalatool
 ./autogen.sh
 ./configure --disable-player
 make tools -j4
+```
+
+For dump\_ciede2000, exit the daalatool directory
+
+```
+cd ../
+```
+
+Install rust if you haven't already. You only need rust to compile the binary
+and don't need it on the individual machines.
+
+```
+curl -sf -L https://static.rust-lang.org/rustup.sh | sh
+```
+
+Build dump_ciede2000.
+
+```
+git clone https://github.com/KyleSiefring/dump_ciede2000
+cd dump_ciede2000
+cargo build --release
 ```
 
 rd_tool will automatically create one slot directory per core, and upload
