@@ -281,9 +281,6 @@ fi
 echo "$ENCTIME"
 
 if [ -f "$VMAFOSSEXEC" ]; then
-  rm -f ref dis
-  mkfifo ref
-  mkfifo dis
   FORMAT=yuv420p
   case $CHROMA in
       420p10)
@@ -296,10 +293,10 @@ if [ -f "$VMAFOSSEXEC" ]; then
           FORMAT=yuv444p
           ;;
   esac
-  "$DAALATOOL_ROOT/tools/y4m2yuv" "$FILE" -o ref &
-  "$DAALATOOL_ROOT/tools/y4m2yuv" "$BASENAME.y4m" -o dis &
-  VMAF=$("$VMAFOSSEXEC" $FORMAT $WIDTH $HEIGHT ref dis "$VMAF_ROOT/resource/model/nflxall_vmafv4.pkl" | tail -n 1)
-
+  "$DAALATOOL_ROOT/tools/y4m2yuv" "$FILE" -o ref
+  "$DAALATOOL_ROOT/tools/y4m2yuv" "$BASENAME.y4m" -o dis
+  VMAF=$("$VMAFOSSEXEC" $FORMAT $WIDTH $HEIGHT ref dis "$VMAF_ROOT/model/vmaf_v0.6.1.pkl" --thread 1 | tail -n 1)
+  rm -f ref dis
   echo "$VMAF"
 else
   echo 0 0 0 0

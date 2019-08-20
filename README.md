@@ -57,6 +57,20 @@ cd dump_ciede2000
 cargo build --release
 ```
 
+Exit that directory
+
+```
+cd ../
+```
+
+Checkout and build vmaf (Optional)
+
+```
+git clone https://github.com/Netflix/vmaf.git
+cd vmaf
+cd ptools; make; cd ../wrapper; make; cd ..;
+```
+
 rd_tool will automatically create one slot directory per core, and upload
 codec binaries into that directory.
 
