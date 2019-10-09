@@ -3169,5 +3169,37 @@
       "虎丘庙会.y4m",
       "隅田公園_SUMIDA_park.y4m"
     ]
-  }
+  },
+  "derf-ntsc-422": {
+    "type": "video",
+    "sources": [
+      "flower_garden_422_ntsc.y4m",
+      "galleon_422_ntsc.y4m",
+      "mobile_calendar_422_ntsc.y4m",
+      "washdc_422_ntsc.y4m",
+      "football_422_ntsc.y4m",
+      "intros_422_ntsc.y4m",
+      "vtc1nw_422_ntsc.y4m"
+    ]
+  },
+  "derf-720p-422": {
+    "type": "video",
+    "framerate": 50,
+    "sources": [
+      "ducks_take_off_422_720p50.y4m",
+      "in_to_tree_422_720p50.y4m",
+      "old_town_cross_422_720p50.y4m",
+      "park_joy_422_720p50.y4m"
+    ]
+  },
+  "derf-720p-444": {
+    "type": "video",
+    "framerate": 50,
+    "sources": [
+      "ducks_take_off_444_720p50.y4m",
+      "in_to_tree_444_720p50.y4m",
+      "old_town_cross_444_720p50.y4m",
+      "park_joy_444_720p50.y4m"
+    ]
+  },
 }
