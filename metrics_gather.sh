@@ -236,7 +236,7 @@ svt-av1)
 esac
 
 #rename core dumps to prevent more than 1 per slot on disk
-mv core.* core || true
+mv core.* core 2>/dev/null || true
 
 "$DUMP_PSNR" -a "$FILE" "$BASENAME.y4m" > "$BASENAME-psnr.out"
 
