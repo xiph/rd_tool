@@ -93,6 +93,10 @@ if [ -z "$YUV2YUV4MPEG" ]; then
   export YUV2YUV4MPEG="$DAALATOOL_ROOT/tools/yuv2yuv4mpeg"
 fi
 
+if [ -z "$DAV1D" ]; then
+  export DAV1D="$DAALATOOL_ROOT/../dav1d/build/tools/dav1d"
+fi
+
 if [ -z "$CODEC" ]; then
   export CODEC=daala
 fi
@@ -222,7 +226,8 @@ thor-rt)
   SIZE=$(stat -c %s $BASENAME.thor)
   ;;
 rav1e)
-  $($TIMER $RAV1E $FILE --quantizer $x -o $BASENAME.ivf -r $BASENAME.y4m --threads 1 $EXTRA_OPTIONS > $BASENAME-enc.out)
+  $($TIMER $RAV1E $FILE --quantizer $x -o $BASENAME.ivf -r $BASENAME-rec.y4m --threads 1 $EXTRA_OPTIONS > $BASENAME-enc.out)
+  $DAV1D -i $BASENAME.ivf -o $BASENAME.y4m
   SIZE=$(stat -c %s $BASENAME.ivf)
   ;;
 svt-av1)
@@ -315,8 +320,3 @@ if [ ! "$NO_DELETE" ]; then
 fi
 
 rm -f pid
-
-
-
-
-
