@@ -20,9 +20,11 @@ Node dependencies
 
 Individual build machines do not need Python, but do need bash. Each machine
 should be configured with a user and work_root (such as that user's home
-directory). This work directory must be populated with a folder called
-daalatool and dump\_ciede2000, which needs to contain a checkout of Daala
-and dump\_ciede git with the tools built:
+directory). This work directory must be populated with folders called
+daalatool, dump\_ciede2000, and dav1d, which need to contain checkouts of
+Daala, dump\_ciede and dav1d git repositories, each with tools built.
+
+To compile Daala tools:
 
 ```
 sudo apt install autoconf libogg-dev libjpeg-dev libpng-dev check python3-numpy python3-scipy
@@ -36,11 +38,21 @@ cd daalatool
 make tools -j4
 ```
 
-For dump\_ciede2000, exit the daalatool directory
+For dav1d:
 
 ```
-cd ../
+sudo apt install meson
 ```
+
+```
+git clone https://code.videolan.org/videolan/dav1d.git
+cd dav1d
+mkdir build && cd build
+meson ..
+ninja
+```
+
+For dump\_ciede2000:
 
 Install rust if you haven't already. You only need rust to compile the binary
 and don't need it on the individual machines.
