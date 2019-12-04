@@ -232,6 +232,9 @@ rav1e)
   else
     $($TIMERDEC $AOMDEC --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf)
   fi
+  "$Y4M2YUV" "$BASENAME-rec.y4m" -o rec.yuv
+  "$Y4M2YUV" "$BASENAME.y4m" -o enc.yuv
+  cmp --silent rec.yuv enc.yuv || (echo "Reconstruction differs from output!"; exit 1)
   SIZE=$(stat -c %s $BASENAME.ivf)
   ;;
 svt-av1)
@@ -302,8 +305,8 @@ if [ -f "$VMAFOSSEXEC" ]; then
           FORMAT=yuv444p
           ;;
   esac
-  "$DAALATOOL_ROOT/tools/y4m2yuv" "$FILE" -o ref
-  "$DAALATOOL_ROOT/tools/y4m2yuv" "$BASENAME.y4m" -o dis
+  "$Y4M2YUV" "$FILE" -o ref
+  "$Y4M2YUV" "$BASENAME.y4m" -o dis
   VMAF=$("$VMAFOSSEXEC" $FORMAT $WIDTH $HEIGHT ref dis "$VMAF_ROOT/model/vmaf_v0.6.1.pkl" --thread 1 | tail -n 1)
   rm -f ref dis
   echo "$VMAF"
