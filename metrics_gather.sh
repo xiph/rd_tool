@@ -227,7 +227,11 @@ thor-rt)
   ;;
 rav1e)
   $($TIMER $RAV1E $FILE --quantizer $x -o $BASENAME.ivf -r $BASENAME-rec.y4m --threads 1 $EXTRA_OPTIONS > $BASENAME-enc.out)
-  $DAV1D -i $BASENAME.ivf -o $BASENAME.y4m
+  if [ -f "$DAV1D" ]; then
+    $($TIMERDEC $DAV1D -i $BASENAME.ivf -o $BASENAME.y4m)
+  else
+    $($TIMERDEC $AOMDEC --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf)
+  fi
   SIZE=$(stat -c %s $BASENAME.ivf)
   ;;
 svt-av1)
