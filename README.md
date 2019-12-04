@@ -21,8 +21,8 @@ Node dependencies
 Individual build machines do not need Python, but do need bash. Each machine
 should be configured with a user and work_root (such as that user's home
 directory). This work directory must be populated with folders called
-daalatool, dump\_ciede2000, and dav1d, which need to contain checkouts of
-Daala, dump\_ciede and dav1d git repositories, each with tools built.
+daalatool, dump\_ciede2000, and, optionally, dav1d and vmaf, which need to
+contain checkouts of their respective git repositories, each with tools built.
 
 To compile Daala tools:
 
@@ -36,20 +36,6 @@ cd daalatool
 ./autogen.sh
 ./configure --disable-player
 make tools -j4
-```
-
-For dav1d:
-
-```
-sudo apt install meson
-```
-
-```
-git clone https://code.videolan.org/videolan/dav1d.git
-cd dav1d
-mkdir build && cd build
-meson ..
-ninja
 ```
 
 For dump\_ciede2000:
@@ -75,7 +61,21 @@ Exit that directory
 cd ../
 ```
 
-Checkout and build vmaf (Optional)
+For dav1d (optional):
+
+```
+sudo apt install meson
+```
+
+```
+git clone https://code.videolan.org/videolan/dav1d.git
+cd dav1d
+mkdir build && cd build
+meson ..
+ninja
+```
+
+For vmaf (optional):
 
 ```
 git clone https://github.com/Netflix/vmaf.git
