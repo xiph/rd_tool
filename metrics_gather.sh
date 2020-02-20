@@ -228,13 +228,13 @@ thor-rt)
 rav1e)
   $($TIMER $RAV1E $FILE --quantizer $x -o $BASENAME.ivf -r $BASENAME-rec.y4m --threads 1 $EXTRA_OPTIONS > $BASENAME-enc.out)
   if [ -f "$DAV1D" ]; then
-    $($TIMERDEC $DAV1D -i $BASENAME.ivf -o $BASENAME.y4m)
+    $($TIMERDEC $DAV1D -i $BASENAME.ivf -o $BASENAME.y4m) || (echo "Corrupt bitstream detected!"; exit 98)
   else
-    $($TIMERDEC $AOMDEC --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf)
+    $($TIMERDEC $AOMDEC --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf) || (echo "Corrupt bitstream detected!"; exit 98)
   fi
   "$Y4M2YUV" "$BASENAME-rec.y4m" -o rec.yuv
   "$Y4M2YUV" "$BASENAME.y4m" -o enc.yuv
-  cmp --silent rec.yuv enc.yuv || (echo "Reconstruction differs from output!"; exit 1)
+  cmp --silent rec.yuv enc.yuv || (echo "Reconstruction differs from output!"; exit 98)
   SIZE=$(stat -c %s $BASENAME.ivf)
   ;;
 svt-av1)
