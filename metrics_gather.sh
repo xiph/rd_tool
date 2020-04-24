@@ -93,10 +93,6 @@ if [ -z "$YUV2YUV4MPEG" ]; then
   export YUV2YUV4MPEG="$DAALATOOL_ROOT/tools/yuv2yuv4mpeg"
 fi
 
-if [ -z "$DAV1D" ]; then
-  export DAV1D="$DAALATOOL_ROOT/../dav1d/build/tools/dav1d"
-fi
-
 if [ -z "$CODEC" ]; then
   export CODEC=daala
 fi
@@ -227,10 +223,10 @@ thor-rt)
   ;;
 rav1e)
   $($TIMER $RAV1E $FILE --quantizer $x -o $BASENAME.ivf -r $BASENAME-rec.y4m --threads 1 $EXTRA_OPTIONS > $BASENAME-enc.out)
-  if [ -f "$DAV1D" ]; then
-    $($TIMERDEC $DAV1D -q -i $BASENAME.ivf -o $BASENAME.y4m) || (echo "Corrupt bitstream detected!"; exit 98)
+  if hash dav1d 2>/dev/null; then
+    $($TIMERDEC dav1d -q -i $BASENAME.ivf -o $BASENAME.y4m) || (echo "Corrupt bitstream detected!"; exit 98)
   else
-    $($TIMERDEC $AOMDEC --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf) || (echo "Corrupt bitstream detected!"; exit 98)
+    $($TIMERDEC aomdec --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf) || (echo "Corrupt bitstream detected!"; exit 98)
   fi
   "$Y4M2YUV" "$BASENAME-rec.y4m" -o rec.yuv
   "$Y4M2YUV" "$BASENAME.y4m" -o enc.yuv
