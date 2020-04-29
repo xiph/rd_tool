@@ -322,7 +322,7 @@ def scheduler_tick():
                     rd_print('Failed to write results for work item',slot.work.get_name())
                 work_done.append(slot.work)
                 rd_print(slot.work.log,slot.work.get_name(),'finished.')
-            elif slot.work.retries < max_retries and not slot.work.run.cancelled:
+            elif slot.work.retries < max_retries and not slot.work.run.cancelled and not slot.p.returncode == 98:
                 slot.work.retries += 1
                 rd_print(slot.work.log,'Retrying work ',slot.work.get_name(),'...',slot.work.retries,'of',max_retries,'retries.')
                 slot.work.failed = False
