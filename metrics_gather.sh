@@ -219,7 +219,7 @@ thor)
   SIZE=$(stat -c %s $BASENAME.thor)
   # using reconstruction is currently broken with HDB
   $THORDEC $BASENAME.thor $BASENAME.yuv > "$BASENAME-stdout.txt"
-  $YUV2YUV4MPEG $BASENAME -an 1 -ad 1 -w$WIDTH -h$HEIGHT
+  $YUV2YUV4MPEG $BASENAME -an1 -ad1 -w$WIDTH -h$HEIGHT
   ;;
 thor-rt)
   $($TIMER $THORENC -qp $x -cf "$THORDIR/config_LDB_high_efficiency.txt" -if $FILE -of $BASENAME.thor -rf $BASENAME.y4m $EXTRA_OPTIONS > $BASENAME-enc.out)
@@ -241,7 +241,7 @@ svt-av1)
   export LD_LIBRARY_PATH=$(dirname "$SVTAV1")
   # svt-av1 has a max intra period of 255
   $($TIMER $SVTAV1 -i $FILE -enc-mode 0 -lp 1 -q $x -o $BASENAME.yuv -b $BASENAME.ivf -w $WIDTH -h $HEIGHT -intra-period 255 $EXTRA_OPTIONS > $BASENAME-enc.out 2>&1)
-  $YUV2YUV4MPEG $BASENAME -an 1 -ad 1 -w$WIDTH -h$HEIGHT > /dev/null
+  $YUV2YUV4MPEG $BASENAME -an1 -ad1 -w$WIDTH -h$HEIGHT > /dev/null
   rm $BASENAME.yuv
   SIZE=$(stat -c %s $BASENAME.ivf)
   ;;
