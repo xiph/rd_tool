@@ -225,7 +225,7 @@ rav1e)
   $($TIMER $RAV1E $FILE --quantizer $x -o $BASENAME.ivf -r $BASENAME-rec.y4m --threads 1 $EXTRA_OPTIONS > $BASENAME-enc.out)
   if hash dav1d 2>/dev/null; then
     $($TIMERDEC dav1d -q -i $BASENAME.ivf -o $BASENAME.y4m) || (echo "Corrupt bitstream detected!"; exit 98)
-  elif hash aomdec 2>dev/null; then
+  elif hash aomdec 2>/dev/null; then
     $($TIMERDEC aomdec --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf) || (echo "Corrupt bitstream detected!"; exit 98)
   else
     echo "AV1 decoder not found, desync/corruption detection disabled."
