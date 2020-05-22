@@ -97,6 +97,10 @@ if [ -z "$CODEC" ]; then
   export CODEC=daala
 fi
 
+if [ -z "$ENCODING_MODE" ]; then
+  export ENCODING_MODE=quantizer
+fi
+
 if [ -z "$x" ]; then
   echo Missing quality setting
   exit 1
@@ -135,6 +139,18 @@ TIMERDECOUT=$BASENAME-dectime.out
 TIMER='time -v --output='"$TIMEROUT"
 TIMERDEC='time -v --output='"$TIMERDECOUT"
 AOMDEC_OPTS='-S'
+
+if [ $ENCODING_MODE = "bitrate" ]; then
+  FPS_NUM=$(grep -o -a -m 1 -P "(?<=F)([0-9]+)(?=:[0-9]+)" "$FILE")
+  FPS_DEN=$(grep -o -a -m 1 -P "(?<=F$FPS_NUM:)([0-9]+)" "$FILE")
+  # compute the number of frames from the size of the input given y4m metadata
+  FRAMES=$(($(stat -c %s $FILE) / $WIDTH / $HEIGHT))
+
+  # computes the anchor bitrate in kilobits per second
+  anchor_bitrate() {
+    BITRATE=$(($SIZE * 8 / $FRAMES * $FPS_NUM / $FPS_DEN / 1000))
+  }
+fi
 
 case $CODEC in
 daala)
@@ -229,6 +245,19 @@ rav1e)
     $($TIMERDEC aomdec --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf) || (echo "Corrupt bitstream detected!"; exit 98)
   else
     echo "AV1 decoder not found, desync/corruption detection disabled."
+  fi
+
+  if [ $ENCODING_MODE = "bitrate" ]; then
+    SIZE=$(stat -c %s $BASENAME.ivf)
+    anchor_bitrate
+
+    # Perform the encode again in single-pass mode using the anchor bitrate.
+    $($TIMER $RAV1E $FILE --bitrate $BITRATE -o $BASENAME.ivf -r $BASENAME-rec.y4m --threads 1 $EXTRA_OPTIONS > $BASENAME-enc.out)
+    if hash dav1d 2>/dev/null; then
+      $($TIMERDEC dav1d -q -i $BASENAME.ivf -o $BASENAME.y4m) || (echo "Corrupt bitstream detected!"; exit 98)
+    elif hash aomdec 2>dev/null; then
+      $($TIMERDEC aomdec --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf) || (echo "Corrupt bitstream detected!"; exit 98)
+    fi
   fi
 
   if [ -f $BASENAME.y4m ]; then

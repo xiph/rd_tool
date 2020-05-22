@@ -38,6 +38,7 @@ class Run:
         self.info = {}
         self.codec = codec
         self.quality = quality_presets[codec]
+        self.encoding_mode = 'quantizer'
         self.runid = get_time()
         self.extra_options = ''
         self.save_encode = False
@@ -179,6 +180,7 @@ class RDWork(Work):
             command += 'DAALATOOL_ROOT="'+daalatool_dir+'"'
             command += ' x="'+str(work.quality) + '" '
             command += 'CODEC="'+work.codec+'" '
+            command += 'ENCODING_MODE="'+work.encoding_mode + '" '
             command += 'EXTRA_OPTIONS="'+work.extra_options + '" '
             if self.no_delete:
                 command += 'NO_DELETE=1 '
@@ -227,6 +229,7 @@ def create_rdwork(run, video_filenames):
             work.run = run
             work.log = run.log
             work.quality = q
+            work.encoding_mode = run.encoding_mode
             work.runid = run.runid
             work.codec = run.codec
             work.bindir = run.bindir

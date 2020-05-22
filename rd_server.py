@@ -103,6 +103,7 @@ class SubmitTask(SchedulerTask):
         run.rundir = config['runs'] + '/' + run_id
         run.log = log_file
         run.set = info['task']
+        run.encoding_mode = info['encoding_mode']
         run.bindir = run.rundir + '/x86_64/'
         run.prefix = run.rundir + '/' + run.set
         try:
