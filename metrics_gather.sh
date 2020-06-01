@@ -250,6 +250,7 @@ rav1e)
   if [ $ENCODING_MODE = "bitrate" ]; then
     SIZE=$(stat -c %s $BASENAME.ivf)
     anchor_bitrate
+    rm $BASENAME.ivf
 
     # Perform the encode again in single-pass mode using the anchor bitrate.
     $($TIMER $RAV1E $FILE --bitrate $BITRATE -o $BASENAME.ivf -r $BASENAME-rec.y4m --threads 1 $EXTRA_OPTIONS > $BASENAME-enc.out)
