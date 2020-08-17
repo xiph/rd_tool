@@ -234,7 +234,7 @@ rav1e)
   if [ -f $BASENAME.y4m ]; then
     "$Y4M2YUV" "$BASENAME-rec.y4m" -o rec.yuv
     "$Y4M2YUV" "$BASENAME.y4m" -o enc.yuv
-    cmp --silent rec.yuv enc.yuv || (echo "Reconstruction differs from output!"; exit 98)
+    cmp --silent rec.yuv enc.yuv || (echo "Reconstruction differs from output!"; rm -f rec.yuv enc.yuv; exit 98)
   fi
   SIZE=$(stat -c %s $BASENAME.ivf)
   ;;
@@ -324,7 +324,7 @@ fi
 echo "$DECTIME"
 
 if [ ! "$NO_DELETE" ]; then
-  rm -f "$BASENAME.y4m" "$BASENAME.yuv" "$BASENAME.ogv" "$BASENAME.x264" "$BASENAME.x265" "$BASENAME.xvc" "$BASENAME.vpx" "$BASENAME.ivf" "$TIMEROUT" "$BASENAME-enc.out" "$BASENAME-psnr.out" "$BASENAME.thor" 2> /dev/null
+  rm -f "$BASENAME.y4m" "$BASENAME.yuv" "$BASENAME.ogv" "$BASENAME.x264" "$BASENAME.x265" "$BASENAME.xvc" "$BASENAME.vpx" "$BASENAME.ivf" "$TIMEROUT" "$BASENAME-enc.out" "$BASENAME-psnr.out" "$BASENAME.thor rec.yuv enc.yuv" 2> /dev/null
 fi
 
 rm -f pid
