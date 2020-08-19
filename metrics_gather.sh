@@ -86,7 +86,7 @@ if [ -z "$VMAF_ROOT" ]; then
 fi
 
 if [ -z "$VMAFOSSEXEC" ]; then
-  export VMAFOSSEXEC="$VMAF_ROOT/wrapper/vmafossexec"
+  export VMAFOSSEXEC="$VMAF_ROOT/libvmaf/build/tools/vmafossexec"
 fi
 
 if [ -z "$YUV2YUV4MPEG" ]; then
