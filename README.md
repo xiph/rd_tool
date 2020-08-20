@@ -27,7 +27,7 @@ contain checkouts of their respective git repositories, each with tools built.
 To compile Daala tools:
 
 ```
-sudo apt install autoconf libogg-dev libjpeg-dev libpng-dev check python3-numpy python3-scipy
+sudo apt install build-essential autoconf libogg-dev libjpeg-dev libpng-dev check python3-numpy python3-scipy libtool pkg-config
 ```
 
 ```
