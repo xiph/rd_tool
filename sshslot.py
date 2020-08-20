@@ -149,7 +149,7 @@ class Slot:
         kill_thread.daemon = True
         kill_thread.start()
     def get_file(self, remote, local):
-        return subprocess.call(['scp','-i',ssh_privkey_file,'-P',self.machine.port,self.machine.user+'@'+self.machine.host+':'+shellquote(remote),local])
+        return subprocess.call(['scp','-T','-i',ssh_privkey_file,'-P',self.machine.port,self.machine.user+'@'+self.machine.host+':'+shellquote(remote),local])
     def check_shell(self, command):
         return subprocess.check_output(['ssh','-i',ssh_privkey_file,'-p',self.machine.port,'-o',' StrictHostKeyChecking=no',
            self.machine.user+'@'+self.machine.host,
