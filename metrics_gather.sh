@@ -89,6 +89,10 @@ if [ -z "$VMAFOSSEXEC" ]; then
   export VMAFOSSEXEC="$VMAF_ROOT/libvmaf/build/tools/vmafossexec"
 fi
 
+if [ -z "$VMAFMODEL" ]; then
+  export VMAFMODEL="vmaf_v0.6.1.pkl" # File name in $VMAFROOT/model
+fi
+
 if [ -z "$YUV2YUV4MPEG" ]; then
   export YUV2YUV4MPEG="$DAALATOOL_ROOT/tools/yuv2yuv4mpeg"
 fi
@@ -309,7 +313,7 @@ if [ -f "$VMAFOSSEXEC" ]; then
   esac
   "$Y4M2YUV" "$FILE" -o ref
   "$Y4M2YUV" "$BASENAME.y4m" -o dis
-  "$VMAFOSSEXEC" $FORMAT $WIDTH $HEIGHT ref dis "$VMAF_ROOT/model/vmaf_v0.6.1.pkl" --log-fmt csv --log "$BASENAME-vmaf.csv" --thread 1 | tail -n 1
+  "$VMAFOSSEXEC" $FORMAT $WIDTH $HEIGHT ref dis "$VMAF_ROOT/model/$VMAFMODEL" --log-fmt csv --log "$BASENAME-vmaf.csv" --thread 1 | tail -n 1
   VMAF=$(cat "$BASENAME-vmaf.csv" | grep -o "[^,]*" | tail -1)
   rm -f ref dis
   echo "$VMAF"
