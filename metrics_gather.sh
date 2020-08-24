@@ -312,9 +312,9 @@ if [ -f "$VMAFOSSEXEC" ]; then
   "$VMAFOSSEXEC" $FORMAT $WIDTH $HEIGHT ref dis "$VMAF_ROOT/model/vmaf_v0.6.1.pkl" --log-fmt csv --log "$BASENAME-vmaf.csv" --thread 1 | tail -n 1
   VMAF=$(cat "$BASENAME-vmaf.csv" | grep -o "[^,]*" | tail -1)
   rm -f ref dis
-  echo "0 0 0 $VMAF"
+  echo "$VMAF"
 else
-  echo 0 0 0 0
+  echo "0"
 fi
 
 if [ -e "$TIMERDECOUT" ]; then
