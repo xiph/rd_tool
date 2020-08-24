@@ -298,7 +298,7 @@ if [ -f "$VMAFOSSEXEC" ]; then
   FORMAT=yuv420p
   case $CHROMA in
       420p10)
-          FORMAT=yuv444p10le
+          FORMAT=yuv420p10le
           ;;
       444p10)
           FORMAT=yuv444p10le
