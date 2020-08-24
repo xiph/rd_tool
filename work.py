@@ -136,8 +136,8 @@ class RDWork(Work):
             self.metric['msssim'][1] = split[50]
             self.metric['msssim'][2] = split[52]
             self.metric['encodetime'] = split[53]
-            self.metric['vmaf'] = split[57]
-            self.metric['decodetime'] = split[58]
+            self.metric['vmaf'] = split[54]
+            self.metric['decodetime'] = split[55]
             self.failed = False
         except IndexError:
             rd_print(self.log,'Decoding result for '+self.filename+' at quality '+str(self.quality)+' failed!')
