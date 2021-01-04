@@ -85,8 +85,8 @@ if [ -z "$VMAF_ROOT" ]; then
   export VMAF_ROOT="$DAALATOOL_ROOT/../vmaf"
 fi
 
-if [ -z "$VMAFOSSEXEC" ]; then
-  export VMAFOSSEXEC="$VMAF_ROOT/libvmaf/build/tools/vmafossexec"
+if [ -z "$VMAF" ]; then
+  export VMAF="$VMAF_ROOT/libvmaf/build/tools/vmaf"
 fi
 
 if [ -z "$VMAFMODEL" ]; then
@@ -298,25 +298,11 @@ fi
 
 echo "$ENCTIME"
 
-if [ -f "$VMAFOSSEXEC" ]; then
-  FORMAT=yuv420p
-  case $CHROMA in
-      420p10)
-          FORMAT=yuv420p10le
-          ;;
-      444p10)
-          FORMAT=yuv444p10le
-          ;;
-      444)
-          FORMAT=yuv444p
-          ;;
-  esac
-  "$Y4M2YUV" "$FILE" -o ref
-  "$Y4M2YUV" "$BASENAME.y4m" -o dis
-  "$VMAFOSSEXEC" $FORMAT $WIDTH $HEIGHT ref dis "$VMAF_ROOT/model/$VMAFMODEL" --log-fmt csv --log "$BASENAME-vmaf.csv" --thread 1 | tail -n 1
-  VMAF=$(cat "$BASENAME-vmaf.csv" | grep -o "[^,]*" | tail -1)
+if [ -f "$VMAF" ]; then
+  "$VMAF" -r "$FILE" -d "$BASENAME.y4m" -m path="$VMAF_ROOT/model/$VMAFMODEL" --csv -o "$BASENAME-vmaf.csv" --thread 1 | tail -n 1
+  VMAF_SCORE=$(cat "$BASENAME-vmaf.csv" | grep -o "[^,]*" | tail -1)
   rm -f ref dis
-  echo "$VMAF"
+  echo "$VMAF_SCORE"
 else
   echo "0"
 fi
