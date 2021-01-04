@@ -90,7 +90,7 @@ if [ -z "$VMAFOSSEXEC" ]; then
 fi
 
 if [ -z "$VMAFMODEL" ]; then
-  export VMAFMODEL="vmaf_v0.6.1.pkl" # File name in $VMAFROOT/model
+  export VMAFMODEL="vmaf_v0.6.1.json" # File name in $VMAFROOT/model
 fi
 
 if [ -z "$YUV2YUV4MPEG" ]; then
