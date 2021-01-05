@@ -27,6 +27,10 @@ quality_presets = {
     "vp10-rt": [8,20,32,43,55,63],
     "av1": [20,32,43,55,63],
     "av1-rt": [20,32,43,55,63],
+    "av2-ai": [18, 27, 36,45, 54, 63],
+    "av2-ra": [23, 31, 39, 47, 55, 63],
+    "av2-ld": [23, 31, 39, 47, 55, 63],
+    "av2-as": [23, 31, 39, 47, 55, 63],
     "thor": list(range(7,43,3)),
     "thor-rt": list(range(7,43,3)),
     "rav1e": [20*4,32*4,43*4,55*4,63*4],
@@ -237,6 +241,8 @@ def create_rdwork(run, video_filenames):
                 work.no_delete = True
                 if work.codec == 'av1' or work.codec == 'av1-rt' or work.codec == 'rav1e' or work.codec == 'svt-av1':
                     work.copy_back_files.append('.ivf')
+                elif (len(work.codec) >= 3) and (work.codec[0:3] == 'av2'):
+                    work.copy_back_files.append('.obu')
                 elif work.codec == 'xvc':
                     work.copy_back_files.append('.xvc')
             work_items.append(work)
