@@ -140,8 +140,20 @@ class RDWork(Work):
             self.metric['msssim'][1] = split[50]
             self.metric['msssim'][2] = split[52]
             self.metric['encodetime'] = split[53]
-            self.metric['vmaf'] = split[54]
+            self.metric['vmaf_old'] = split[54]
             self.metric['decodetime'] = split[55]
+            self.metric['vmaf_psnr_y'] = split[56]
+            self.metric['vmaf_psnr_cb'] = split[57]
+            self.metric['vmaf_psnr_cr'] = split[58]
+            self.metric['vmaf_ciede2000'] = split[59]
+            self.metric['vmaf_float_ssim'] = split[60]
+            self.metric['vmaf_float_ms_ssim'] = split[61]
+            self.metric['vmaf_psnr_hvs_y'] = split[62]
+            self.metric['vmaf_psnr_hvs_cb'] = split[63]
+            self.metric['vmaf_psnr_hvs_cr'] = split[64]
+            self.metric['vmaf_psnr_hvs'] = split[65]
+            self.metric['vmaf'] = split[66]
+            self.metric['vmaf_neg'] = split[67]
             self.failed = False
         except IndexError:
             rd_print(self.log,'Decoding result for '+self.filename+' at quality '+str(self.quality)+' failed!')
@@ -168,8 +180,20 @@ class RDWork(Work):
         f += (str(work.metric['apsnr'][2])+' ')
         f += (str(work.metric['msssim'][0])+' ')
         f += (str(work.metric['encodetime'])+' ')
-        f += (str(work.metric['vmaf'])+' ')
+        f += (str(work.metric['vmaf_old'])+' ')
         f += (str(work.metric['decodetime'])+' ')
+        f += (str(work.metric['vmaf_psnr_y'])+' ')
+        f += (str(work.metric['vmaf_psnr_cb'])+' ')
+        f += (str(work.metric['vmaf_psnr_cr'])+' ')
+        f += (str(work.metric['vmaf_ciede2000'])+' ')
+        f += (str(work.metric['vmaf_float_ssim'])+' ')
+        f += (str(work.metric['vmaf_float_ms_ssim'])+' ')
+        f += (str(work.metric['vmaf_psnr_hvs_y'])+' ')
+        f += (str(work.metric['vmaf_psnr_hvs_cb'])+' ')
+        f += (str(work.metric['vmaf_psnr_hvs_cr'])+' ')
+        f += (str(work.metric['vmaf_psnr_hvs'])+' ')
+        f += (str(work.metric['vmaf'])+' ')
+        f += (str(work.metric['vmaf_neg'])+' ')
         f += ('\n')
         return f
     def execute(self):
