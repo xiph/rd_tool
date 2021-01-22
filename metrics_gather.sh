@@ -238,7 +238,7 @@ av2 | av2-ai | av2-ra | av2-ld | av2-as)
   if $AOMDEC --help 2>&1 | grep output-bit-depth > /dev/null; then
     AOMDEC_OPTS+=" --output-bit-depth=$DEPTH"
   fi
-  $($TIMERDEC $AOMDEC --codec=$CODEC $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.obu)
+  $($TIMERDEC $AOMDEC --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.obu)
   SIZE=$(stat -c %s $BASENAME.obu)
   ;;
 thor)
