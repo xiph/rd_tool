@@ -117,15 +117,15 @@ FILE=$1
 BASENAME="$(basename $FILE)-$x"
 rm "$BASENAME.out" 2> /dev/null || true
 
-WIDTH="$(head -1 $FILE | cut -d\  -f 2 | tr -d 'W')"
-HEIGHT="$(head -1 $FILE | cut -d\  -f 3 | tr -d 'H')"
-CHROMA="$(head -1 $FILE | cut -d\  -f 7 | tr -d 'C')"
+WIDTH=$(head -1 $FILE | tr ' ' '\n' | grep -E '\bW' | tr -d 'W')
+HEIGHT=$(head -1 $FILE | tr ' ' '\n' | grep -E '\bH' | tr -d 'H')
+CHROMA=$(head -1 $FILE | tr ' ' '\n' | grep -E '\bC')
 DEPTH=8
 case $CHROMA in
-444p10)
+C444p10)
   DEPTH=10
   ;;
-420p10)
+C420p10)
   DEPTH=10
   ;;
 esac
