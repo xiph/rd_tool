@@ -234,12 +234,31 @@ av2 | av2-ai | av2-ra | av2-ld | av2-as)
       ;;
   esac
   # threading options for the A1 test set must be overriden via EXTRA_OPTIONS at a higher level
-  $($TIMER $AOMENC --codec=av1 --cq-level=$x --test-decode=fatal $CTC_PROFILE_OPTS --tile-columns=0 --threads=1 -o $BASENAME.obu $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
-  if $AOMDEC --help 2>&1 | grep output-bit-depth > /dev/null; then
-    AOMDEC_OPTS+=" --output-bit-depth=$DEPTH"
-  fi
-  $($TIMERDEC $AOMDEC --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.obu)
-  SIZE=$(stat -c %s $BASENAME.obu)
+  case $CODEC in
+    av2-ra)
+      # this is intentionally not a separate script as only metrics_gather.sh is sent to workers
+      echo "#!/bin/bash" > /tmp/enc$$.sh
+      echo "TIMER='time -v --output='enctime$$-\$1.out" >> /tmp/enc$$.sh
+      echo "RUN='$AOMENC --codec=av1 --cq-level=$x --test-decode=fatal $CTC_PROFILE_OPTS --tile-columns=0 --threads=1 -o $BASENAME-'\$1'.obu $EXTRA_OPTIONS --limit=130 --'\$1'=65 $FILE'" >> /tmp/enc$$.sh
+      echo "\$(\$TIMER \$RUN > $BASENAME$$-stdout.txt)" >> /tmp/enc$$.sh
+      chmod +x /tmp/enc$$.sh
+      for s in {limit,skip}; do printf "$s\0"; done | xargs -0 -n1 -P2 /tmp/enc$$.sh
+      $(cat $BASENAME-limit.obu $BASENAME-skip.obu > $BASENAME.obu)
+      TIME1=$(cat enctime$$-limit.out | grep User | cut -d\  -f4)
+      TIME2=$(cat enctime$$-skip.out | grep User | cut -d\  -f4)
+      ENCTIME=$(awk "BEGIN {print $TIME1+$TIME2; exit}")
+      rm -f /tmp/enc$$.sh enctime$$-limit.out enctime$$-skip.out $BASENAME-limit.obu $BASENAME-skip.obu
+      ;;
+    *)
+      $($TIMER $AOMENC --codec=av1 --cq-level=$x --test-decode=fatal $CTC_PROFILE_OPTS --tile-columns=0 --threads=1 -o $BASENAME.obu $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
+      ;;
+  esac
+    if $AOMDEC --help 2>&1 | grep output-bit-depth > /dev/null; then
+      AOMDEC_OPTS+=" --output-bit-depth=$DEPTH"
+    fi
+    echo $TIMERDEC $AOMDEC --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.obu
+    $($TIMERDEC $AOMDEC --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.obu)
+    SIZE=$(stat -c %s $BASENAME.obu)
   ;;
 thor)
   $($TIMER $THORENC -qp $x -cf "$THORDIR/config_HDB16_high_efficiency.txt" -if $FILE -of $BASENAME.thor $EXTRA_OPTIONS > $BASENAME-enc.out)
@@ -320,7 +339,9 @@ echo "$MSSSIM"
 if [ -e "$TIMEROUT" ]; then
   ENCTIME=$(awk '/User/ { s=$4 } END { printf "%.2f", s }' "$TIMEROUT")
 else
-  ENCTIME=0
+  if [ -z "$ENCTIME" ]; then
+    ENCTIME=0
+  fi
 fi
 
 echo "$ENCTIME"
