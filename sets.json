@@ -89,27 +89,6 @@
       "Sniper_1920x1080P_30fps_8bit.y4m"
     ]
   },
-  "av2-g1-hdr-4k": {
-    "type": "video",
-    "sources": [
-      "MeridianRoad_3840x2160_5994_hdr10.y4m",
-      "SparksWelding_4096x2160_5994_hdr10.y4m",
-      "NocturneDance_3840x2160_60fps_hdr10.y4m",
-      "NocturneRoom_3840x2160_60fps_hdr10.y4m"
-    ]
-  },
-  "av2-g2-hdr-2k": {
-    "type": "video",
-    "sources": [
-      "MeridianShore_1920x1080_5994_hdr10.y4m",
-      "CosmosTreeTrunk_2048x858p24_hdr10.y4m",
-      "SolLevanteFace_1920x1080p24_hdr10.y4m",
-      "SolLevanteDragons_1920x1080p24_hdr10.y4m",
-      "CosmosCaterpillar_2048x858p24_hdr10.y4m",
-      "SparksTruck_2048x1080_5994_hdr10.y4m",
-      "MeridianTalk_1920x1080_5994_hdr10.y4m"
-    ]
-  },
   "av2-f1-hires": {
     "type": "image",
     "sources": [
@@ -177,6 +156,27 @@
       "KellermanBallfieldMefisto.y4m",
       "Madeira_151_Funchal_Mercado_dos_Lavradores.y4m",
       "OperaLamps.y4m"
+    ]
+  },
+  "av2-g1-hdr-4k": {
+    "type": "video",
+    "sources": [
+      "MeridianRoad_3840x2160_5994_hdr10.y4m",
+      "SparksWelding_4096x2160_5994_hdr10.y4m",
+      "NocturneDance_3840x2160_60fps_hdr10.y4m",
+      "NocturneRoom_3840x2160_60fps_hdr10.y4m"
+    ]
+  },
+  "av2-g2-hdr-2k": {
+    "type": "video",
+    "sources": [
+      "MeridianShore_1920x1080_5994_hdr10.y4m",
+      "CosmosTreeTrunk_2048x858p24_hdr10.y4m",
+      "SolLevanteFace_1920x1080p24_hdr10.y4m",
+      "SolLevanteDragons_1920x1080p24_hdr10.y4m",
+      "CosmosCaterpillar_2048x858p24_hdr10.y4m",
+      "SparksTruck_2048x1080_5994_hdr10.y4m",
+      "MeridianTalk_1920x1080_5994_hdr10.y4m"
     ]
   },
   "video-1-short": {
