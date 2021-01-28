@@ -214,12 +214,12 @@ av1-rt)
   $($TIMERDEC $AOMDEC --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf)
   SIZE=$(stat -c %s $BASENAME.ivf)
   ;;
-av2 | av2-ai | av2-ra | av2-ld | av2-as)
+av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as)
   case $CODEC in
     av2-ai)
       CTC_PROFILE_OPTS="--cpu-used=0 --passes=1 --end-usage=q --kf-min-dist=0 --kf-max-dist=0 --use-fixed-qp-offsets=1 --limit=30 --deltaq-mode=0 --enable-tpl-model=0 --enable-keyframe-filtering=0 --obu"
       ;;
-    av2-ra)
+    av2-ra | av2-ra-st)
       CTC_PROFILE_OPTS="--cpu-used=0 --passes=1 --lag-in-frames=19 --auto-alt-ref=1 --min-gf-interval=16 --max-gf-interval=16 --gf-min-pyr-height=4 --gf-max-pyr-height=4 --limit=130 --kf-min-dist=65 --kf-max-dist=65 --use-fixed-qp-offsets=1 --deltaq-mode=0 --enable-tpl-model=0 --end-usage=q --enable-keyframe-filtering=0 --obu"
       ;;
     av2-ld)
