@@ -97,6 +97,14 @@ if [ -z "$YUV2YUV4MPEG" ]; then
   export YUV2YUV4MPEG="$DAALATOOL_ROOT/tools/yuv2yuv4mpeg"
 fi
 
+if [ -z "$HDRTOOLS_ROOT" ]; then
+  export HDRTOOLS_ROOT="$DAALATOOL_ROOT/../hdrtools"
+fi
+
+if [ -z "$HDRCONVERT" ]; then
+  export HDRCONVERT="$HDRTOOLS_ROOT/bin/HDRConvert"
+fi
+
 if [ -z "$CODEC" ]; then
   export CODEC=daala
 fi
@@ -256,6 +264,23 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as)
   fi
   $($TIMERDEC $AOMDEC --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.obu)
   SIZE=$(stat -c %s $BASENAME.obu)
+  case $CODEC in
+    av2-as)
+      if [ $((WIDTH)) -ne 3840 ] && [ $((HEIGHT)) -ne 2160 ]; then
+        # change the reference to 3840x2160
+        FILE=$(sed -e 's/\(640x360\|960x540\|1280x720\|1920x1080\|2560x1440\)/3840x2160/' <<< $FILE)
+        # hack to force input Y4M file to F30:1 because HDRConvert requires specifying an output frame rate, and if they do not match it will resample temporaly
+        echo "YUV4MPEG2 W$WIDTH H$HEIGHT F30:1 $CHROMA" > $BASENAME-$$.y4m
+        $(tail -n+2 $BASENAME.y4m >> $BASENAME-$$.y4m)
+        # upsample decoded output to 3840x2160
+        $HDRCONVERT -p SourceFile=$BASENAME-$$.y4m -p OutputFile=$BASENAME-$$-out.y4m -p OutputWidth=3840 -p OutputHeight=2160 -p OutputChromaFormat=1 -p OutputBitDepthCmp0=10 -p OutputBitDepthCmp1=10 -p OutputBitDepthCmp2=10 -p OutputColorSpace=0 -p OutputColorPrimaries=0 -p OutputTransferFunction=12 -p SilentMode=1 -p ScaleOnly=1 -p ScalingMode=12 -p OutputRate=30 -p NumberOfFrames=130
+        # replace decoded output with upsampled file using Y4M header from the reference
+        $(head -n 1 $FILE > $BASENAME.y4m)
+        $(tail -n+2 $BASENAME-$$-out.y4m >> $BASENAME.y4m)
+        rm $BASENAME-$$.y4m $BASENAME-$$-out.y4m
+      fi
+      ;;
+  esac
   ;;
 thor)
   $($TIMER $THORENC -qp $x -cf "$THORDIR/config_HDB16_high_efficiency.txt" -if $FILE -of $BASENAME.thor $EXTRA_OPTIONS > $BASENAME-enc.out)
