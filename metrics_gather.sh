@@ -250,11 +250,12 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as)
       $($TIMER $AOMENC --codec=av1 --cq-level=$x --test-decode=fatal $CTC_PROFILE_OPTS --tile-columns=0 --threads=1 -o $BASENAME.obu $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
       ;;
   esac
-    if $AOMDEC --help 2>&1 | grep output-bit-depth > /dev/null; then
-      AOMDEC_OPTS+=" --output-bit-depth=$DEPTH"
-    fi
-    $($TIMERDEC $AOMDEC --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.obu)
-    SIZE=$(stat -c %s $BASENAME.obu)
+  # decode the OBU to Y4M
+  if $AOMDEC --help 2>&1 | grep output-bit-depth > /dev/null; then
+    AOMDEC_OPTS+=" --output-bit-depth=$DEPTH"
+  fi
+  $($TIMERDEC $AOMDEC --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.obu)
+  SIZE=$(stat -c %s $BASENAME.obu)
   ;;
 thor)
   $($TIMER $THORENC -qp $x -cf "$THORDIR/config_HDB16_high_efficiency.txt" -if $FILE -of $BASENAME.thor $EXTRA_OPTIONS > $BASENAME-enc.out)
