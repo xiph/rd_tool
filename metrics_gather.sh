@@ -331,32 +331,39 @@ PIXELS=$(($WIDTH*$HEIGHT*$FRAMES))
 
 echo "$x" "$PIXELS" "$SIZE"
 
-PSNR=$(cat "$BASENAME-psnr.out" | grep Total)
+#PSNR=$(cat "$BASENAME-psnr.out" | grep Total)
 
-echo "$PSNR"
+#echo "$PSNR"
+echo 0
 
-APSNR=$(cat "$BASENAME-psnr.out" | grep Frame-averaged)
-PSNRHVS=$("$DUMP_PSNRHVS" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
+#APSNR=$(cat "$BASENAME-psnr.out" | grep Frame-averaged)
+#PSNRHVS=$("$DUMP_PSNRHVS" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 
-echo "$PSNRHVS"
+#echo "$PSNRHVS"
+echo 0
 
-SSIM=$("$DUMP_SSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
+#SSIM=$("$DUMP_SSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 
-echo "$SSIM"
+#echo "$SSIM"
+echo 0
 
-FASTSSIM=$("$DUMP_FASTSSIM" -c "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
+#FASTSSIM=$("$DUMP_FASTSSIM" -c "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 
-echo "$FASTSSIM"
+#echo "$FASTSSIM"
+echo 0
 
-CIEDE=$("$DUMP_CIEDE" --threads 1 "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
+#CIEDE=$("$DUMP_CIEDE" --threads 1 "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 
-echo "$CIEDE"
+#echo "$CIEDE"
+echo 0
 
-echo "$APSNR"
+#echo "$APSNR"
+echo 0
 
-MSSSIM=$("$DUMP_MSSSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
+#MSSSIM=$("$DUMP_MSSSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 
-echo "$MSSSIM"
+#echo "$MSSSIM"
+echo 0
 
 if [ -e "$TIMEROUT" ]; then
   ENCTIME=$(awk '/User/ { s=$4 } END { printf "%.2f", s }' "$TIMEROUT")
@@ -369,6 +376,7 @@ fi
 echo "$ENCTIME"
 
 if [ -f "$VMAF" ]; then
+  echo "$VMAF -r $FILE -d $BASENAME.y4m --aom_ctc v1.0 --csv -o $BASENAME-vmaf.csv --thread 1"
   "$VMAF" -r "$FILE" -d "$BASENAME.y4m" --aom_ctc v1.0 --csv -o "$BASENAME-vmaf.csv" --thread 1 | tail -n 1
   # "old" VMAF field
   VMAF_SCORE=$(cat "$BASENAME-vmaf.csv" | grep -o "[^,]*" | tail -2 | head -n1)
