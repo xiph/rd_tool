@@ -232,7 +232,7 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as)
   esac
   # threading options for the A1 test set must be overriden via EXTRA_OPTIONS at a higher level
   case $CODEC in
-    av2-ra)
+    av2-ra | av2-as)
       # this is intentionally not a separate script as only metrics_gather.sh is sent to workers
       echo "#!/bin/bash" > /tmp/enc$$.sh
       echo "TIMER='time -v --output='enctime$$-\$1.out" >> /tmp/enc$$.sh
