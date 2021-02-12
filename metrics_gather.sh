@@ -308,6 +308,8 @@ rav1e)
     "$Y4M2YUV" "$BASENAME.y4m" -o enc.yuv
     cmp --silent rec.yuv enc.yuv || (echo "Reconstruction differs from output!"; rm -f rec.yuv enc.yuv "$BASENAME-rec.y4m"; exit 98)
     rm -f rec.yuv enc.yuv "$BASENAME-rec.y4m"
+  else
+    mv "$BASENAME-rec.y4m" "$BASENAME.y4m"
   fi
   SIZE=$(stat -c %s $BASENAME.ivf)
   ;;
