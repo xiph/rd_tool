@@ -150,6 +150,8 @@ class RDWork(Work):
                 self.metric['vmaf_'+metric_name] = root.find("pooled_metrics/metric[@name='"+metric_name+"']").get('mean')
             self.metric['vmaf'] = root.find("pooled_metrics/metric[@name='vmaf']").get('mean')
             self.metric['vmaf_neg'] = root.find("pooled_metrics/metric[@name='vmaf_neg']").get('mean')
+            for metric_name in ['apsnr_y', 'apsnr_cb', 'apsnr_cr']:
+                self.metric['vmaf_'+metric_name] = root.find("aggregate_metrics").get(metric_name)
             self.failed = False
         except IndexError:
             rd_print(self.log,'Decoding result for '+self.filename+' at quality '+str(self.quality)+' failed!')
@@ -190,6 +192,9 @@ class RDWork(Work):
         f += (str(work.metric['vmaf_psnr_hvs'])+' ')
         f += (str(work.metric['vmaf'])+' ')
         f += (str(work.metric['vmaf_neg'])+' ')
+        f += (str(work.metric['vmaf_apsnr_y'])+' ')
+        f += (str(work.metric['vmaf_apsnr_cb'])+' ')
+        f += (str(work.metric['vmaf_apsnr_cr'])+' ')
         f += ('\n')
         return f
     def execute(self):
