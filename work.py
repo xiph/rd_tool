@@ -233,6 +233,10 @@ class RDWork(Work):
         with open(filename,'w') as f:
             for line in lines:
                 f.write(line)
+        #write vmaf xml in separate files
+        xml_filename = (runs_dst_dir+'/'+self.runid+'/'+self.set+'/'+self.filename+'-'+str(self.quality)+'-libvmaf.xml').encode('utf-8')
+        with open(xml_filename, 'w') as f:
+            f.write(self.vmaf_xml)
     def get_name(self):
         return self.filename + ' with quality ' + str(self.quality) + ' for run ' + self.runid
     def cancel(self):
