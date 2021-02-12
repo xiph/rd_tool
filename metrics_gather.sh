@@ -300,7 +300,7 @@ rav1e)
   elif hash aomdec 2>/dev/null; then
     $($TIMERDEC aomdec --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf) || (echo "Corrupt bitstream detected!"; exit 98)
   else
-    echo "AV1 decoder not found, desync/corruption detection disabled."
+    echo "AV1 decoder not found, desync/corruption detection disabled." >&2
   fi
 
   if [ -f $BASENAME.y4m ]; then
