@@ -153,7 +153,7 @@ class RDWork(Work):
             for metric_name in ['apsnr_y', 'apsnr_cb', 'apsnr_cr']:
                 self.metric['vmaf_'+metric_name] = root.find("aggregate_metrics").get(metric_name)
             self.failed = False
-        except IndexError:
+        except (IndexError, ET.ParseError):
             rd_print(self.log,'Decoding result for '+self.filename+' at quality '+str(self.quality)+' failed!')
             rd_print(self.log,'stdout:')
             rd_print(self.log,stdout.decode('utf-8'))
