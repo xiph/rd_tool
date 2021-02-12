@@ -2,6 +2,7 @@ from utility import *
 import os
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
 
 runs_dst_dir = os.getenv("RUNS_DST_DIR", os.path.join(os.getcwd(), "../runs"))
 
@@ -111,7 +112,7 @@ class RDWork(Work):
         self.raw = stdout
         split = None
         try:
-            split = self.raw.decode('utf-8').replace(')',' ').split()
+            split = self.raw.decode('utf-8').replace(')',' ').split(maxsplit=56)
             self.pixels = split[1]
             self.size = split[2]
             self.metric = {}
@@ -143,18 +144,12 @@ class RDWork(Work):
             self.metric['encodetime'] = split[53]
             self.metric['vmaf_old'] = split[54]
             self.metric['decodetime'] = split[55]
-            self.metric['vmaf_psnr_y'] = split[56]
-            self.metric['vmaf_psnr_cb'] = split[57]
-            self.metric['vmaf_psnr_cr'] = split[58]
-            self.metric['vmaf_ciede2000'] = split[59]
-            self.metric['vmaf_float_ssim'] = split[60]
-            self.metric['vmaf_float_ms_ssim'] = split[61]
-            self.metric['vmaf_psnr_hvs_y'] = split[62]
-            self.metric['vmaf_psnr_hvs_cb'] = split[63]
-            self.metric['vmaf_psnr_hvs_cr'] = split[64]
-            self.metric['vmaf_psnr_hvs'] = split[65]
-            self.metric['vmaf'] = split[66]
-            self.metric['vmaf_neg'] = split[67]
+            self.vmaf_xml = split[56]
+            root = ET.fromstring(self.vmaf_xml)
+            for metric_name in ['psnr_y', 'psnr_cb', 'psnr_cr', 'ciede2000', 'float_ssim', 'float_ms_ssim', 'psnr_hvs_y', 'psnr_hvs_cb', 'psnr_hvs_cr', 'psnr_hvs']:
+                self.metric['vmaf_'+metric_name] = root.find("pooled_metrics/metric[@name='"+metric_name+"']").get('mean')
+            self.metric['vmaf'] = root.find("pooled_metrics/metric[@name='vmaf']").get('mean')
+            self.metric['vmaf_neg'] = root.find("pooled_metrics/metric[@name='vmaf_neg']").get('mean')
             self.failed = False
         except IndexError:
             rd_print(self.log,'Decoding result for '+self.filename+' at quality '+str(self.quality)+' failed!')

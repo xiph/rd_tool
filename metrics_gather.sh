@@ -369,14 +369,9 @@ fi
 echo "$ENCTIME"
 
 if [ -f "$VMAF" ]; then
-  "$VMAF" -r "$FILE" -d "$BASENAME.y4m" --aom_ctc v1.0 --csv -o "$BASENAME-vmaf.csv" --thread 1 | tail -n 1
-  # "old" VMAF field
-  VMAF_SCORE=$(cat "$BASENAME-vmaf.csv" | grep -o "[^,]*" | tail -2 | head -n1)
-  # "new" VMAF scores (todo: replace with JSON)
-  # psnr_y,psnr_cb,psnr_cr,ciede2000,float_ssim,float_ms_ssim,psnr_hvs_y,psnr_hvs_cb,psnr_hvs_cr,psnr_hvs,vmaf,vmaf_neg
-  VMAF_ALL_METRICS=$(cat "$BASENAME-vmaf.csv" | grep -o "[^,]*" | tail -12)
+  "$VMAF" -r "$FILE" -d "$BASENAME.y4m" --aom_ctc v1.0 --xml -o "$BASENAME-vmaf.xml" --thread 1 | tail -n 1
   rm -f ref dis
-  echo "$VMAF_SCORE"
+  echo "0"
 else
   echo "0"
 fi
@@ -390,11 +385,8 @@ fi
 echo "$DECTIME"
 
 if [ -f "$VMAF" ]; then
-  echo "$VMAF_ALL_METRICS"
-else
-  for i in `seq 1 12`; do
-    echo "0"
-  done
+  cat "$BASENAME-vmaf.xml"
+  rm "$BASENAME-vmaf.xml"
 fi
 
 if [ ! "$NO_DELETE" ]; then
