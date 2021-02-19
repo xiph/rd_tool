@@ -238,13 +238,18 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as)
       CTC_PROFILE_OPTS=""
       ;;
   esac
+  if [ $((WIDTH)) -ge 3840 ] && [ $((HEIGHT)) -ge 2160 ]; then
+    CTC_PROFILE_OPTS+=" --tile-columns=1 --threads=2 --row-mt=0"
+  else
+    CTC_PROFILE_OPTS+=" --tile-columns=0 --threads=1"
+  fi
   # threading options for the A1 test set must be overriden via EXTRA_OPTIONS at a higher level
   case $CODEC in
     av2-ra | av2-as)
       # this is intentionally not a separate script as only metrics_gather.sh is sent to workers
       echo "#!/bin/bash" > /tmp/enc$$.sh
       echo "TIMER='time -v --output='enctime$$-\$1.out" >> /tmp/enc$$.sh
-      echo "RUN='$AOMENC --codec=av1 --cq-level=$x --test-decode=fatal $CTC_PROFILE_OPTS --tile-columns=0 --threads=1 -o $BASENAME-'\$1'.obu $EXTRA_OPTIONS --limit=130 --'\$1'=65 $FILE'" >> /tmp/enc$$.sh
+      echo "RUN='$AOMENC --codec=av1 --cq-level=$x --test-decode=fatal $CTC_PROFILE_OPTS -o $BASENAME-'\$1'.obu $EXTRA_OPTIONS --limit=130 --'\$1'=65 $FILE'" >> /tmp/enc$$.sh
       echo "\$(\$TIMER \$RUN > $BASENAME$$-stdout.txt)" >> /tmp/enc$$.sh
       chmod +x /tmp/enc$$.sh
       for s in {limit,skip}; do printf "$s\0"; done | xargs -0 -n1 -P2 /tmp/enc$$.sh
@@ -255,7 +260,7 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as)
       rm -f /tmp/enc$$.sh enctime$$-limit.out enctime$$-skip.out $BASENAME-limit.obu $BASENAME-skip.obu
       ;;
     *)
-      $($TIMER $AOMENC --codec=av1 --cq-level=$x --test-decode=fatal $CTC_PROFILE_OPTS --tile-columns=0 --threads=1 -o $BASENAME.obu $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
+      $($TIMER $AOMENC --codec=av1 --cq-level=$x --test-decode=fatal $CTC_PROFILE_OPTS -o $BASENAME.obu $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
       ;;
   esac
   # decode the OBU to Y4M
