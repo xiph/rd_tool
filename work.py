@@ -2,6 +2,7 @@ from utility import *
 import os
 import subprocess
 import sys
+import xml.etree.ElementTree as ET
 
 runs_dst_dir = os.getenv("RUNS_DST_DIR", os.path.join(os.getcwd(), "../runs"))
 
@@ -27,6 +28,11 @@ quality_presets = {
     "vp10-rt": [8,20,32,43,55,63],
     "av1": [20,32,43,55,63],
     "av1-rt": [20,32,43,55,63],
+    "av2-ai": [15, 23, 31, 39, 47, 55],
+    "av2-ra": [23, 31, 39, 47, 55, 63],
+    "av2-ra-st": [23, 31, 39, 47, 55, 63],
+    "av2-ld": [23, 31, 39, 47, 55, 63],
+    "av2-as": [23, 31, 39, 47, 55, 63],
     "thor": list(range(7,43,3)),
     "thor-rt": list(range(7,43,3)),
     "rav1e": [20*4,32*4,43*4,55*4,63*4],
@@ -106,7 +112,7 @@ class RDWork(Work):
         self.raw = stdout
         split = None
         try:
-            split = self.raw.decode('utf-8').replace(')',' ').split()
+            split = self.raw.decode('utf-8').replace(')',' ').split(maxsplit=56)
             self.pixels = split[1]
             self.size = split[2]
             self.metric = {}
@@ -136,10 +142,18 @@ class RDWork(Work):
             self.metric['msssim'][1] = split[50]
             self.metric['msssim'][2] = split[52]
             self.metric['encodetime'] = split[53]
-            self.metric['vmaf'] = split[57]
-            self.metric['decodetime'] = split[58]
+            self.metric['vmaf_old'] = split[54]
+            self.metric['decodetime'] = split[55]
+            self.vmaf_xml = split[56]
+            root = ET.fromstring(self.vmaf_xml)
+            for metric_name in ['psnr_y', 'psnr_cb', 'psnr_cr', 'ciede2000', 'float_ssim', 'float_ms_ssim', 'psnr_hvs_y', 'psnr_hvs_cb', 'psnr_hvs_cr', 'psnr_hvs']:
+                self.metric['vmaf_'+metric_name] = root.find("pooled_metrics/metric[@name='"+metric_name+"']").get('mean')
+            self.metric['vmaf'] = root.find("pooled_metrics/metric[@name='vmaf']").get('mean')
+            self.metric['vmaf_neg'] = root.find("pooled_metrics/metric[@name='vmaf_neg']").get('mean')
+            for metric_name in ['apsnr_y', 'apsnr_cb', 'apsnr_cr']:
+                self.metric['vmaf_'+metric_name] = root.find("aggregate_metrics").get(metric_name)
             self.failed = False
-        except IndexError:
+        except (IndexError, ET.ParseError):
             rd_print(self.log,'Decoding result for '+self.filename+' at quality '+str(self.quality)+' failed!')
             rd_print(self.log,'stdout:')
             rd_print(self.log,stdout.decode('utf-8'))
@@ -164,8 +178,23 @@ class RDWork(Work):
         f += (str(work.metric['apsnr'][2])+' ')
         f += (str(work.metric['msssim'][0])+' ')
         f += (str(work.metric['encodetime'])+' ')
-        f += (str(work.metric['vmaf'])+' ')
+        f += (str(work.metric['vmaf_old'])+' ')
         f += (str(work.metric['decodetime'])+' ')
+        f += (str(work.metric['vmaf_psnr_y'])+' ')
+        f += (str(work.metric['vmaf_psnr_cb'])+' ')
+        f += (str(work.metric['vmaf_psnr_cr'])+' ')
+        f += (str(work.metric['vmaf_ciede2000'])+' ')
+        f += (str(work.metric['vmaf_float_ssim'])+' ')
+        f += (str(work.metric['vmaf_float_ms_ssim'])+' ')
+        f += (str(work.metric['vmaf_psnr_hvs_y'])+' ')
+        f += (str(work.metric['vmaf_psnr_hvs_cb'])+' ')
+        f += (str(work.metric['vmaf_psnr_hvs_cr'])+' ')
+        f += (str(work.metric['vmaf_psnr_hvs'])+' ')
+        f += (str(work.metric['vmaf'])+' ')
+        f += (str(work.metric['vmaf_neg'])+' ')
+        f += (str(work.metric['vmaf_apsnr_y'])+' ')
+        f += (str(work.metric['vmaf_apsnr_cb'])+' ')
+        f += (str(work.metric['vmaf_apsnr_cr'])+' ')
         f += ('\n')
         return f
     def execute(self):
@@ -209,6 +238,10 @@ class RDWork(Work):
         with open(filename,'w') as f:
             for line in lines:
                 f.write(line)
+        #write vmaf xml in separate files
+        xml_filename = (runs_dst_dir+'/'+self.runid+'/'+self.set+'/'+self.filename+'-'+str(self.quality)+'-libvmaf.xml').encode('utf-8')
+        with open(xml_filename, 'w') as f:
+            f.write(self.vmaf_xml)
     def get_name(self):
         return self.filename + ' with quality ' + str(self.quality) + ' for run ' + self.runid
     def cancel(self):
@@ -237,6 +270,8 @@ def create_rdwork(run, video_filenames):
                 work.no_delete = True
                 if work.codec == 'av1' or work.codec == 'av1-rt' or work.codec == 'rav1e' or work.codec == 'svt-av1':
                     work.copy_back_files.append('.ivf')
+                elif (len(work.codec) >= 3) and (work.codec[0:3] == 'av2'):
+                    work.copy_back_files.append('.obu')
                 elif work.codec == 'xvc':
                     work.copy_back_files.append('.xvc')
             work_items.append(work)

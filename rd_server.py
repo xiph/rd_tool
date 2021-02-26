@@ -217,7 +217,7 @@ def main():
             machines.append(sshslot.Machine(m['host'],m['user'],m['cores'],m['work_root'],str(m['port']),m['media_path']))
         for machine in machines:
             slots.extend(machine.get_slots())
-        free_slots.extend(slots)
+        free_slots.extend(reversed(slots))
     app = tornado.web.Application(
         [
             (r"/work_list.json", WorkListHandler),

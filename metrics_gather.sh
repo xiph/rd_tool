@@ -85,12 +85,24 @@ if [ -z "$VMAF_ROOT" ]; then
   export VMAF_ROOT="$DAALATOOL_ROOT/../vmaf"
 fi
 
-if [ -z "$VMAFOSSEXEC" ]; then
-  export VMAFOSSEXEC="$VMAF_ROOT/wrapper/vmafossexec"
+if [ -z "$VMAF" ]; then
+  export VMAF="$VMAF_ROOT/libvmaf/build/tools/vmaf"
+fi
+
+if [ -z "$VMAFMODEL" ]; then
+  export VMAFMODEL="vmaf_v0.6.1.json" # File name in $VMAFROOT/model
 fi
 
 if [ -z "$YUV2YUV4MPEG" ]; then
   export YUV2YUV4MPEG="$DAALATOOL_ROOT/tools/yuv2yuv4mpeg"
+fi
+
+if [ -z "$HDRTOOLS_ROOT" ]; then
+  export HDRTOOLS_ROOT="$DAALATOOL_ROOT/../hdrtools"
+fi
+
+if [ -z "$HDRCONVERT" ]; then
+  export HDRCONVERT="$HDRTOOLS_ROOT/bin/HDRConvert"
 fi
 
 if [ -z "$CODEC" ]; then
@@ -113,15 +125,15 @@ FILE=$1
 BASENAME="$(basename $FILE)-$x"
 rm "$BASENAME.out" 2> /dev/null || true
 
-WIDTH="$(head -1 $FILE | cut -d\  -f 2 | tr -d 'W')"
-HEIGHT="$(head -1 $FILE | cut -d\  -f 3 | tr -d 'H')"
-CHROMA="$(head -1 $FILE | cut -d\  -f 7 | tr -d 'C')"
+WIDTH=$(head -1 $FILE | tr ' ' '\n' | grep -E '\bW' | tr -d 'W')
+HEIGHT=$(head -1 $FILE | tr ' ' '\n' | grep -E '\bH' | tr -d 'H')
+CHROMA=$(head -1 $FILE | tr ' ' '\n' | grep -E '\bC')
 DEPTH=8
 case $CHROMA in
-444p10)
+C444p10)
   DEPTH=10
   ;;
-420p10)
+C420p10)
   DEPTH=10
   ;;
 esac
@@ -210,6 +222,71 @@ av1-rt)
   $($TIMERDEC $AOMDEC --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf)
   SIZE=$(stat -c %s $BASENAME.ivf)
   ;;
+av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as)
+  case $CODEC in
+    av2-ai)
+      CTC_PROFILE_OPTS="--cpu-used=0 --passes=1 --end-usage=q --kf-min-dist=0 --kf-max-dist=0 --use-fixed-qp-offsets=1 --limit=30 --deltaq-mode=0 --enable-tpl-model=0 --enable-keyframe-filtering=0 --obu"
+      ;;
+    av2-ra | av2-ra-st | av2-as)
+      CTC_PROFILE_OPTS="--cpu-used=0 --passes=1 --lag-in-frames=19 --auto-alt-ref=1 --min-gf-interval=16 --max-gf-interval=16 --gf-min-pyr-height=4 --gf-max-pyr-height=4 --limit=130 --kf-min-dist=65 --kf-max-dist=65 --use-fixed-qp-offsets=1 --deltaq-mode=0 --enable-tpl-model=0 --end-usage=q --enable-keyframe-filtering=0 --obu"
+      ;;
+    av2-ld)
+      CTC_PROFILE_OPTS="--cpu-used=0 --passes=1 --lag-in-frames=0 --min-gf-interval=16 --max-gf-interval=16 --gf-min-pyr-height=4 --gf-max-pyr-height=4 --limit=130 --kf-min-dist=9999 --kf-max-dist=9999  --use-fixed-qp-offsets=1 --deltaq-mode=0 --enable-tpl-model=0 --end-usage=q --subgop-config-str=ld --enable-keyframe-filtering=0 --obu"
+      ;;
+    av2)
+      # generic, not currently used
+      CTC_PROFILE_OPTS=""
+      ;;
+  esac
+  if [ $((WIDTH)) -ge 3840 ] && [ $((HEIGHT)) -ge 2160 ]; then
+    CTC_PROFILE_OPTS+=" --tile-columns=1 --threads=2 --row-mt=0"
+  else
+    CTC_PROFILE_OPTS+=" --tile-columns=0 --threads=1"
+  fi
+  # threading options for the A1 test set must be overriden via EXTRA_OPTIONS at a higher level
+  case $CODEC in
+    av2-ra | av2-as)
+      # this is intentionally not a separate script as only metrics_gather.sh is sent to workers
+      echo "#!/bin/bash" > /tmp/enc$$.sh
+      echo "TIMER='time -v --output='enctime$$-\$1.out" >> /tmp/enc$$.sh
+      echo "RUN='$AOMENC --codec=av1 --cq-level=$x --test-decode=fatal $CTC_PROFILE_OPTS -o $BASENAME-'\$1'.obu $EXTRA_OPTIONS --limit=130 --'\$1'=65 $FILE'" >> /tmp/enc$$.sh
+      echo "\$(\$TIMER \$RUN > $BASENAME$$-stdout.txt)" >> /tmp/enc$$.sh
+      chmod +x /tmp/enc$$.sh
+      for s in {limit,skip}; do printf "$s\0"; done | xargs -0 -n1 -P2 /tmp/enc$$.sh
+      $(cat $BASENAME-limit.obu $BASENAME-skip.obu > $BASENAME.obu)
+      TIME1=$(cat enctime$$-limit.out | grep User | cut -d\  -f4)
+      TIME2=$(cat enctime$$-skip.out | grep User | cut -d\  -f4)
+      ENCTIME=$(awk "BEGIN {print $TIME1+$TIME2; exit}")
+      rm -f /tmp/enc$$.sh enctime$$-limit.out enctime$$-skip.out $BASENAME-limit.obu $BASENAME-skip.obu
+      ;;
+    *)
+      $($TIMER $AOMENC --codec=av1 --cq-level=$x --test-decode=fatal $CTC_PROFILE_OPTS -o $BASENAME.obu $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
+      ;;
+  esac
+  # decode the OBU to Y4M
+  if $AOMDEC --help 2>&1 | grep output-bit-depth > /dev/null; then
+    AOMDEC_OPTS+=" --output-bit-depth=$DEPTH"
+  fi
+  $($TIMERDEC $AOMDEC --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.obu)
+  SIZE=$(stat -c %s $BASENAME.obu)
+  case $CODEC in
+    av2-as)
+      if [ $((WIDTH)) -ne 3840 ] && [ $((HEIGHT)) -ne 2160 ]; then
+        # change the reference to 3840x2160
+        FILE=$(sed -e 's/\(640x360\|960x540\|1280x720\|1920x1080\|2560x1440\)/3840x2160/' <<< $FILE)
+        # hack to force input Y4M file to F30:1 because HDRConvert requires specifying an output frame rate, and if they do not match it will resample temporaly
+        echo "YUV4MPEG2 W$WIDTH H$HEIGHT F30:1 $CHROMA" > $BASENAME-$$.y4m
+        $(tail -n+2 $BASENAME.y4m >> $BASENAME-$$.y4m)
+        # upsample decoded output to 3840x2160
+        $HDRCONVERT -p SourceFile=$BASENAME-$$.y4m -p OutputFile=$BASENAME-$$-out.y4m -p OutputWidth=3840 -p OutputHeight=2160 -p OutputChromaFormat=1 -p OutputBitDepthCmp0=10 -p OutputBitDepthCmp1=10 -p OutputBitDepthCmp2=10 -p OutputColorSpace=0 -p OutputColorPrimaries=0 -p OutputTransferFunction=12 -p SilentMode=1 -p ScaleOnly=1 -p ScalingMode=12 -p OutputRate=30 -p NumberOfFrames=130 1>&2
+        # replace decoded output with upsampled file using Y4M header from the reference
+        $(head -n 1 $FILE > $BASENAME.y4m)
+        $(tail -n+2 $BASENAME-$$-out.y4m >> $BASENAME.y4m)
+        rm $BASENAME-$$.y4m $BASENAME-$$-out.y4m
+      fi
+      ;;
+  esac
+  ;;
 thor)
   $($TIMER $THORENC -qp $x -cf "$THORDIR/config_HDB16_high_efficiency.txt" -if $FILE -of $BASENAME.thor $EXTRA_OPTIONS > $BASENAME-enc.out)
   SIZE=$(stat -c %s $BASENAME.thor)
@@ -228,7 +305,7 @@ rav1e)
   elif hash aomdec 2>/dev/null; then
     $($TIMERDEC aomdec --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf) || (echo "Corrupt bitstream detected!"; exit 98)
   else
-    echo "AV1 decoder not found, desync/corruption detection disabled."
+    echo "AV1 decoder not found, desync/corruption detection disabled." >&2
   fi
 
   if [ -f $BASENAME.y4m ]; then
@@ -236,6 +313,8 @@ rav1e)
     "$Y4M2YUV" "$BASENAME.y4m" -o enc.yuv
     cmp --silent rec.yuv enc.yuv || (echo "Reconstruction differs from output!"; rm -f rec.yuv enc.yuv "$BASENAME-rec.y4m"; exit 98)
     rm -f rec.yuv enc.yuv "$BASENAME-rec.y4m"
+  else
+    mv "$BASENAME-rec.y4m" "$BASENAME.y4m"
   fi
   SIZE=$(stat -c %s $BASENAME.ivf)
   ;;
@@ -289,31 +368,19 @@ echo "$MSSSIM"
 if [ -e "$TIMEROUT" ]; then
   ENCTIME=$(awk '/User/ { s=$4 } END { printf "%.2f", s }' "$TIMEROUT")
 else
-  ENCTIME=0
+  if [ -z "$ENCTIME" ]; then
+    ENCTIME=0
+  fi
 fi
 
 echo "$ENCTIME"
 
-if [ -f "$VMAFOSSEXEC" ]; then
-  FORMAT=yuv420p
-  case $CHROMA in
-      420p10)
-          FORMAT=yuv444p10le
-          ;;
-      444p10)
-          FORMAT=yuv444p10le
-          ;;
-      444)
-          FORMAT=yuv444p
-          ;;
-  esac
-  "$Y4M2YUV" "$FILE" -o ref
-  "$Y4M2YUV" "$BASENAME.y4m" -o dis
-  VMAF=$("$VMAFOSSEXEC" $FORMAT $WIDTH $HEIGHT ref dis "$VMAF_ROOT/model/vmaf_v0.6.1.pkl" --thread 1 | tail -n 1)
+if [ -f "$VMAF" ]; then
+  "$VMAF" -r "$FILE" -d "$BASENAME.y4m" --aom_ctc v1.0 --xml -o "$BASENAME-vmaf.xml" --thread 1 | tail -n 1
   rm -f ref dis
-  echo "$VMAF"
+  echo "0"
 else
-  echo 0 0 0 0
+  echo "0"
 fi
 
 if [ -e "$TIMERDECOUT" ]; then
@@ -323,6 +390,11 @@ else
 fi
 
 echo "$DECTIME"
+
+if [ -f "$VMAF" ]; then
+  cat "$BASENAME-vmaf.xml"
+  rm "$BASENAME-vmaf.xml"
+fi
 
 if [ ! "$NO_DELETE" ]; then
   rm -f "$BASENAME.ogv" "$BASENAME.x264" "$BASENAME.x265" "$BASENAME.xvc" "$BASENAME.vpx" "$BASENAME.ivf" "$TIMEROUT" "$BASENAME-enc.out" "$BASENAME-psnr.out" "$BASENAME.thor" 2> /dev/null
