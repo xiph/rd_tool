@@ -107,7 +107,7 @@ class RDWork(Work):
     def __init__(self):
         super().__init__()
         self.no_delete = False
-        self.copy_back_files = ['-stdout.txt']
+        self.copy_back_files = ['-stdout.txt', '-stderr.txt']
     def parse(self, stdout, stderr):
         self.raw = stdout
         split = None
