@@ -3528,5 +3528,25 @@
       "surfing.y4m",
       "xmas.y4m"
     ]
+  },
+  "vimeo-corpus-10s-qcif": {
+    "type": "video",
+    "sources": [
+      "autumn.y4m",
+      "blower.y4m",
+      "brothers.y4m",
+      "coffee.y4m",
+      "dolphin.y4m",
+      "ffmpeg.y4m",
+      "ocean.y4m",
+      "rabbit.y4m",
+      "running_man.y4m",
+      "sky.y4m",
+      "slideshow.y4m",
+      "slow_pan.y4m",
+      "snowboard.y4m",
+      "surfing.y4m",
+      "xmas.y4m"
+    ]
   }
 }
