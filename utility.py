@@ -1,12 +1,8 @@
 #!/usr/bin/env python3
 
-from datetime import datetime
-import sys
+import rs_rd_tool
 
-#our timestamping function, accurate to milliseconds
-#(remove [:-3] to display microseconds)
-def get_time():
-    return datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
+get_time = rs_rd_tool.utility.get_time
 
 def rd_print(log, *args, **kwargs):
     print(get_time(), *args, flush=True, **kwargs)

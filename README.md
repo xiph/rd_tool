@@ -1,14 +1,15 @@
 rd_tool
 =======
 
-rd_tool.py is a script for collecting rate-distortion curves across a series of either local or Amazon AWS nodes.
+rd_tool.sh is a script for collecting rate-distortion curves across a series of either local or Amazon AWS nodes.
 
 This script is run by arewecompressedyet.com, but can also be run locally to produce the same data.
 
 Dependencies
 ============
 
-You will need Python 3.4 or later, as well as [boto3](https://github.com/boto/boto3).
+You will need Python 3.6 or later, [boto3](https://github.com/boto/boto3),
+tornado, and Rust version 1.52.1 or later.
 
 On Ubuntu, install with:
 ```
@@ -40,12 +41,7 @@ make tools -j4
 
 For dump\_ciede2000:
 
-Install rust if you haven't already. You only need rust to compile the binary
-and don't need it on the individual machines.
-
-```
-curl -sf -L https://static.rust-lang.org/rustup.sh | sh
-```
+You will only need rust to compile the binary and don't need it on the individual machines.
 
 Build dump_ciede2000.
 
@@ -121,7 +117,7 @@ Builds
 ======
 
 Specify the path to the git checkout of thetested codec with the -bindir
-argument. rd_tool.py expects to find prebuilt binaries of the codec - it will
+argument. rd_tool.sh expects to find prebuilt binaries of the codec - it will
 not build the codec automatically.
 
 Output files
