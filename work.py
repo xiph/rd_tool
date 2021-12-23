@@ -112,7 +112,7 @@ class RDWork(Work):
         self.raw = stdout
         split = None
         try:
-            split = self.raw.decode('utf-8').replace(')',' ').split(maxsplit=56)
+            split = self.raw.decode('utf-8').replace(')',' ').split(maxsplit=58)
             self.pixels = split[1]
             self.size = split[2]
             self.metric = {}
@@ -144,6 +144,8 @@ class RDWork(Work):
             self.metric['encodetime'] = split[53]
             self.metric['vmaf_old'] = split[54]
             self.metric['decodetime'] = split[55]
+            self.metric['butter'] = split[57]
+            self.metric['ssimulacra'] = split[58]
             self.vmaf_xml = split[56]
             root = ET.fromstring(self.vmaf_xml)
             for metric_name in ['psnr_y', 'psnr_cb', 'psnr_cr', 'ciede2000', 'float_ssim', 'float_ms_ssim', 'psnr_hvs_y', 'psnr_hvs_cb', 'psnr_hvs_cr', 'psnr_hvs']:
@@ -195,6 +197,8 @@ class RDWork(Work):
         f += (str(work.metric['vmaf_apsnr_y'])+' ')
         f += (str(work.metric['vmaf_apsnr_cb'])+' ')
         f += (str(work.metric['vmaf_apsnr_cr'])+' ')
+        f += (str(work.metric['butter'])+' ')
+        f += (str(work.metric['ssimulacra'])+' ')
         f += ('\n')
         return f
     def execute(self):

@@ -1,27 +1,25 @@
-rd_tool
-=======
+# rd_tool
 
 rd_tool.py is a script for collecting rate-distortion curves across a series of either local or Amazon AWS nodes.
 
 This script is run by arewecompressedyet.com, but can also be run locally to produce the same data.
 
-Dependencies
-============
+# Dependencies
 
 You will need Python 3.4 or later, as well as [boto3](https://github.com/boto/boto3).
 
 On Ubuntu, install with:
+
 ```
 sudo apt install python3-tornado python3-boto3
 ```
 
-Node dependencies
-=================
+# Node dependencies
 
 Individual build machines do not need Python, but do need bash. Each machine
 should be configured with a user and work_root (such as that user's home
 directory). This work directory must be populated with folders called
-daalatool, dump\_ciede2000, and, optionally, dav1d and vmaf, which need to
+daalatool, dump_ciede2000, and, optionally, dav1d and vmaf, which need to
 contain checkouts of their respective git repositories, each with tools built.
 
 To compile Daala tools:
@@ -38,7 +36,7 @@ cd daalatool
 make tools -j4
 ```
 
-For dump\_ciede2000:
+For dump_ciede2000:
 
 Install rust if you haven't already. You only need rust to compile the binary
 and don't need it on the individual machines.
@@ -83,18 +81,31 @@ cd vmaf
 cd ptools; make; cd ../wrapper; make; cd ..;
 ```
 
+For butteraugli and ssimulacra (optional):
+
+```
+git clone https://github.com/libjxl/libjxl.git
+cd libjxl
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DJPEGXL_ENABLE_DEVTOOLS=true ..
+cmake --build . -- -j$(nproc)
+cd ..
+git clone https://github.com/shssoichiro/butter-video.git
+cargo build --release
+cd ..
+```
+
 rd_tool will automatically create one slot directory per core, and upload
 codec binaries into that directory.
 
-Using AWS nodes
-===============
+# Using AWS nodes
 
 You will need a ~/.aws configuration for boto with your AWS information and credentials.
 
 Specify the autoscaling groukp to use with -awsgroup.
 
-Using local nodes
-=================
+# Using local nodes
 
 You can specify all of the machines you want to use in a JSON file:
 
@@ -117,15 +128,13 @@ You can specify all of the machines you want to use in a JSON file:
 
 Specify this configuration on the command line with -machineconf.
 
-Builds
-======
+# Builds
 
 Specify the path to the git checkout of thetested codec with the -bindir
 argument. rd_tool.py expects to find prebuilt binaries of the codec - it will
 not build the codec automatically.
 
-Output files
-============
+# Output files
 
 Output files are written into the current directory. The format of the .out
 files is one quantizer per line, of the format

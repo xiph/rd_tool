@@ -93,6 +93,21 @@ if [ -z "$VMAFMODEL" ]; then
   export VMAFMODEL="vmaf_v0.6.1.json" # File name in $VMAFROOT/model
 fi
 
+if [ -z "$LIBJXL_ROOT" ]; then
+  export LIBJXL_ROOT="$DAALATOOL_ROOT/../libjxl"
+fi
+
+if [ -z "$BUTTERAUGLI" ]; then
+  export BUTTERAUGLI="$LIBJXL_ROOT/tools/butteraugli"
+fi
+
+if [ -z "$SSIMULACRA" ]; then
+  export SSIMULACRA="$LIBJXL_ROOT/tools/ssimulacra"
+fi
+
+if [ -z "$BUTTERVIDEO" ]; then
+  export BUTTERVIDEO="$DAALATOOL_ROOT/../butter-video/target/release/butter-video"
+
 if [ -z "$YUV2YUV4MPEG" ]; then
   export YUV2YUV4MPEG="$DAALATOOL_ROOT/tools/yuv2yuv4mpeg"
 fi
@@ -390,6 +405,24 @@ else
 fi
 
 echo "$DECTIME"
+
+if [ -f "$BUTTERVIDEO" ]; then
+  if [ -f "$BUTTERAUGLI" ]; then
+    # This is pain
+    BUTTERAUGLI_PATH="$BUTTERAUGLI" "$BUTTERVIDEO" butter "$FILE" "$BASENAME.y4m"
+  else
+    echo "0"
+  fi
+
+  if [ -f "$SSIMULACRA" ]; then
+    SSIMULACRA_PATH="$SSIMULACRA" "$BUTTERVIDEO" ssimulacra "$FILE" "$BASENAME.y4m"
+  else
+    echo "0"
+  fi
+else
+  echo "0"
+  echo "0"
+fi
 
 if [ -f "$VMAF" ]; then
   cat "$BASENAME-vmaf.xml"
