@@ -103,7 +103,11 @@ class SubmitTask(SchedulerTask):
         run.rundir = config['runs'] + '/' + run_id
         run.log = log_file
         run.set = info['task']
-        run.bindir = run.rundir + '/x86_64/'
+        if 'arch' in info:
+            run.arch = info['arch']
+        else:
+            run.arch = 'x86_64'
+        run.bindir = run.rundir + '/' + run.arch + '/'
         run.prefix = run.rundir + '/' + run.set
         try:
             os.mkdir(run.prefix)
