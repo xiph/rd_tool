@@ -41,7 +41,7 @@ def shellquote(s):
     return "'" + s.replace("'", "'\"'\"'") + "'"
 
 class Machine:
-    def __init__(self,host,user='ec2-user',cores=18,work_root='/home/ec2-user',port=22,media_path='/mnt/media'):
+    def __init__(self,host,user='ec2-user',cores=18,work_root='/home/ec2-user',port=22,media_path='/mnt/media',arch='x86_64'):
         self.host = host
         self.user = user
         self.cores = cores
@@ -49,6 +49,7 @@ class Machine:
         self.port = str(port)
         self.media_path = media_path
         self.log = None
+        self.arch = arch
         self.slots = []
     def rsync(self, local, remote):
         return subprocess.call(['rsync', '-r', '-e', "ssh -i "+ssh_privkey_file+" -o StrictHostKeyChecking=no -p "+str(self.port), local, self.user + '@' + self.host + ':' + remote])
@@ -102,6 +103,7 @@ class Slot:
         self.work = None
         self.log = log
         self.can_kill = None
+        self.arch = machine.arch
     def gather(self):
         return self.p.communicate()
     def start_work(self, work):

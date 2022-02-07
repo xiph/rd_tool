@@ -266,6 +266,7 @@ def create_rdwork(run, video_filenames):
             work.set = run.set
             work.filename = filename
             work.extra_options = run.extra_options
+            work.arch = run.arch
             if run.save_encode:
                 work.no_delete = True
                 if work.codec == 'av1' or work.codec == 'av1-rt' or work.codec == 'rav1e' or work.codec == 'svt-av1':
