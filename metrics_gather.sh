@@ -376,7 +376,7 @@ fi
 echo "$ENCTIME"
 
 if [ -f "$VMAF" ]; then
-  "$VMAF" -r "$FILE" -d "$BASENAME.y4m" --aom_ctc v1.0 --xml -o "$BASENAME-vmaf.xml" --thread 1 | tail -n 1
+  "$VMAF" -r "$FILE" -d "$BASENAME.y4m" --aom_ctc v3.0 --xml -o "$BASENAME-vmaf.xml" --thread 1 | tail -n 1
   rm -f ref dis
   echo "0"
 else

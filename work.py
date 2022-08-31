@@ -146,7 +146,7 @@ class RDWork(Work):
             self.metric['decodetime'] = split[55]
             self.vmaf_xml = split[56]
             root = ET.fromstring(self.vmaf_xml)
-            for metric_name in ['psnr_y', 'psnr_cb', 'psnr_cr', 'ciede2000', 'float_ssim', 'float_ms_ssim', 'psnr_hvs_y', 'psnr_hvs_cb', 'psnr_hvs_cr', 'psnr_hvs']:
+            for metric_name in ['psnr_y', 'psnr_cb', 'psnr_cr', 'ciede2000', 'float_ssim', 'float_ms_ssim', 'psnr_hvs_y', 'psnr_hvs_cb', 'psnr_hvs_cr', 'psnr_hvs', 'cambi']:
                 self.metric['vmaf_'+metric_name] = root.find("pooled_metrics/metric[@name='"+metric_name+"']").get('mean')
             self.metric['vmaf'] = root.find("pooled_metrics/metric[@name='vmaf']").get('mean')
             self.metric['vmaf_neg'] = root.find("pooled_metrics/metric[@name='vmaf_neg']").get('mean')
@@ -195,6 +195,7 @@ class RDWork(Work):
         f += (str(work.metric['vmaf_apsnr_y'])+' ')
         f += (str(work.metric['vmaf_apsnr_cb'])+' ')
         f += (str(work.metric['vmaf_apsnr_cr'])+' ')
+        f += (str(work.metric['vmaf_cambi'])+' ')
         f += ('\n')
         return f
     def execute(self):
