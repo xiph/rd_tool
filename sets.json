@@ -81,12 +81,26 @@
       "GlassHalf_1920x1080p_24p_8bit_420.y4m",
       "Life_1080p30.y4m",
       "MINECRAFT_1080p_60_8bit.y4m",
-      "MissionControlClip3_1920x1080_60_420.y4m",
       "Sniper_1920x1080P_30fps_8bit.y4m",
       "SolLevanteDragons_sdr_1920x1080_24_10bit.y4m",
       "SolLevanteFace_sdr_1920x1080_24_10bit.y4m",
-      "Wikipedia_1920x1080p30.y4m",
       "WITCHER3_1920x1080_60_8bit_420.y4m"
+    ]
+  },
+  "aomctc-b2-syn": {
+    "type": "video",
+    "sources": [
+      "BigBuckBunnyStudio1_1920x1080_60fps_10bit_420_020_0149.y4m",
+      "Debugging_1920x1080_30fps_8bit_420.y4m",
+      "MissionControlClip1_1920x1080_60fps_10bit_420_0450_0579.y4m",
+      "MissionControlClip3_1920x1080_60_420.y4m",
+      "MobileDeviceScreenSharing.y4m",
+      "SceneComposition_1.y4m",
+      "SceneComposition_2.y4m",
+      "Slides1_1920x1080_30fps_8bit_420.y4m",
+      "Slides2r_1920x1080_30fps_8bit_420.y4m",
+      "Spreadsheet_1920x1080_30fps_8bit_420_130f.y4m",
+      "Wikipedia_1920x1080p30.y4m"
     ]
   },
   "aomctc-f1-hires": {
