@@ -28,11 +28,12 @@ quality_presets = {
     "vp10-rt": [8,20,32,43,55,63],
     "av1": [20,32,43,55,63],
     "av1-rt": [20,32,43,55,63],
-    "av2-ai": [15, 23, 31, 39, 47, 55],
-    "av2-ra": [23, 31, 39, 47, 55, 63],
-    "av2-ra-st": [23, 31, 39, 47, 55, 63],
-    "av2-ld": [23, 31, 39, 47, 55, 63],
-    "av2-as": [23, 31, 39, 47, 55, 63],
+    "av2-ai": [85, 110, 135, 160, 185, 210],
+    "av2-ra": [110, 135, 160, 185, 210, 235],
+    "av2-ra-st": [110, 135, 160, 185, 210, 235],
+    "av2-ld": [110, 135, 160, 185, 210, 235],
+    "av2-as": [110, 135, 160, 185, 210, 235],
+    "av2-f" : [60, 85, 110, 135, 160, 185],
     "thor": list(range(7,43,3)),
     "thor-rt": list(range(7,43,3)),
     "rav1e": [20*4,32*4,43*4,55*4,63*4],
@@ -108,6 +109,7 @@ class RDWork(Work):
         super().__init__()
         self.no_delete = False
         self.copy_back_files = ['-stdout.txt']
+        self.ctc_class = ''
     def parse(self, stdout, stderr):
         self.raw = stdout
         split = None
@@ -209,6 +211,7 @@ class RDWork(Work):
             command += 'DAALATOOL_ROOT="'+daalatool_dir+'"'
             command += ' x="'+str(work.quality) + '" '
             command += 'CODEC="'+work.codec+'" '
+            command += 'CTC_CLASS="'+work.ctc_class+'" '
             command += 'EXTRA_OPTIONS="'+work.extra_options + '" '
             if self.no_delete:
                 command += 'NO_DELETE=1 '
@@ -265,6 +268,9 @@ def create_rdwork(run, video_filenames):
             work.codec = run.codec
             work.bindir = run.bindir
             work.set = run.set
+            # Parse and Store the CTC class (A1..A5, E, F1/F2, G1/G2)
+            if 'aomctc' in work.set:
+                work.ctc_class = work.set.split('-')[1].upper()
             work.filename = filename
             work.extra_options = run.extra_options
             if run.save_encode:

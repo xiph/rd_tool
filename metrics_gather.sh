@@ -243,13 +243,17 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as)
   else
     CTC_PROFILE_OPTS+=" --tile-columns=0 --threads=1"
   fi
+  case $CTC_CLASS in
+    G1 | G2)
+    CTC_PROFILE_OPTS+=" --color-primaries=bt2020 --transfer-characteristics=smpte2084 --matrix-coefficients=bt2020ncl --chroma-sample-position=colocated"
+  esac
   # threading options for the A1 test set must be overriden via EXTRA_OPTIONS at a higher level
   case $CODEC in
     av2-ra | av2-as)
       # this is intentionally not a separate script as only metrics_gather.sh is sent to workers
       echo "#!/bin/bash" > /tmp/enc$$.sh
       echo "TIMER='time -v --output='enctime$$-\$1.out" >> /tmp/enc$$.sh
-      echo "RUN='$AOMENC --codec=av1 --cq-level=$x --test-decode=fatal $CTC_PROFILE_OPTS -o $BASENAME-'\$1'.obu $EXTRA_OPTIONS --limit=130 --'\$1'=65 $FILE'" >> /tmp/enc$$.sh
+      echo "RUN='$AOMENC --qp=$x $CTC_PROFILE_OPTS -o $BASENAME-'\$1'.obu $EXTRA_OPTIONS --limit=130 --'\$1'=65 $FILE'" >> /tmp/enc$$.sh
       echo "\$(\$TIMER \$RUN > $BASENAME$$-stdout.txt)" >> /tmp/enc$$.sh
       chmod +x /tmp/enc$$.sh
       for s in {limit,skip}; do printf "$s\0"; done | xargs -0 -n1 -P2 /tmp/enc$$.sh
@@ -260,14 +264,14 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as)
       rm -f /tmp/enc$$.sh enctime$$-limit.out enctime$$-skip.out $BASENAME-limit.obu $BASENAME-skip.obu
       ;;
     *)
-      $($TIMER $AOMENC --codec=av1 --cq-level=$x --test-decode=fatal $CTC_PROFILE_OPTS -o $BASENAME.obu $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
+      $($TIMER $AOMENC --qp=$x $CTC_PROFILE_OPTS -o $BASENAME.obu $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
       ;;
   esac
   # decode the OBU to Y4M
   if $AOMDEC --help 2>&1 | grep output-bit-depth > /dev/null; then
     AOMDEC_OPTS+=" --output-bit-depth=$DEPTH"
   fi
-  $($TIMERDEC $AOMDEC --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.obu)
+  $($TIMERDEC $AOMDEC $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.obu)
   SIZE=$(stat -c %s $BASENAME.obu)
   case $CODEC in
     av2-as)
