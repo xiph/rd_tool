@@ -247,7 +247,10 @@ class RDWork(Work):
         with open(xml_filename, 'w') as f:
             f.write(self.vmaf_xml)
     def get_name(self):
-        return self.filename + ' with quality ' + str(self.quality) + ' for run ' + self.runid
+        if len(self.ctc_class) > 0:
+            return self.filename + ' with quality ' + str(self.quality) + ' of '+ str(self.ctc_class) + ' for run ' + self.runid
+        else:
+            return self.filename + ' with quality ' + str(self.quality) + ' for run ' + self.runid
     def cancel(self):
         if self.slot:
             self.slot.kill()
