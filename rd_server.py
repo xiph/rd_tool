@@ -21,11 +21,30 @@ codecs_src_dir = os.getenv("CODECS_SRC_DIR", os.path.join(os.getcwd(), ".."))
 video_sets_f = codecs.open(os.path.join(config_dir, 'sets.json'),'r',encoding='utf-8')
 video_sets = json.load(video_sets_f)
 
+# CTC Configs
+# LD : ctc_sets_mandatory
+# RA: ctc_sets_mandatory  + ctc_sets_optional
+# AI: ctc_sets_mandatory_ai + ctc_sets_optional
+# AS: A1 with Downsampling
+ctc_sets_mandatory = [
+    "aomctc-a1-4k",
+    "aomctc-a2-2k",
+    "aomctc-a3-720p",
+    "aomctc-a4-360p",
+    "aomctc-a5-270p",
+    "aomctc-b1-syn",
+    "aomctc-b2-syn"]
+ctc_sets_mandatory_ai = ctc_sets_mandatory + \
+    ["aomctc-f1-hires", "aomctc-f2-midres"]
+ctc_sets_optional = ["aomctc-g1-hdr-4k",
+                     "aomctc-g2-hdr-2k", "aomctc-e-nonpristine"]
+
 machines = []
 slots = []
 free_slots = []
 work_list = []
 run_list = []
+run_set_list = []
 work_done = []
 args = {}
 scheduler_tasks = queue.Queue()
@@ -90,6 +109,7 @@ class SubmitTask(SchedulerTask):
     def run(self):
         global work_list
         global run_list
+        global run_set_list
         run_id = self.run_id
         rundir = config['runs'] + '/' + run_id
         info_file_path = rundir + '/info.json'
@@ -97,51 +117,69 @@ class SubmitTask(SchedulerTask):
         info_file = open(info_file_path, 'r')
         log_file = open(log_file_path, 'a')
         info = json.load(info_file)
-        run = RDRun(info['codec'])
-        run.info = info
-        run.runid = run_id
-        run.rundir = config['runs'] + '/' + run_id
-        run.log = log_file
-        run.set = info['task']
-        if 'arch' in info:
-            run.arch = info['arch']
+        if len(info['ctcSets']) > 0:
+            run_set_list = info['ctcSets']
+            if 'aomctc-all' in info['ctcSets']:
+                if info['codec'] == 'av2-ai':
+                  run_set_list = ctc_sets_mandatory_ai + ctc_sets_optional
+                elif info['codec'] == 'av2-ra-st' or info['codec'] == 'av2-ra':
+                  run_set_list = ctc_sets_mandatory + ctc_sets_optional
+                elif info['codec'] == 'av2-ld':
+                  run_set_list = ctc_sets_mandatory
+            elif 'aomctc-mandatory' in info['ctcSets']:
+                if info['codec'] == 'av2-ra-st' or info['codec'] == 'av2-ra' or info['codec'] == 'av2-ld':
+                  run_set_list = ctc_sets_mandatory
+                elif info['codec'] == 'av2-ai':
+                  run_set_list = ctc_sets_mandatory_ai
         else:
-            run.arch = 'x86_64'
-        run.bindir = run.rundir + '/' + run.arch + '/'
-        run.prefix = run.rundir + '/' + run.set
-        try:
-            os.mkdir(run.prefix)
-        except FileExistsError:
-            pass
-        if 'qualities' in info:
-          if info['qualities'] != '':
-              run.quality = info['qualities'].split()
-        if 'extra_options' in info:
-          run.extra_options = info['extra_options']
-        if 'save_encode' in info:
-            if info['save_encode']:
-                run.save_encode = True
-        run.status = 'running'
-        run.write_status()
-        run_list.append(run)
-        video_filenames = video_sets[run.set]['sources']
-        run.set_type = video_sets[run.set].get('type', 'undef')
-        run.work_items = create_rdwork(run, video_filenames)
-        work_list.extend(run.work_items)
-        if False:
-            if 'ab_compare' in info:
-                if info['ab_compare']:
-                    abrun = ABRun(info['codec'])
-                    abrun.runid = run_id
-                    abrun.rundir = config['runs'] + '/' + run_id
-                    abrun.log = log_file
-                    abrun.set = info['task']
-                    abrun.bindir = config['codecs'] + '/' + info['codec']
-                    abrun.prefix = run.rundir + '/' + run.set
-                    run_list.append(abrun)
-                    abrun.work_items.extend(create_abwork(abrun, video_filenames))
-                    work_list.extend(abrun.work_items)
-                    pass
+              run_set_list = [info['task']]
+        for this_video_set in sorted(run_set_list):
+            run = RDRun(info['codec'])
+            run.info = info
+            run.runid = run_id
+            run.rundir = config['runs'] + '/' + run_id
+            run.log = log_file
+            run.set = this_video_set
+            rd_print(run.log, "Starting encoding of ", this_video_set)
+            if 'arch' in info:
+                run.arch = info['arch']
+            else:
+                run.arch = 'x86_64'
+            run.bindir = run.rundir + '/' + run.arch + '/'
+            run.prefix = run.rundir + '/' + run.set
+            try:
+                os.mkdir(run.prefix)
+            except FileExistsError:
+                pass
+            if 'qualities' in info:
+              if info['qualities'] != '':
+                  run.quality = info['qualities'].split()
+            if 'extra_options' in info:
+              run.extra_options = info['extra_options']
+            if 'save_encode' in info:
+                if info['save_encode']:
+                    run.save_encode = True
+            run.status = 'running'
+            run.write_status()
+            run_list.append(run)
+            video_filenames = video_sets[run.set]['sources']
+            run.set_type = video_sets[run.set].get('type', 'undef')
+            run.work_items = create_rdwork(run, video_filenames)
+            work_list.extend(run.work_items)
+            if False:
+                if 'ab_compare' in info:
+                    if info['ab_compare']:
+                        abrun = ABRun(info['codec'])
+                        abrun.runid = run_id
+                        abrun.rundir = config['runs'] + '/' + run_id
+                        abrun.log = log_file
+                        abrun.set = info['task']
+                        abrun.bindir = config['codecs'] + '/' + info['codec']
+                        abrun.prefix = run.rundir + '/' + run.set
+                        run_list.append(abrun)
+                        abrun.work_items.extend(create_abwork(abrun,    video_filenames))
+                        work_list.extend(abrun.work_items)
+                        pass
 
 class WorkListHandler(tornado.web.RequestHandler):
     def get(self):
@@ -155,6 +193,7 @@ class RunStatusHandler(tornado.web.RequestHandler):
         for run in run_list:
             run_json = {}
             run_json['run_id'] = run.runid
+            run_json['set'] = run.set
             run_json['completed'] = 0
             run_json['total'] = 0
             run_json['info'] = run.info
@@ -303,6 +342,7 @@ def scheduler_tick():
     global free_slots
     global work_list
     global run_list
+    global run_set_list
     global work_done
     global scheduler_tasks
     max_retries = 5
@@ -353,21 +393,47 @@ def scheduler_tick():
             work_list.remove(work)
             rd_print(work.log,'Encoding',work.get_name(),'on',slot.machine.host)
             slot.start_work(work)
-    # find runs where all work has been completed
-    for run in run_list:
-        done = True
-        for work in run.work_items:
-            if work.done == False:
-                done = False
-        if done:
-            run_list.remove(run)
-            try:
-                run.reduce()
-            except Exception as e:
-                rd_print(run.log,e)
-                rd_print(run.log,'Failed to run reduce step on '+run.runid)
-            rd_print(run.log,'Finished '+run.runid)
-            run.finish()
+    # As we have Work of Works with different sets for same RunID,
+    # Create a mechanism to filter and store the results for unique jobs based
+    # on sets.
+    current_unique_run_list = []
+    for this_run in run_list:
+        current_unique_run_list.append(this_run.runid)
+    current_unique_run_list = list(dict.fromkeys(current_unique_run_list))
+    # Make a tracker for given a run
+    run_tracker = {}
+    # find runs/sub-runs where all work has been completed a given run_id
+    for this_run in current_unique_run_list:
+        # Create a set-based tracker for unique jobs.
+        run_tracker[this_run] = {}
+        run_tracker[this_run]['done'] = True
+        run_tracker[this_run]['sets'] = {}
+        for run in run_list:
+            if run.runid == this_run:
+                run_tracker[this_run]['sets'][run.set] = True
+        for run in run_list:
+            if run.runid == this_run:
+                for work in run.work_items:
+                    if work.done == False:
+                        run_tracker[this_run]['sets'][run.set] = False
+                        run_tracker[this_run]['done'] = False
+                if run_tracker[this_run]['sets'][run.set]:
+                    rd_print(run.log, "Finished Encoding ", run.set, "set.")
+                    run_list.remove(run)
+                    run_tracker[this_run]['done'] = False
+                if all(value == True for value in run_tracker[this_run]['sets'].values()):
+                    run_tracker[this_run]['done'] = True
+                    rd_print(run.log, "Finished Encoding all sets for ", run.runid)
+                    try:
+                        # Explicty set the first Task ID as the Prefix for
+                        # average (this taskID is sorted based on priority)
+                        run.prefix = run.rundir + '/' + sorted(run_set_list)[0]
+                        run.reduce()
+                    except Exception as e:
+                        rd_print(run.log,e)
+                        rd_print(run.log,'Failed to run reduce step on '+run.runid)
+                        rd_print(run.log,'Finished '+run.runid)
+                        run.finish()
     tornado.ioloop.IOLoop.current().call_later(1,scheduler_tick)
 
 if __name__ == "__main__":
