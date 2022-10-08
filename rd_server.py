@@ -428,6 +428,9 @@ def scheduler_tick():
                         # Explicty set the first Task ID as the Prefix for
                         # average (this taskID is sorted based on priority)
                         run.prefix = run.rundir + '/' + sorted(run_set_list)[0]
+                        # Use A2 set for mandatory/all CTC Class
+                        if  'aomctc-mandatory' in run.info['ctcSets'] or 'aomctc-all' in run.info['ctcSets']:
+                            run.prefix = run.rundir + '/aomctc-a2-2k'
                         run.reduce()
                     except Exception as e:
                         rd_print(run.log,e)
