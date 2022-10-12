@@ -411,15 +411,20 @@ def scheduler_tick():
         run_tracker[this_run] = {}
         run_tracker[this_run]['done'] = True
         run_tracker[this_run]['sets'] = {}
+        ## Part 1: Initialise flags as True
         for run in run_list:
             if run.runid == this_run:
                 run_tracker[this_run]['sets'][run.set] = True
+        ## Part 2: Update flags
         for run in run_list:
             if run.runid == this_run:
                 for work in run.work_items:
                     if work.done == False:
                         run_tracker[this_run]['sets'][run.set] = False
                         run_tracker[this_run]['done'] = False
+        ## Part 3: Send updates and curate results.
+        for run in run_list:
+            if run.runid == this_run:
                 if run_tracker[this_run]['sets'][run.set]:
                     rd_print(run.log, "Finished Encoding ", run.set, "set.")
                     run_list.remove(run)
