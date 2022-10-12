@@ -13,6 +13,7 @@ import awsremote
 import queue
 from work import *
 from utility import *
+from work import quality_presets
 
 config_dir = os.getenv("CONFIG_DIR", os.getcwd())
 runs_dst_dir = os.getenv("RUNS_DST_DIR", os.path.join(os.getcwd(), "../runs"))
@@ -140,6 +141,8 @@ class SubmitTask(SchedulerTask):
             run.rundir = config['runs'] + '/' + run_id
             run.log = log_file
             run.set = this_video_set
+            if this_video_set in ['aomctc-f1-hires','aomctc-f2-midres']:
+                run.quality = quality_presets['av2-f']
             rd_print(run.log, "Starting encoding of ", this_video_set)
             if 'arch' in info:
                 run.arch = info['arch']
