@@ -246,6 +246,10 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as)
   case $CTC_CLASS in
     G1 | G2)
     CTC_PROFILE_OPTS+=" --color-primaries=bt2020 --transfer-characteristics=smpte2084 --matrix-coefficients=bt2020ncl --chroma-sample-position=colocated"
+    ;;
+    F1 | F2)
+    CTC_PROFILE_OPTS+=" --limit=1 "
+    ;;
   esac
   # threading options for the A1 test set must be overriden via EXTRA_OPTIONS at a higher level
   case $CODEC in
