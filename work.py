@@ -3,6 +3,7 @@ import os
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
+import time
 
 runs_dst_dir = os.getenv("RUNS_DST_DIR", os.path.join(os.getcwd(), "../runs"))
 
@@ -218,6 +219,8 @@ class RDWork(Work):
             command += slot.work_root + '/rd_tool/metrics_gather.sh '+shellquote(input_path)
             slot.start_shell(command)
             (stdout, stderr) = slot.gather()
+            # We need some buffer before we try to copy
+            time.sleep(2)
             for file in self.copy_back_files:
                 if slot.get_file(slot.work_root+'/'+work.filename+'-'+str(work.quality)+file,runs_dst_dir+'/'+work.runid+'/'+work.set+'/') != 0:
                     rd_print(self.log,'Failed to copy back '+work.filename+'-'+str(work.quality)+file+', continuing anyway')
