@@ -11,6 +11,7 @@ import threading
 import time
 import awsremote
 import queue
+import subprocess
 from work import *
 from utility import *
 from work import quality_presets
@@ -39,13 +40,14 @@ ctc_sets_mandatory_ai = ctc_sets_mandatory + \
     ["aomctc-f1-hires", "aomctc-f2-midres"]
 ctc_sets_optional = ["aomctc-g1-hdr-4k",
                      "aomctc-g2-hdr-2k", "aomctc-e-nonpristine"]
-
+ctc_full_presets = ["av2-ra-st", 'av2-ld','av2-ai']
 machines = []
 slots = []
 free_slots = []
 work_list = []
 run_list = []
 run_set_list = []
+run_preset_list = []
 work_done = []
 args = {}
 scheduler_tasks = queue.Queue()
@@ -54,6 +56,26 @@ config = {
   'runs': runs_dst_dir,
   'codecs': codecs_src_dir,
 }
+
+def return_set_list(info_file, codec_id):
+    if len(info_file['ctcSets']) > 0:
+        if 'aomctc-all' in info_file['ctcSets']:
+            if codec_id == 'av2-ai':
+                run_set_list = ctc_sets_mandatory_ai + ctc_sets_optional
+            elif codec_id == 'av2-ra-st' or codec_id == 'av2-ra':
+                run_set_list = ctc_sets_mandatory + ctc_sets_optional
+            elif codec_id == 'av2-ld':
+                run_set_list = ctc_sets_mandatory
+        elif 'aomctc-mandatory' in info_file['ctcSets']:
+            if codec_id == 'av2-ra-st' or codec_id == 'av2-ra' or codec_id ==   'av2-ld':
+                run_set_list = ctc_sets_mandatory
+            elif codec_id == 'av2-ai':
+                run_set_list =  ctc_sets_mandatory_ai
+        else:
+            run_set_list = info_file['ctcSets']
+    else:
+        run_set_list = [info_file['task']]
+    return run_set_list
 
 def lookup_run_by_id(run_id):
     for run in run_list:
@@ -111,6 +133,7 @@ class SubmitTask(SchedulerTask):
         global work_list
         global run_list
         global run_set_list
+        global run_preset_list
         run_id = self.run_id
         rundir = config['runs'] + '/' + run_id
         info_file_path = rundir + '/info.json'
@@ -118,71 +141,78 @@ class SubmitTask(SchedulerTask):
         info_file = open(info_file_path, 'r')
         log_file = open(log_file_path, 'a')
         info = json.load(info_file)
-        if len(info['ctcSets']) > 0:
-            run_set_list = info['ctcSets']
-            if 'aomctc-all' in info['ctcSets']:
-                if info['codec'] == 'av2-ai':
-                  run_set_list = ctc_sets_mandatory_ai + ctc_sets_optional
-                elif info['codec'] == 'av2-ra-st' or info['codec'] == 'av2-ra':
-                  run_set_list = ctc_sets_mandatory + ctc_sets_optional
-                elif info['codec'] == 'av2-ld':
-                  run_set_list = ctc_sets_mandatory
-            elif 'aomctc-mandatory' in info['ctcSets']:
-                if info['codec'] == 'av2-ra-st' or info['codec'] == 'av2-ra' or info['codec'] == 'av2-ld':
-                  run_set_list = ctc_sets_mandatory
-                elif info['codec'] == 'av2-ai':
-                  run_set_list = ctc_sets_mandatory_ai
+        if len(info['ctcSets']) > 1:
+            run_set_list = return_set_list(info, info['codec'])
         else:
               run_set_list = [info['task']]
-        for this_video_set in sorted(run_set_list):
-            run = RDRun(info['codec'])
-            run.info = info
-            run.runid = run_id
-            run.rundir = config['runs'] + '/' + run_id
-            run.log = log_file
-            run.set = this_video_set
-            if this_video_set in ['aomctc-f1-hires','aomctc-f2-midres']:
-                run.quality = quality_presets['av2-f']
-            rd_print(run.log, "Starting encoding of ", this_video_set)
-            if 'arch' in info:
-                run.arch = info['arch']
-            else:
-                run.arch = 'x86_64'
-            run.bindir = run.rundir + '/' + run.arch + '/'
-            run.prefix = run.rundir + '/' + run.set
-            try:
-                os.mkdir(run.prefix)
-            except FileExistsError:
-                pass
-            if 'qualities' in info:
-              if info['qualities'] != '':
-                  run.quality = info['qualities'].split()
-            if 'extra_options' in info:
-              run.extra_options = info['extra_options']
-            if 'save_encode' in info:
-                if info['save_encode']:
-                    run.save_encode = True
-            run.status = 'running'
-            run.write_status()
-            run_list.append(run)
-            video_filenames = video_sets[run.set]['sources']
-            run.set_type = video_sets[run.set].get('type', 'undef')
-            run.work_items = create_rdwork(run, video_filenames)
-            work_list.extend(run.work_items)
-            if False:
-                if 'ab_compare' in info:
-                    if info['ab_compare']:
-                        abrun = ABRun(info['codec'])
-                        abrun.runid = run_id
-                        abrun.rundir = config['runs'] + '/' + run_id
-                        abrun.log = log_file
-                        abrun.set = info['task']
-                        abrun.bindir = config['codecs'] + '/' + info['codec']
-                        abrun.prefix = run.rundir + '/' + run.set
-                        run_list.append(abrun)
-                        abrun.work_items.extend(create_abwork(abrun,    video_filenames))
-                        work_list.extend(abrun.work_items)
+        if len(info['ctcPresets']) > 1:
+            run_preset_list = info['ctcPresets']
+            if 'av2-all' in info['ctcPresets']:
+                run_preset_list = ctc_full_presets
+        else:
+            run_preset_list = [info['codec']]
+        for this_preset in run_preset_list:
+            run_set_list = return_set_list(info, this_preset)
+            for this_video_set in sorted(run_set_list):
+                run = RDRun(info['codec'])
+                run.info = info
+                run.runid = run_id
+                run.rundir = config['runs'] + '/' + run_id
+                run.log = log_file
+                run.codec = this_preset
+                run.set = this_video_set
+                if len(run_preset_list) > 1:
+                    run.multicfg = True
+                else:
+                    run.multicfg = False
+                if this_video_set in ['aomctc-f1-hires','aomctc-f2-midres']:
+                    run.quality = quality_presets['av2-f']
+                rd_print(run.log, "Starting encoding of ", this_video_set, "with", this_preset)
+                if 'arch' in info:
+                    run.arch = info['arch']
+                else:
+                    run.arch = 'x86_64'
+                run.bindir = run.rundir + '/' + run.arch + '/'
+                run.prefix = run.rundir + '/' + run.set
+                if len(run_preset_list) > 1:
+                    run.prefix = run.rundir + '/' + run.codec + '/' + run.set
+                try:
+                    prefix_maker = subprocess.run(['mkdir','-p', run.prefix])
+                    if prefix_maker.returncode == 0:
                         pass
+                    else:
+                        print(prefix_maker)
+                except FileExistsError:
+                    pass
+                if 'qualities' in info:
+                  if info['qualities'] != '':
+                      run.quality = info['qualities'].split()
+                if 'extra_options' in info:
+                  run.extra_options = info['extra_options']
+                if 'save_encode' in info:
+                    if info['save_encode']:
+                        run.save_encode = True
+                run.status = 'running'
+                run.write_status()
+                run_list.append(run)
+                video_filenames = video_sets[run.set]['sources']
+                run.set_type = video_sets[run.set].get('type', 'undef')
+                run.work_items = create_rdwork(run, video_filenames)
+                work_list.extend(run.work_items)
+                if False:
+                    if 'ab_compare' in info:
+                        if info['ab_compare']:
+                            abrun = ABRun(info['codec'])
+                            abrun.runid = run_id
+                            abrun.rundir = config['runs'] + '/' + run_id
+                            abrun.log = log_file
+                            abrun.set = info['task']
+                            abrun.bindir = config['codecs'] + '/' + info['codec']
+                            abrun.prefix = run.rundir + '/' + run.set
+                            run_list.append(abrun)
+                            abrun.work_items.extend(create_abwork(abrun,    video_filenames))
+                            work_list.extend(abrun.work_items)
+                            pass
 
 class WorkListHandler(tornado.web.RequestHandler):
     def get(self):
@@ -197,6 +227,7 @@ class RunStatusHandler(tornado.web.RequestHandler):
             run_json = {}
             run_json['run_id'] = run.runid
             run_json['set'] = run.set
+            run_json['config'] = run.codec
             run_json['completed'] = 0
             run_json['total'] = 0
             run_json['info'] = run.info
@@ -410,23 +441,33 @@ def scheduler_tick():
         # Create a set-based tracker for unique jobs.
         run_tracker[this_run] = {}
         run_tracker[this_run]['done'] = True
-        run_tracker[this_run]['sets'] = {}
-        ## Part 1: Initialise flags as True
+        run_tracker[this_run]['cfg'] = {}
+        run_tracker[this_run]['status'] = {}
+        #run_tracker[this_run]['sets'] = {}
+        ## Part 1: Initialise config for different presets
         for run in run_list:
             if run.runid == this_run:
-                run_tracker[this_run]['sets'][run.set] = True
+                run_tracker[this_run]['cfg'][run.codec] = {}
+        ## Part 2: Update flags
+        for run in run_list:
+            if run.runid == this_run:
+                run_tracker[this_run]['cfg'][run.codec][run.set] = True
                 for work in run.work_items:
                     if work.done == False:
-                        run_tracker[this_run]['sets'][run.set] = False
+                        run_tracker[this_run]['cfg'][run.codec][run.set] = False
                         run_tracker[this_run]['done'] = False
-        ## Part 2: Send updates and curate results.
+                        run_tracker[this_run]['status'][run.codec] = False
+        ## Part 3: Send updates and curate results.
         for run in run_list:
             if run.runid == this_run:
-                if run_tracker[this_run]['sets'][run.set]:
-                    rd_print(run.log, "Finished Encoding ", run.set, "set.")
+                if run_tracker[this_run]['cfg'][run.codec][run.set]:
+                    rd_print(run.log, "Finished Encoding ", run.set, "set for ", run.codec, "config.")
                     run_list.remove(run)
                     run_tracker[this_run]['done'] = False
-                if all(value == True for value in run_tracker[this_run]['sets'].values()):
+                if all(value == True for value in run_tracker[this_run]['cfg'][run.codec].values()):
+                    rd_print(run.log, "Finished Encoding", run.codec, "config.")
+                    run_tracker[this_run]['status'][run.codec] = True
+                if all(value == True for value in run_tracker[this_run]['status'].values()):
                     run_tracker[this_run]['done'] = True
                     rd_print(run.log, "Finished Encoding all sets for ", run.runid)
                     try:
@@ -436,6 +477,11 @@ def scheduler_tick():
                         # Use A2 set for mandatory/all CTC Class
                         if  'aomctc-mandatory' in run.info['ctcSets'] or 'aomctc-all' in run.info['ctcSets']:
                             run.prefix = run.rundir + '/aomctc-a2-2k'
+                        if len(run.info['ctcPresets']) > 1:
+                            run.prefix = run.rundir + '/' + \
+                                run.info['codec'] + '/' + sorted(run_set_list)[0]
+                            if 'aomctc-mandatory' in run.info['ctcSets'] or 'aomctc-all' in run.info['ctcSets']:
+                                run.prefix = run.rundir + '/' + run.info['codec'] + '/aomctc-a2-2k'
                         run.reduce()
                     except Exception as e:
                         rd_print(run.log,e)
