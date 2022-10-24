@@ -26,6 +26,7 @@ binaries = {
     'av2-ra-st': ['aomenc','aomdec'],
     'av2-ld': ['aomenc','aomdec'],
     'av2-as': ['aomenc','aomdec'],
+    'av2-as-st': ['aomenc','aomdec'],
     'thor': ['build/Thorenc','build/Thordec','config_HDB16_high_efficiency.txt','config_LDB_high_efficiency.txt'],
     'thor-rt': ['build/Thorenc','build/Thordec','config_HDB16_high_efficiency.txt','config_LDB_high_efficiency.txt'],
     'rav1e': ['target/release/rav1e'],
