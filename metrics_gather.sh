@@ -222,12 +222,12 @@ av1-rt)
   $($TIMERDEC $AOMDEC --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf)
   SIZE=$(stat -c %s $BASENAME.ivf)
   ;;
-av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as)
+av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as | av2-as-st)
   case $CODEC in
     av2-ai)
       CTC_PROFILE_OPTS="--cpu-used=0 --passes=1 --end-usage=q --kf-min-dist=0 --kf-max-dist=0 --use-fixed-qp-offsets=1 --limit=30 --deltaq-mode=0 --enable-tpl-model=0 --enable-keyframe-filtering=0 --obu"
       ;;
-    av2-ra | av2-ra-st | av2-as)
+    av2-ra | av2-ra-st | av2-as | av2-as | av2-as-st)
       CTC_PROFILE_OPTS="--cpu-used=0 --passes=1 --lag-in-frames=19 --auto-alt-ref=1 --min-gf-interval=16 --max-gf-interval=16 --gf-min-pyr-height=4 --gf-max-pyr-height=4 --limit=130 --kf-min-dist=65 --kf-max-dist=65 --use-fixed-qp-offsets=1 --deltaq-mode=0 --enable-tpl-model=0 --end-usage=q --enable-keyframe-filtering=0 --obu"
       ;;
     av2-ld)
@@ -257,7 +257,7 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as)
       # this is intentionally not a separate script as only metrics_gather.sh is sent to workers
       echo "#!/bin/bash" > /tmp/enc$$.sh
       echo "TIMER='time -v --output='enctime$$-\$1.out" >> /tmp/enc$$.sh
-      echo "RUN='$AOMENC --qp=$x --test-decode=fatal $CTC_PROFILE_OPTS -o $BASENAME-'\$1'.obu $EXTRA_OPTIONS --limit=130 --'\$1'=65 $FILE'" >> /tmp/enc$$.sh
+      echo "RUN='$AOMENC --qp=$x --test-decode=fatal $CTC_PROFILE_OPTS -o $BASENAME-'\$1'.obu --limit=130 --'\$1'=65 $EXTRA_OPTIONS $FILE'" >> /tmp/enc$$.sh
       echo "\$(\$TIMER \$RUN > $BASENAME$$-stdout.txt)" >> /tmp/enc$$.sh
       chmod +x /tmp/enc$$.sh
       for s in {limit,skip}; do printf "$s\0"; done | xargs -0 -n1 -P2 /tmp/enc$$.sh
@@ -278,7 +278,7 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as)
   $($TIMERDEC $AOMDEC $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.obu)
   SIZE=$(stat -c %s $BASENAME.obu)
   case $CODEC in
-    av2-as)
+    av2-as | av2-as-st)
       if [ $((WIDTH)) -ne 3840 ] && [ $((HEIGHT)) -ne 2160 ]; then
         # change the reference to 3840x2160
         FILE=$(sed -e 's/\(640x360\|960x540\|1280x720\|1920x1080\|2560x1440\)/3840x2160/' <<< $FILE)
