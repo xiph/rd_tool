@@ -147,6 +147,7 @@ TIMERDECOUT=$BASENAME-dectime.out
 TIMER='time -v --output='"$TIMEROUT"
 TIMERDEC='time -v --output='"$TIMERDECOUT"
 AOMDEC_OPTS='-S'
+ENC_EXT=''
 
 case $CODEC in
 daala)
@@ -158,6 +159,7 @@ daala)
     exit 1
   fi
   SIZE=$(stat -c %s "$BASENAME.ogv")
+  ENC_EXT='.ogv'
   #mv "00000000out-$BASENAME.y4m" "$BASENAME.y4m"
   rm -f "00000000out-$BASENAME.y4m"
   "$DUMP_VIDEO" "$BASENAME.ogv" -o "$BASENAME.y4m"
@@ -166,45 +168,54 @@ x264)
   $($TIMER $X264 --dump-yuv $BASENAME.yuv --preset placebo --min-keyint $KFINT --keyint $KFINT --no-scenecut --crf=$x -o $BASENAME.x264 $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
   $YUV2YUV4MPEG $BASENAME -w$WIDTH -h$HEIGHT -an0 -ad0 -c420mpeg2
   SIZE=$(stat -c %s $BASENAME.x264)
+  ENC_EXT='.x264'
   ;;
 x265)
   $($TIMER $X265 -r $BASENAME.y4m --preset slow --frame-threads 1 --min-keyint $KFINT --keyint $KFINT --no-scenecut --crf=$x -o $BASENAME.x265 $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
   SIZE=$(stat -c %s $BASENAME.x265)
+  ENC_EXT='.x265'
   ;;
 x265-rt)
   $($TIMER $X265 -r $BASENAME.y4m --preset slow --tune zerolatency --rc-lookahead 0 --bframes 0 --frame-threads 1 --min-keyint $KFINT --keyint $KFINT --no-scenecut --crf=$x --csv $BASENAME.csv -o $BASENAME.x265 $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
   SIZE=$(stat -c %s $BASENAME.x265)
+  ENC_EXT='.x265'
   ;;
 xvc)
   $($TIMER $XVCENC -max-keypic-distance $KFINT -qp $x -output-file $BASENAME.xvc $EXTRA_OPTIONS -input-file $FILE > "$BASENAME-stdout.txt")
   $($TIMERDEC $XVCDEC -output-bitdepth $DEPTH -dither 0 -output-file $BASENAME.yuv -bitstream-file $BASENAME.xvc >> $BASENAME-stdout.txt)
   $YUV2YUV4MPEG $BASENAME -w$WIDTH -h$HEIGHT -an0 -ad0 -c420mpeg2
   SIZE=$(stat -c %s $BASENAME.xvc)
+  ENC_EXT='.x265'
   ;;
 vp8)
   $($TIMER $VPXENC --codec=$CODEC --threads=1 --cpu-used=0 --kf-min-dist=$KFINT --kf-max-dist=$KFINT --end-usage=cq --target-bitrate=100000 --cq-level=$x -o $BASENAME.vpx $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
   $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
+  ENC_EXT='.vpx'
   ;;
 vp9)
   $($TIMER $VPXENC --codec=$CODEC --ivf --frame-parallel=0 --tile-columns=0 --auto-alt-ref=2 --cpu-used=0 --passes=2 --threads=1 --kf-min-dist=$KFINT --kf-max-dist=$KFINT --lag-in-frames=25 --end-usage=q --cq-level=$x -o $BASENAME.vpx $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
   $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
+  ENC_EXT='.vpx'
   ;;
 vp9-rt)
   $($TIMER $VPXENC --codec=vp9 --ivf --frame-parallel=0 --tile-columns=0 --cpu-used=0 --threads=1 --kf-min-dist=$KFINT --kf-max-dist=$KFINT -p 1 --lag-in-frames=0 --end-usage=q --cq-level=$x -o $BASENAME.vpx $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
   $VPXDEC --codec=vp9 -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
+  ENC_EXT='.vpx'
   ;;
 vp10)
   $($TIMER $VPXENC --codec=$CODEC --ivf --frame-parallel=0 --tile-columns=0 --auto-alt-ref=2 --cpu-used=0 --passes=2 --threads=1 --kf-min-dist=$KFINT --kf-max-dist=$KFINT --lag-in-frames=25 --end-usage=q --cq-level=$x -o $BASENAME.vpx $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
   $VPXDEC --codec=$CODEC -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
+  ENC_EXT='.vpx'
   ;;
 vp10-rt)
   $($TIMER $VPXENC --codec=vp10 --ivf --frame-parallel=0 --tile-columns=0 --cpu-used=0 --passes=1 --threads=1 --kf-min-dist=$KFINT --kf-max-dist=$KFINT --lag-in-frames=0 --end-usage=q --cq-level=$x -o $BASENAME.vpx $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
   $VPXDEC --codec=vp10 -o $BASENAME.y4m $BASENAME.vpx
   SIZE=$(stat -c %s $BASENAME.vpx)
+  ENC_EXT='.vpx'
   ;;
 av1)
   $($TIMER $AOMENC --codec=$CODEC --ivf --frame-parallel=0 --tile-columns=0 --auto-alt-ref=2 --cpu-used=0 --passes=2 --threads=1 --kf-min-dist=$KFINT --kf-max-dist=$KFINT --lag-in-frames=25 --end-usage=q --cq-level=$x --test-decode=fatal -o $BASENAME.ivf $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
@@ -213,6 +224,7 @@ av1)
   fi
   $($TIMERDEC $AOMDEC --codec=$CODEC $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf)
   SIZE=$(stat -c %s $BASENAME.ivf)
+  ENC_EXT='.ivf'
   ;;
 av1-rt)
   $($TIMER $AOMENC --codec=av1 --ivf --frame-parallel=0 --tile-columns=0 --cpu-used=0 --passes=1 --threads=1 --kf-min-dist=$KFINT --kf-max-dist=$KFINT --lag-in-frames=0 --end-usage=q --cq-level=$x --test-decode=fatal -o $BASENAME.ivf $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
@@ -221,6 +233,7 @@ av1-rt)
   fi
   $($TIMERDEC $AOMDEC --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf)
   SIZE=$(stat -c %s $BASENAME.ivf)
+  ENC_EXT='.ivf'
   ;;
 av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as | av2-as-st)
   case $CODEC in
@@ -277,6 +290,7 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as | av2-as-st)
   fi
   $($TIMERDEC $AOMDEC $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.obu)
   SIZE=$(stat -c %s $BASENAME.obu)
+  ENC_EXT='.obu'
   case $CODEC in
     av2-as | av2-as-st)
       if [ $((WIDTH)) -ne 3840 ] && [ $((HEIGHT)) -ne 2160 ]; then
@@ -298,6 +312,7 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as | av2-as-st)
 thor)
   $($TIMER $THORENC -qp $x -cf "$THORDIR/config_HDB16_high_efficiency.txt" -if $FILE -of $BASENAME.thor $EXTRA_OPTIONS > $BASENAME-enc.out)
   SIZE=$(stat -c %s $BASENAME.thor)
+  ENC_EXT='.thor'
   # using reconstruction is currently broken with HDB
   $THORDEC $BASENAME.thor $BASENAME.yuv > "$BASENAME-stdout.txt"
   $YUV2YUV4MPEG $BASENAME -an1 -ad1 -w$WIDTH -h$HEIGHT
@@ -305,6 +320,7 @@ thor)
 thor-rt)
   $($TIMER $THORENC -qp $x -cf "$THORDIR/config_LDB_high_efficiency.txt" -if $FILE -of $BASENAME.thor -rf $BASENAME.y4m $EXTRA_OPTIONS > $BASENAME-enc.out)
   SIZE=$(stat -c %s $BASENAME.thor)
+  ENC_EXT='.thor'
   ;;
 rav1e)
   $($TIMER $RAV1E $FILE --quantizer $x -o $BASENAME.ivf -r $BASENAME-rec.y4m --threads 1 $EXTRA_OPTIONS > $BASENAME-enc.out)
@@ -325,6 +341,7 @@ rav1e)
     mv "$BASENAME-rec.y4m" "$BASENAME.y4m"
   fi
   SIZE=$(stat -c %s $BASENAME.ivf)
+  ENC_EXT='.ivf'
   ;;
 svt-av1)
   export LD_LIBRARY_PATH=$(dirname "$SVTAV1")
@@ -333,6 +350,7 @@ svt-av1)
   $YUV2YUV4MPEG $BASENAME -an1 -ad1 -w$WIDTH -h$HEIGHT > /dev/null
   rm $BASENAME.yuv
   SIZE=$(stat -c %s $BASENAME.ivf)
+  ENC_EXT='.ivf'
   ;;
 esac
 
@@ -398,6 +416,11 @@ else
 fi
 
 echo "$DECTIME"
+
+# Extract MD5 of encoded file
+ENC_FILE=${BASENAME}${ENC_EXT}
+MD5SUM=($(md5sum $ENC_FILE))
+echo $MD5SUM
 
 if [ -f "$VMAF" ]; then
   cat "$BASENAME-vmaf.xml"
