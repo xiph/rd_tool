@@ -30,7 +30,12 @@ binaries = {
     'thor': ['build/Thorenc','build/Thordec','config_HDB16_high_efficiency.txt','config_LDB_high_efficiency.txt'],
     'thor-rt': ['build/Thorenc','build/Thordec','config_HDB16_high_efficiency.txt','config_LDB_high_efficiency.txt'],
     'rav1e': ['target/release/rav1e'],
-    'svt-av1': ['Bin/Release/SvtAv1EncApp']
+    'svt-av1': ['Bin/Release/SvtAv1EncApp'],
+    'vvc-vtm': ['bin/EncoderAppStatic', 'bin/DecoderAppStatic', 'bin/parcatStatic'],
+    'vvc-vtm-ra': ['bin/EncoderAppStatic', 'bin/DecoderAppStatic', 'bin/parcatStatic'],
+    'vvc-vtm-ra-st': ['bin/EncoderAppStatic', 'bin/DecoderAppStatic', 'bin/parcatStatic'],
+    'vvc-vtm-ld': ['bin/EncoderAppStatic', 'bin/DecoderAppStatic', 'bin/parcatStatic'],
+    'vvc-vtm-ai': ['bin/EncoderAppStatic', 'bin/DecoderAppStatic', 'bin/parcatStatic']
 }
 
 # Finding files such as `this_(that)` requires `'` be placed on both
