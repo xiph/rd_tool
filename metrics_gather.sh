@@ -118,6 +118,11 @@ if [ -e pid ]; then
   kill -9 -$(cat pid) || true
 fi
 
+if  [ ! -x "$(command -v perf)" ]; then
+  echo "perf, perf-stat is not installed"
+  exit 1
+fi
+
 echo $$ > pid
 
 FILE=$1
@@ -143,8 +148,10 @@ RATE=$(echo $x*$WIDTH*$HEIGHT*30/1000 | bc)
 
 KFINT=1000
 TIMEROUT=$BASENAME-enctime.out
+PERFOUT=${BASENAME}'-perf.out'
+PERFCTR='perf stat -o '${BASENAME}'-perf.out'
 TIMERDECOUT=$BASENAME-dectime.out
-TIMER='time -v --output='"$TIMEROUT"
+TIMER=$PERFCTR' time -v --output='"$TIMEROUT"
 TIMERDEC='time -v --output='"$TIMERDECOUT"
 AOMDEC_OPTS='-S'
 ENC_EXT=''
@@ -421,6 +428,22 @@ echo "$DECTIME"
 ENC_FILE=${BASENAME}${ENC_EXT}
 MD5SUM=($(md5sum $ENC_FILE))
 echo $MD5SUM
+
+# Extract Encoding Instruction count and cycles
+if [ -e "$PERFOUT" ]; then
+  PERFENCINSTRCNT=$(awk '/instructions/ { s=$1 } END { gsub(",", "", s) ; print s }' "$PERFOUT")
+  PERFENCCYCLE=$(awk '/cycles/ { s=$1 } END { gsub(",", "", s) ; print s }' "$PERFOUT")
+else
+  if [ -z "$PERFENCINSTRCNT" ]; then
+    $PERFENCINSTRCNT=0
+  fi
+  if [ -z "$PERFENCCYCLE" ]; then
+    $PERFENCCYCLE=0
+  fi
+fi
+
+echo $PERFENCINSTRCNT
+echo $PERFENCCYCLE
 
 if [ -f "$VMAF" ]; then
   cat "$BASENAME-vmaf.xml"
