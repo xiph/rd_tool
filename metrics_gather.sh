@@ -48,6 +48,15 @@ fi
 if [ -z "$SVTAV1" ]; then
   export SVTAV1="$WORK_ROOT/$CODEC/Bin/Release/SvtAv1EncApp"
 fi
+if [ -z "$VVCENC" ]; then
+  export VVCENC="$WORK_ROOT/$CODEC/bin/EncoderAppStatic"
+fi
+if [ -z "$VVCDEC" ]; then
+  export VVCDEC="$WORK_ROOT/$CODEC/bin/DecoderAppStatic"
+fi
+if [ -z "$VVCCAT" ]; then
+  export VVCCAT="$WORK_ROOT/$CODEC/bin/parcatStatic"
+fi
 if [ -z "$ENCODER_EXAMPLE" ]; then
   export ENCODER_EXAMPLE="$WORK_ROOT/daala/examples/encoder_example"
 fi
@@ -128,14 +137,20 @@ rm "$BASENAME.out" 2> /dev/null || true
 WIDTH=$(head -1 $FILE | tr ' ' '\n' | grep -E '\bW' | tr -d 'W')
 HEIGHT=$(head -1 $FILE | tr ' ' '\n' | grep -E '\bH' | tr -d 'H')
 CHROMA=$(head -1 $FILE | tr ' ' '\n' | grep -E '\bC')
+# YUV2Y4M requires to be just numbers
+YUV_CHROMA=$CHROMA
 DEPTH=8
 case $CHROMA in
 C444p10)
   DEPTH=10
+  YUV_CHROMA=444
   ;;
 C420p10)
   DEPTH=10
+  YUV_CHROMA=420
   ;;
+C420jpeg | C420mpeg2)
+  YUV_CHROMA=420
 esac
 
 # used for libvpx vbr
@@ -295,6 +310,74 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as | av2-as-st)
       ;;
   esac
   ;;
+vvc-vtm | vvc-vtm-ra | vvc-vtm-ra-st | vvc-vtm-ld | vvc-vtm-ai)
+  case $CODEC in
+   vvc-vtm-ra | vvc-vtm-ra-st)
+     VVC_CFG=$WORK_ROOT/rd_tool/cfg/vvc-vtm/encoder_randomaccess_vtm.cfg
+     ;;
+   vvc-vtm-ld)
+      VVC_CFG=$WORK_ROOT/rd_tool/cfg/vvc-vtm/encoder_lowdelay_vtm.cfg
+      ;;
+   vvc-vtm-ai)
+      VVC_CFG=$WORK_ROOT/rd_tool/cfg/vvc-vtm/encoder_intra_vtm.cfg
+      ;;
+    vvc-vtm)
+      VVC_CFG=''
+      ;;
+  esac
+  FPS_NUM=$(grep -o -a -m 1 -P "(?<=F)([0-9]+)(?=:[0-9]+)" "$FILE")
+  FPS_DEN=$(grep -o -a -m 1 -P "(?<=F$FPS_NUM:)([0-9]+)" "$FILE")
+  FPS=$(bc <<< 'scale=3; '$FPS_NUM' / '$FPS_DEN'')
+  # VVC_CTC says IntraPeriod should be different for different FPS, *shrug*
+  # TODO: For comparision with AVM, we will require to change this
+  INTRA_PERIOD=32
+  case $FPS in
+    20 | 24 | 30)
+      INTRA_PERIOD=32
+      ;;
+    50 | 60)
+      INTRA_PERIOD=64
+      ;;
+    100)
+      INTRA_PERIOD=100
+      ;;
+  esac
+  # Convert to YUV on-the-fly
+  $Y4M2YUV $FILE -o ${BASENAME}_src.yuv
+  # Encode video
+  case $CODEC in
+    vvc-vtm-ra)
+      # this is intentionally not a separate script as only metrics_gather.sh is
+      # sent to workers
+      # VVC parCat requires perfect constructed GOP to concat, so we are always
+      # overriding the $EXTRA_OPTIONS wrt GOP Struct.
+      echo "#!/bin/bash" > /tmp/enc$$.sh
+      echo "TIMER='time -v --output='enctime$$-\$1.out" >> /tmp/enc$$.sh
+      echo "case \$1 in FramesToBeEncoded) GOP_PARAMS=\"--\$1=65\";; FrameSkip) GOP_PARAMS=\" --FramesToBeEncoded=65 --\$1=65 \" ;; esac" >> /tmp/enc$$.sh
+      echo "RUN='$VVCENC -i ${BASENAME}_src.yuv -c $VVC_CFG --SourceWidth=$WIDTH --SourceHeight=$HEIGHT --FrameRate=$FPS --InputBitDepth=$DEPTH --FramesToBeEncoded=130 --QP=$x --ReconFile=${BASENAME}-'\$1'-rec.yuv -b $BASENAME-'\$1'.bin $EXTRA_OPTIONS '" >> /tmp/enc$$.sh
+      echo "\$(\$TIMER \$RUN \$GOP_PARAMS > $BASENAME$$-stdout.txt)" >> /tmp/enc$$.sh
+      chmod +x /tmp/enc$$.sh
+      for s in {FramesToBeEncoded,FrameSkip}; do printf "$s\0"; done | xargs -0 -n1 -P2 /tmp/enc$$.sh
+      # parcat is tool by VTM for concating files as per JVET-B0036
+      $($VVCCAT $BASENAME-FramesToBeEncoded.bin $BASENAME-FrameSkip.bin $BASENAME.bin)
+      TIME1=$(cat enctime$$-FramesToBeEncoded.out | grep User | cut -d\  -f4)
+      TIME2=$(cat enctime$$-FrameSkip.out | grep User | cut -d\  -f4)
+      ENCTIME=$(awk "BEGIN {print $TIME1+$TIME2; exit}")
+      rm -f /tmp/enc$$.sh enctime$$-FramesToBeEncoded.out enctime$$-FrameSkip.out $BASENAME-FramesToBeEncoded.bin $BASENAME-FrameSkip.bin
+      ;;
+    *)
+      $($TIMER $VVCENC -i ${BASENAME}_src.yuv -c $VVC_CFG --SourceWidth=$WIDTH --SourceHeight=$HEIGHT --FrameRate=$FPS --InputBitDepth=$DEPTH --IntraPeriod=$INTRA_PERIOD --FramesToBeEncoded=130 --QP=$x -b $BASENAME.bin --ReconFile=${BASENAME}-rec.yuv  $EXTRA_OPTIONS > "$BASENAME-stdout.txt")
+      ;;
+  esac
+  # Decode the video
+  $($TIMERDEC $VVCDEC -b $BASENAME.bin -d $DEPTH -o $BASENAME.yuv > "$BASENAME-dec.txt")
+  # Convert the YUV file to Y4M file.
+  # YUV2YUV4MPEG of daala_tool takes headers as args and filename without *.yuv*
+  # extension
+  $YUV2YUV4MPEG $BASENAME  -an1 -ad1 -w$WIDTH -h$HEIGHT -fn$FPS_NUM -fd$FPS_DEN -c$YUV_CHROMA -b$DEPTH
+  SIZE=$(stat -c %s $BASENAME.bin)
+  ENC_EXT='.bin'
+;;
 thor)
   $($TIMER $THORENC -qp $x -cf "$THORDIR/config_HDB16_high_efficiency.txt" -if $FILE -of $BASENAME.thor $EXTRA_OPTIONS > $BASENAME-enc.out)
   SIZE=$(stat -c %s $BASENAME.thor)
@@ -408,6 +491,6 @@ if [ ! "$NO_DELETE" ]; then
   rm -f "$BASENAME.ogv" "$BASENAME.x264" "$BASENAME.x265" "$BASENAME.xvc" "$BASENAME.vpx" "$BASENAME.ivf" "$TIMEROUT" "$BASENAME-enc.out" "$BASENAME-psnr.out" "$BASENAME.thor" 2> /dev/null
 fi
 
-rm -f "$BASENAME.y4m" "$BASENAME.yuv" "$BASENAME-rec.y4m" 2> /dev/null
+rm -f "$BASENAME.y4m" "$BASENAME.yuv" "$BASENAME-rec.y4m" ${BASENAME}_src.yuv  ${BASENAME}-rec.yuv ${BASENAME}-FrameSkip-rec.yuv ${BASENAME}-FramesToBeEncoded-rec.yuv 2> /dev/null
 
 rm -f pid
