@@ -116,7 +116,7 @@ class RDWork(Work):
         self.raw = stdout
         split = None
         try:
-            split = self.raw.decode('utf-8').replace(')',' ').split(maxsplit=57)
+            split = self.raw.decode('utf-8').replace(')',' ').split(maxsplit=59)
             self.pixels = split[1]
             self.size = split[2]
             self.metric = {}
@@ -149,7 +149,9 @@ class RDWork(Work):
             self.metric['vmaf_old'] = split[54]
             self.metric['decodetime'] = split[55]
             self.metric['enc_md5'] = split[56]
-            self.vmaf_xml = split[57]
+            self.metric['enc_instr_cnt'] = split[57]
+            self.metric['enc_cycle_cnt'] = split[58]
+            self.vmaf_xml = split[59]
             root = ET.fromstring(self.vmaf_xml)
             for metric_name in ['psnr_y', 'psnr_cb', 'psnr_cr', 'ciede2000', 'float_ssim', 'float_ms_ssim', 'psnr_hvs_y', 'psnr_hvs_cb', 'psnr_hvs_cr', 'psnr_hvs', 'cambi']:
                 self.metric['vmaf_'+metric_name] = root.find("pooled_metrics/metric[@name='"+metric_name+"']").get('mean')
@@ -202,6 +204,8 @@ class RDWork(Work):
         f += (str(work.metric['vmaf_apsnr_cr'])+' ')
         f += (str(work.metric['vmaf_cambi'])+' ')
         f += (str(work.metric['enc_md5'])+' ')
+        f += (str(work.metric['enc_instr_cnt'])+' ')
+        f += (str(work.metric['enc_cycle_cnt'])+' ')
         f += ('\n')
         return f
     def execute(self):
