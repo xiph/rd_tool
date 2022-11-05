@@ -40,6 +40,11 @@ quality_presets = {
     "thor-rt": list(range(7,43,3)),
     "rav1e": [20*4,32*4,43*4,55*4,63*4],
     "svt-av1": [20,32,43,55,63],
+    "vvc-vtm": [22, 27, 32, 37],
+    "vvc-vtm-ra": [22, 27, 32, 37],
+    "vvc-vtm-ra-st": [22, 27, 32, 37],
+    "vvc-vtm-ld": [22, 27, 32, 37],
+    "vvc-vtm-ai": [22, 27, 32, 37],
 }
 
 class Run:
@@ -294,6 +299,8 @@ def create_rdwork(run, video_filenames):
                     work.copy_back_files.append('.ivf')
                 elif (len(work.codec) >= 3) and (work.codec[0:3] == 'av2'):
                     work.copy_back_files.append('.obu')
+                elif (len(work.codec) >= 3) and (work.codec[0:3] == 'vvc'):
+                    work.copy_back_files.append('.bin')
                 elif work.codec == 'xvc':
                     work.copy_back_files.append('.xvc')
             work_items.append(work)
