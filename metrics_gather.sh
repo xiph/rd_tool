@@ -163,11 +163,13 @@ RATE=$(echo $x*$WIDTH*$HEIGHT*30/1000 | bc)
 
 KFINT=1000
 TIMEROUT=$BASENAME-enctime.out
-PERFOUT=${BASENAME}'-perf.out'
-PERFCTR='perf stat -o '${BASENAME}'-perf.out'
+PERF_ENC_OUT=${BASENAME}'-encperf.out'
+PERF_DEC_OUT=${BASENAME}'-decperf.out'
+PERF_ENC_STAT='perf stat -o '${PERF_ENC_OUT}''
+PERF_DEC_STAT='perf stat -o '${PERF_DEC_OUT}''
 TIMERDECOUT=$BASENAME-dectime.out
-TIMER=$PERFCTR' time -v --output='"$TIMEROUT"
-TIMERDEC='time -v --output='"$TIMERDECOUT"
+TIMER=$PERF_ENC_STAT' time -v --output='"$TIMEROUT"
+TIMERDEC=$PERF_DEC_STAT' time -v --output='"$TIMERDECOUT"
 AOMDEC_OPTS='-S'
 ENC_EXT=''
 
@@ -513,20 +515,35 @@ MD5SUM=($(md5sum $ENC_FILE))
 echo $MD5SUM
 
 # Extract Encoding Instruction count and cycles
-if [ -e "$PERFOUT" ]; then
-  PERFENCINSTRCNT=$(awk '/instructions/ { s=$1 } END { gsub(",", "", s) ; print s }' "$PERFOUT")
-  PERFENCCYCLE=$(awk '/cycles/ { s=$1 } END { gsub(",", "", s) ; print s }' "$PERFOUT")
+if [ -e "$PERF_ENC_OUT" ]; then
+  PERF_ENC_INSTR_CNT=$(awk '/instructions/ { s=$1 } END { gsub(",", "", s) ; print s }' "$PERF_ENC_OUT")
+  PERF_ENC_CYCLE_CNT=$(awk '/cycles/ { s=$1 } END { gsub(",", "", s) ; print s }' "$PERF_ENC_OUT")
 else
-  if [ -z "$PERFENCINSTRCNT" ]; then
-    $PERFENCINSTRCNT=0
+  if [ -z "$PERF_ENC_INSTR_CNT" ]; then
+    $PERF_ENC_INSTR_CNT=0
   fi
-  if [ -z "$PERFENCCYCLE" ]; then
-    $PERFENCCYCLE=0
+  if [ -z "$PERF_ENC_CYCLE_CNT" ]; then
+    $PERF_ENC_CYCLE_CNT=0
   fi
 fi
 
-echo $PERFENCINSTRCNT
-echo $PERFENCCYCLE
+# Extract Decoding Instruction count and cycles
+if [ -e "$PERF_DEC_OUT" ]; then
+  PERF_DEC_INSTR_CNT=$(awk '/instructions/ { s=$1 } END { gsub(",", "", s) ; print s }' "$PERF_DEC_OUT")
+  PERF_DEC_CYCLE_CNT=$(awk '/cycles/ { s=$1 } END { gsub(",", "", s) ; print s }' "$PERF_DEC_OUT")
+else
+  if [ -z "$PERF_DEC_INSTR_CNT" ]; then
+    $PERF_DEC_INSTR_CNT=0
+  fi
+  if [ -z "$PERF_DEC_CYCLE_CNT" ]; then
+    $PERF_DEC_CYCLE_CNT=0
+  fi
+fi
+
+echo $PERF_ENC_INSTR_CNT
+echo $PERF_ENC_CYCLE_CNT
+echo $PERF_DEC_INSTR_CNT
+echo $PERF_DEC_CYCLE_CNT
 
 if [ -f "$VMAF" ]; then
   cat "$BASENAME-vmaf.xml"
