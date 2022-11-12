@@ -15,6 +15,8 @@ import subprocess
 from work import *
 from utility import *
 from work import quality_presets
+from smtplib import SMTP_SSL as SMTP
+from email.mime.text import MIMEText
 
 config_dir = os.getenv("CONFIG_DIR", os.getcwd())
 runs_dst_dir = os.getenv("RUNS_DST_DIR", os.path.join(os.getcwd(), "../runs"))
@@ -22,6 +24,7 @@ codecs_src_dir = os.getenv("CODECS_SRC_DIR", os.path.join(os.getcwd(), ".."))
 
 video_sets_f = codecs.open(os.path.join(config_dir, 'sets.json'),'r',encoding='utf-8')
 video_sets = json.load(video_sets_f)
+smtp_config = json.load(open(os.path.join(config_dir, 'smtp_cfg.json')))
 
 # CTC Configs
 # LD : ctc_sets_mandatory
@@ -82,6 +85,65 @@ def lookup_run_by_id(run_id):
         if run.runid == run_id:
             return run
     return None
+
+
+def generate_email_content(run, set_flag, cfg_flag, all_flag):
+    completed_jobs = 0
+    total_jobs = 0
+    for work in run.work_items:
+        total_jobs += 1
+        if work.done:
+            completed_jobs += 1
+    content_string = 'Run ID: %s, \nSet: %s, \nCodec: %s, \nCompleted Jobs: %d, \nTotal Jobs: %d, \nMetadata: %s ' % (
+        run.runid, run.set, run.codec, completed_jobs, total_jobs, run.info)
+    if set_flag:
+        content_string += '\nFinished Encoding for %s set with %s config' % (
+            run.set, run.codec)
+    if cfg_flag:
+        content_string += '\nFinished Encoding all sets for %s config' % (
+            run.codec)
+    if all_flag:
+        content_string += '\nFinished Encoding all the given sets and configs for the RunID %s' % (
+            run.runid)
+    server_cfg = json.load(open(os.path.join(config_dir, 'config.json')))
+    if 'base_url' in server_cfg.keys():
+        server_url = server_cfg['base_url']
+    else:
+        server_url = 'http://' + \
+            os.getenv('EXTERNAL_ADDR', 'localhost') + \
+            ':' + str(server_cfg['port'])
+    content_string += '\nCheck job for more information: ' + \
+        server_url + '/?job=' + run.runid
+    content_string += '\nJob logs: ' + \
+        server_url + '/runs/' + run.runid + '/output.txt'
+    return content_string
+
+
+def submit_email_notification(run, smtp_cfg, set_flag, cfg_flag, all_flag):
+    text_subtype = 'plain'
+    subject = 'AWCY: Run status: %s' % (run.runid)
+    content = generate_email_content(run, set_flag, cfg_flag, all_flag)
+    destination = run.info['nick']
+    # Do not attempt to do emailing if the Nick is not having email style ie.
+    # containing @ symbol to keep it simple
+    if '@' not in destination:
+        return
+    try:
+        msg = MIMEText(content, text_subtype)
+        msg['Subject'] = subject
+        msg['From'] = smtp_cfg['sender']
+        msg['To'] = destination
+
+        conn = SMTP(smtp_cfg['smtpserver'])
+        conn.set_debuglevel(False)
+        conn.login(smtp_cfg['username'], smtp_cfg['password'])
+        try:
+            conn.sendmail(smtp_cfg['sender'], destination, msg.as_string())
+        finally:
+            conn.quit()
+    except Exception as e:
+        rd_print(run.log, "E: Failed to send email, error:", e)
+
 
 class SchedulerTask:
     def get(self):
@@ -464,12 +526,17 @@ def scheduler_tick():
                     rd_print(run.log, "Finished Encoding ", run.set, "set for ", run.codec, "config.")
                     run_list.remove(run)
                     run_tracker[this_run]['done'] = False
+                    if len(run.info['ctcSets']) > 1:
+                        submit_email_notification(run, smtp_config, set_flag=True, cfg_flag=False, all_flag=False)
                 if all(value == True for value in run_tracker[this_run]['cfg'][run.codec].values()):
                     rd_print(run.log, "Finished Encoding", run.codec, "config.")
                     run_tracker[this_run]['status'][run.codec] = True
+                    if len(run.info['ctcPresets']) > 1:
+                        submit_email_notification(run, smtp_config, set_flag=False, cfg_flag=True, all_flag=False)
                 if all(value == True for value in run_tracker[this_run]['status'].values()):
                     run_tracker[this_run]['done'] = True
                     rd_print(run.log, "Finished Encoding all sets for ", run.runid)
+                    submit_email_notification(run, smtp_config, set_flag=False, cfg_flag=False, all_flag=True)
                     try:
                         # Explicty set the first Task ID as the Prefix for
                         # average (this taskID is sorted based on priority)
