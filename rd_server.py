@@ -471,9 +471,6 @@ def scheduler_tick():
                     run_tracker[this_run]['done'] = True
                     rd_print(run.log, "Finished Encoding all sets for ", run.runid)
                     try:
-                        # Explicty set the first Task ID as the Prefix for
-                        # average (this taskID is sorted based on priority)
-                        run.prefix = run.rundir + '/' + sorted(run_set_list)[0]
                         # Use A2 set for mandatory/all CTC Class
                         if  'aomctc-mandatory' in run.info['ctcSets'] or 'aomctc-all' in run.info['ctcSets']:
                             run.prefix = run.rundir + '/aomctc-a2-2k'
