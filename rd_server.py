@@ -538,9 +538,6 @@ def scheduler_tick():
                     rd_print(run.log, "Finished Encoding all sets for ", run.runid)
                     submit_email_notification(run, smtp_config, set_flag=False, cfg_flag=False, all_flag=True)
                     try:
-                        # Explicty set the first Task ID as the Prefix for
-                        # average (this taskID is sorted based on priority)
-                        run.prefix = run.rundir + '/' + sorted(run_set_list)[0]
                         # Use A2 set for mandatory/all CTC Class
                         if  'aomctc-mandatory' in run.info['ctcSets'] or 'aomctc-all' in run.info['ctcSets']:
                             run.prefix = run.rundir + '/aomctc-a2-2k'
