@@ -435,12 +435,46 @@ rav1e)
   SIZE=$(stat -c %s $BASENAME.ivf)
   ENC_EXT='.ivf'
   ;;
-svt-av1)
-  export LD_LIBRARY_PATH=$(dirname "$SVTAV1")
-  # svt-av1 has a max intra period of 255
-  $($TIMER $SVTAV1 -i $FILE --preset 0 --lp 1 -q $x -o $BASENAME.yuv -b $BASENAME.ivf -w $WIDTH -h $HEIGHT --intra-period 255 $EXTRA_OPTIONS > $BASENAME-enc.out 2>&1)
-  $YUV2YUV4MPEG $BASENAME -an1 -ad1 -w$WIDTH -h$HEIGHT > /dev/null
-  rm $BASENAME.yuv
+svt-av1 | svt-av1-ra | svt-av1-ra-crf | svt-av1-ra-vbr | svt-av1-ra-vbr-2p | svt-av1-ld-cbr | svt-av1-ra-cq )
+  case $CODEC in
+    # 1-pass CQ, CTC Style Preset
+    svt-av1-ra)
+      SVT_PROFILE_OPTS="--preset 0 --passes 1 --hierarchical-levels 4 --frames 130 --keyint 65 --aq-mode 0 --rc 0 --qp $x"
+      ;;
+    # 1-pass CRF RA
+    svt-av1-ra-crf)
+      SVT_PROFILE_OPTS="--lp 1 --passes 1 --rc 0 --crf $x --pred-struct 2"
+      ;;
+    # 1-pass VBR RA
+    svt-av1-ra-vbr)
+      SVT_PROFILE_OPTS="--lp 1 --passes 1 --rc 1 --tbr $x --pred-struct 2"
+      ;;
+    # 2-pass VBR RA
+    svt-av1-ra-vbr-2p)
+      SVT_PROFILE_OPTS="--lp 1 --passes 2 --rc 1 --tbr $x --pred-struct 2"
+      ;;
+    # 1-pass CBR LD, RTC Mode
+    svt-av1-ld-cbr)
+      SVT_PROFILE_OPTS="--lp 1 --passes 1 --rc 2 --tbr $x --pred-struct 1"
+      ;;
+    # 1-pass CQP RA
+    svt-av1-ra-cq)
+      SVT_PROFILE_OPTS="--lp 1 --passes 1 --rc 0 --aq-mode 0 --crf $x --pred-struct 2 --keyint 999"
+      ;;
+    svt-av1)
+      SVT_PROFILE_OPTS=""
+      ;;
+  esac
+  # Encode the video
+  $($TIMER $SVTAV1 -i $FILE $SVT_PROFILE_OPTS -b $BASENAME.ivf $EXTRA_OPTIONS > $BASENAME-enc.out 2>&1)
+  # Decode the video
+  if hash dav1d 2>/dev/null; then
+    $($TIMERDEC dav1d -q -i $BASENAME.ivf -o $BASENAME.y4m) || (echo "Corrupt bitstream detected!"; exit 98)
+  elif hash aomdec 2>/dev/null; then
+    $($TIMERDEC aomdec --codec=av1 $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.ivf) || (echo "Corrupt bitstream detected!"; exit 98)
+  else
+    echo "AV1 decoder not found, desync/corruption detection disabled." >&2
+  fi
   SIZE=$(stat -c %s $BASENAME.ivf)
   ENC_EXT='.ivf'
   ;;
