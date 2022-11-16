@@ -39,7 +39,13 @@ quality_presets = {
     "thor": list(range(7,43,3)),
     "thor-rt": list(range(7,43,3)),
     "rav1e": [20*4,32*4,43*4,55*4,63*4],
-    "svt-av1": [20,32,43,55,63],
+    "svt-av1": [27, 33, 39, 46, 52, 58],
+    "svt-av1-ra": [27, 33, 39, 46, 52, 58],
+    "svt-av1-ra-crf": [27, 33, 39, 46, 52, 58],
+    "svt-av1-ra-vbr": [27, 33, 39, 46, 52, 58],
+    "svt-av1-ra-vbr-2p": [27, 33, 39, 46, 52, 58],
+    "svt-av1-ld-cbr": [27, 33, 39, 46, 52, 58],
+    "svt-av1-ra-cq": [27, 33, 39, 46, 52, 58],
     "vvc-vtm": [22, 27, 32, 37],
     "vvc-vtm-ra": [22, 27, 32, 37],
     "vvc-vtm-ra-st": [22, 27, 32, 37],
@@ -305,7 +311,7 @@ def create_rdwork(run, video_filenames):
             work.extra_options = run.extra_options
             if run.save_encode:
                 work.no_delete = True
-                if work.codec == 'av1' or work.codec == 'av1-rt' or work.codec == 'rav1e' or work.codec == 'svt-av1':
+                if work.codec == 'av1' or work.codec == 'av1-rt' or work.codec == 'rav1e' or 'svt-av1' in work.codec:
                     work.copy_back_files.append('.ivf')
                 elif (len(work.codec) >= 3) and (work.codec[0:3] == 'av2'):
                     work.copy_back_files.append('.obu')
