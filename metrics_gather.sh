@@ -463,7 +463,7 @@ svt-av1 | svt-av1-ra | svt-av1-ra-crf | svt-av1-ra-vbr | svt-av1-ra-vbr-2p | svt
       ;;
     svt-av1)
       # Always define CRF points for the given QPs
-      SVT_PROFILE_OPTS="--crf $x "
+      SVT_PROFILE_OPTS="--lp 1 --crf $x "
       ;;
   esac
   # Encode the video
