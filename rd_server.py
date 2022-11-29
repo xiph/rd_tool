@@ -24,7 +24,13 @@ codecs_src_dir = os.getenv("CODECS_SRC_DIR", os.path.join(os.getcwd(), ".."))
 
 video_sets_f = codecs.open(os.path.join(config_dir, 'sets.json'),'r',encoding='utf-8')
 video_sets = json.load(video_sets_f)
-smtp_config = json.load(open(os.path.join(config_dir, 'smtp_cfg.json')))
+
+try:
+    smtp_config = json.load(open(os.path.join(config_dir, 'smtp_cfg.json')))
+except Exception as e:
+    smtp_config = {}
+    print("W: STMP email config file not found ", e)
+    print("W: Email based notification system will not work!")
 
 # CTC Configs
 # LD : ctc_sets_mandatory
@@ -526,17 +532,18 @@ def scheduler_tick():
                     rd_print(run.log, "Finished Encoding ", run.set, "set for ", run.codec, "config.")
                     run_list.remove(run)
                     run_tracker[this_run]['done'] = False
-                    if len(run.info['ctcSets']) > 1:
+                    if len(run.info['ctcSets']) > 1 and len(smtp_config) > 0:
                         submit_email_notification(run, smtp_config, set_flag=True, cfg_flag=False, all_flag=False)
                 if all(value == True for value in run_tracker[this_run]['cfg'][run.codec].values()):
                     rd_print(run.log, "Finished Encoding", run.codec, "config.")
                     run_tracker[this_run]['status'][run.codec] = True
-                    if len(run.info['ctcPresets']) > 1:
+                    if len(run.info['ctcPresets']) > 1 and len(smtp_config) > 0:
                         submit_email_notification(run, smtp_config, set_flag=False, cfg_flag=True, all_flag=False)
                 if all(value == True for value in run_tracker[this_run]['status'].values()):
                     run_tracker[this_run]['done'] = True
                     rd_print(run.log, "Finished Encoding all sets for ", run.runid)
-                    submit_email_notification(run, smtp_config, set_flag=False, cfg_flag=False, all_flag=True)
+                    if len(smtp_config) > 0:
+                        submit_email_notification(run, smtp_config, set_flag=False, cfg_flag=False, all_flag=True)
                     try:
                         # Use A2 set for mandatory/all CTC Class
                         if  'aomctc-mandatory' in run.info['ctcSets'] or 'aomctc-all' in run.info['ctcSets']:
