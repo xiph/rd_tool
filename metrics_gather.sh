@@ -555,10 +555,10 @@ if [ -e "$PERF_ENC_OUT" ]; then
   PERF_ENC_CYCLE_CNT=$(awk '/cycles/ { s=$1 } END { gsub(",", "", s) ; print s }' "$PERF_ENC_OUT")
 else
   if [ -z "$PERF_ENC_INSTR_CNT" ]; then
-    $PERF_ENC_INSTR_CNT=0
+    PERF_ENC_INSTR_CNT=0
   fi
   if [ -z "$PERF_ENC_CYCLE_CNT" ]; then
-    $PERF_ENC_CYCLE_CNT=0
+    PERF_ENC_CYCLE_CNT=0
   fi
 fi
 
@@ -568,10 +568,10 @@ if [ -e "$PERF_DEC_OUT" ]; then
   PERF_DEC_CYCLE_CNT=$(awk '/cycles/ { s=$1 } END { gsub(",", "", s) ; print s }' "$PERF_DEC_OUT")
 else
   if [ -z "$PERF_DEC_INSTR_CNT" ]; then
-    $PERF_DEC_INSTR_CNT=0
+    PERF_DEC_INSTR_CNT=0
   fi
   if [ -z "$PERF_DEC_CYCLE_CNT" ]; then
-    $PERF_DEC_CYCLE_CNT=0
+    PERF_DEC_CYCLE_CNT=0
   fi
 fi
 
