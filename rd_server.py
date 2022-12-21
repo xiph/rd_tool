@@ -233,8 +233,10 @@ class SubmitTask(SchedulerTask):
                     run.multicfg = True
                 else:
                     run.multicfg = False
-                if this_video_set in ['aomctc-f1-hires','aomctc-f2-midres']:
+                if this_video_set in ['aomctc-f1-hires','aomctc-f2-midres'] and this_preset in ['av2-ai']:
                     run.quality = quality_presets['av2-f']
+                elif this_preset in ['av2-ai']:
+                    run.quality = quality_presets['av2-ai']
                 rd_print(run.log, "Starting encoding of ", this_video_set, "with", this_preset)
                 if 'arch' in info:
                     run.arch = info['arch']
@@ -260,6 +262,9 @@ class SubmitTask(SchedulerTask):
                 if 'save_encode' in info:
                     if info['save_encode']:
                         run.save_encode = True
+                # Explictly signal Limit as 1 for still-images for AV2-AI.
+                if run.set in ['aomctc-f1-hires','aomctc-f2-midres'] and 'av2-ai' in run.codec:
+                    run.extra_options += ' --limit=1 '
                 run.status = 'running'
                 run.write_status()
                 run_list.append(run)
