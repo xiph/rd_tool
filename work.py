@@ -92,7 +92,7 @@ class RDRun(Run):
                 pass
             else:
                 any_work_failed = True
-        subprocess.call('OUTPUT="'+self.prefix+'/'+'total" "'+sys.path[0]+'/rd_average.sh" "'+self.prefix+'/*.out"',
+        subprocess.call('OUTPUT="'+self.prefix+'/'+'total" "'+sys.path[0]+'/rd_average.sh" "'+self.prefix+'/*-daala.out"',
           shell=True)
         if any_work_failed:
             self.status = 'failed'
@@ -121,7 +121,7 @@ class RDWork(Work):
     def __init__(self):
         super().__init__()
         self.no_delete = False
-        self.copy_back_files = ['-stdout.txt']
+        self.copy_back_files = ['-stdout.txt', '-enctime.out', '-dectime.out']
         self.ctc_class = ''
     def parse(self, stdout, stderr):
         self.raw = stdout
