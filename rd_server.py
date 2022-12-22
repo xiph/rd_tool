@@ -215,10 +215,10 @@ class SubmitTask(SchedulerTask):
               run_set_list = [info['task']]
         if len(info['ctcPresets']) > 1:
             run_preset_list = info['ctcPresets']
-            if 'av2-all' in info['ctcPresets']:
-                run_preset_list = ctc_full_presets
         else:
             run_preset_list = [info['codec']]
+        if 'av2-all' in info['ctcPresets']:
+            run_preset_list = ctc_full_presets
         for this_preset in run_preset_list:
             run_set_list = return_set_list(info, this_preset)
             for this_video_set in sorted(run_set_list):
@@ -537,12 +537,12 @@ def scheduler_tick():
                     rd_print(run.log, "Finished Encoding ", run.set, "set for ", run.codec, "config.")
                     run_list.remove(run)
                     run_tracker[this_run]['done'] = False
-                    if len(run.info['ctcSets']) > 1 and len(smtp_config) > 0:
+                    if ((len(run.info['ctcSets']) > 1) or ('aomctc-all' in run.info['ctcSets'])) and len(smtp_config) > 0:
                         submit_email_notification(run, smtp_config, set_flag=True, cfg_flag=False, all_flag=False)
                 if all(value == True for value in run_tracker[this_run]['cfg'][run.codec].values()):
                     rd_print(run.log, "Finished Encoding", run.codec, "config.")
                     run_tracker[this_run]['status'][run.codec] = True
-                    if len(run.info['ctcPresets']) > 1 and len(smtp_config) > 0:
+                    if ((len(run.info['ctcPresets']) > 1) or ('av2-all' in run.info['ctcPresets']))  and len(smtp_config) > 0:
                         submit_email_notification(run, smtp_config, set_flag=False, cfg_flag=True, all_flag=False)
                 if all(value == True for value in run_tracker[this_run]['status'].values()):
                     run_tracker[this_run]['done'] = True
@@ -558,6 +558,8 @@ def scheduler_tick():
                                 run.info['codec'] + '/' + sorted(run_set_list)[0]
                             if 'aomctc-mandatory' in run.info['ctcSets'] or 'aomctc-all' in run.info['ctcSets']:
                                 run.prefix = run.rundir + '/' + run.info['codec'] + '/aomctc-a2-2k'
+                        elif 'av2-all' in run.info['ctcPresets']:
+                            run.prefix = run.rundir + '/' + run.info['codec'] + '/' + run.info['task']
                         run.reduce()
                     except Exception as e:
                         rd_print(run.log,e)
