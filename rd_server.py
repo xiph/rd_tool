@@ -177,6 +177,12 @@ class CancelTask(SchedulerTask):
             rd_print(None,'Could not cancel '+run_id+'. run_id not found.')
             return
         run.cancel()
+        # Explictly search through current runIDs and remove them
+        for this_run in run_list:
+            if this_run.runid == run_id:
+                rd_print(this_run.log, "Cancelling sub-job of",
+                         this_run.set, "for", this_run.codec, ".")
+                this_run.cancel()
         for work in work_list[:]:
             if work.runid == run_id:
                 work_list.remove(work)
