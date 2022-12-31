@@ -93,24 +93,9 @@ def lookup_run_by_id(run_id):
     return None
 
 
-def generate_email_content(run, set_flag, cfg_flag, all_flag):
+def generate_email_content(run, set_flag, cfg_flag, all_flag, fail_type):
     completed_jobs = 0
     total_jobs = 0
-    for work in run.work_items:
-        total_jobs += 1
-        if work.done:
-            completed_jobs += 1
-    content_string = 'Run ID: %s, \nSet: %s, \nCodec: %s, \nCompleted Jobs: %d, \nTotal Jobs: %d, \nMetadata: %s ' % (
-        run.runid, run.set, run.codec, completed_jobs, total_jobs, run.info)
-    if set_flag:
-        content_string += '\nFinished Encoding for %s set with %s config' % (
-            run.set, run.codec)
-    if cfg_flag:
-        content_string += '\nFinished Encoding all sets for %s config' % (
-            run.codec)
-    if all_flag:
-        content_string += '\nFinished Encoding all the given sets and configs for the RunID %s' % (
-            run.runid)
     server_cfg = json.load(open(os.path.join(config_dir, 'config.json')))
     if 'base_url' in server_cfg.keys():
         server_url = server_cfg['base_url']
@@ -118,18 +103,48 @@ def generate_email_content(run, set_flag, cfg_flag, all_flag):
         server_url = 'http://' + \
             os.getenv('EXTERNAL_ADDR', 'localhost') + \
             ':' + str(server_cfg['port'])
+    if isinstance(run, RDRun):
+        this_run_id = run.runid
+    elif isinstance(run, str):
+        this_run_id = run
+    try:
+        for work in run.work_items:
+            total_jobs += 1
+            if work.done:
+                completed_jobs += 1
+        content_string = 'Run ID: %s, \nSet: %s, \nCodec: %s, \nCompleted Jobs: %d,     \nTotal Jobs: %d, \nMetadata: %s ' % (
+            run.runid, run.set, run.codec, completed_jobs, total_jobs, run.info)
+        if set_flag and len(fail_type) == 0:
+            content_string += '\nFinished Encoding for %s set with %s config' % (
+                run.set, run.codec)
+        if cfg_flag and len(fail_type) == 0:
+            content_string += '\nFinished Encoding all sets for %s config' % (
+                run.codec)
+        if all_flag and len(fail_type) == 0:
+            content_string += '\nFinished Encoding all the given sets and configs for the RunID %s' % (
+                run.runid)
+        if len(fail_type) > 0:
+            content_string += '\nEncoding for all the given sets failed, \nfail_type:%s for the RunID %s' % (
+                fail_type, run.runid)
+    except:
+        content_string = 'Run ID: %s, \nFailed before starting the job, fail_type: %s' % (
+            this_run_id, fail_type)
     content_string += '\nCheck job for more information: ' + \
-        server_url + '/?job=' + run.runid
+        server_url + '/?job=' + this_run_id
     content_string += '\nJob logs: ' + \
-        server_url + '/runs/' + run.runid + '/output.txt'
+        server_url + '/runs/' + this_run_id + '/output.txt'
     return content_string
 
 
-def submit_email_notification(run, smtp_cfg, set_flag, cfg_flag, all_flag):
+def submit_email_notification(run, smtp_cfg, set_flag, cfg_flag, all_flag, fail_type, destination):
     text_subtype = 'plain'
-    subject = 'AWCY: Run status: %s' % (run.runid)
-    content = generate_email_content(run, set_flag, cfg_flag, all_flag)
-    destination = run.info['nick']
+    if isinstance(run, RDRun):
+        subject = 'AWCY: Run status: %s' % (run.runid)
+        destination = run.info['nick']
+    elif isinstance(run, str):
+        subject = 'AWCY: Run status: %s' % (run)
+    content = generate_email_content(
+        run, set_flag, cfg_flag, all_flag, fail_type)
     # Do not attempt to do emailing if the Nick is not having email style ie.
     # containing @ symbol to keep it simple
     if '@' not in destination:
@@ -190,6 +205,8 @@ class CancelTask(SchedulerTask):
             else:
                 rd_print(None, work.runid)
         rd_print(None, len(work_list))
+        if len(smtp_config) > 0:
+            submit_email_notification(run, smtp_config, set_flag=False, cfg_flag=False, all_flag=False, fail_type='runCancel', destination='')
 
 class RunSubmitHandler(tornado.web.RequestHandler):
     def get(self):
@@ -356,6 +373,21 @@ class ExecuteTick(tornado.web.RequestHandler):
         self.write('ok')
 
 
+# Handle Job Failed Email Notifications
+class FailNotifier(tornado.web.RequestHandler):
+    def get(self):
+        run_id = self.get_query_argument('run_id')
+        fail_type = self.get_query_argument('failtype')
+        nick = self.get_query_argument('nick')
+        if len(smtp_config) > 0:
+            submit_email_notification(
+                run_id, smtp_config, set_flag=False, cfg_flag=False, all_flag=False, fail_type=fail_type, destination=nick)
+            if '@' in nick:
+                self.write("OK, sent email notification to " + nick)
+            else:
+                self.write(
+                    "ERR, no email found in nick for sending notification, nick: " + nick)
+
 def main():
     global free_slots
     global machines
@@ -382,7 +414,8 @@ def main():
             (r"/free_slots.json", FreeSlotsHandler),
             (r"/submit", RunSubmitHandler),
             (r"/cancel", CancelHandler),
-            (r"/execute_tick",ExecuteTick)
+            (r"/execute_tick",ExecuteTick),
+            (r"/fail_job_notifier", FailNotifier)
         ],
         static_path=os.path.join(os.path.dirname(__file__), "static"),
         xsrf_cookies=True,
@@ -544,17 +577,20 @@ def scheduler_tick():
                     run_list.remove(run)
                     run_tracker[this_run]['done'] = False
                     if ((len(run.info['ctcSets']) > 1) or ('aomctc-all' in run.info['ctcSets'])) and len(smtp_config) > 0:
-                        submit_email_notification(run, smtp_config, set_flag=True, cfg_flag=False, all_flag=False)
+                        submit_email_notification(
+                            run, smtp_config, set_flag=True, cfg_flag=False, all_flag=False, fail_type='', destination='')
                 if all(value == True for value in run_tracker[this_run]['cfg'][run.codec].values()):
                     rd_print(run.log, "Finished Encoding", run.codec, "config.")
                     run_tracker[this_run]['status'][run.codec] = True
                     if ((len(run.info['ctcPresets']) > 1) or ('av2-all' in run.info['ctcPresets']))  and len(smtp_config) > 0:
-                        submit_email_notification(run, smtp_config, set_flag=False, cfg_flag=True, all_flag=False)
+                        submit_email_notification(
+                            run, smtp_config, set_flag=False, cfg_flag=True, all_flag=False, fail_type='', destination='')
                 if all(value == True for value in run_tracker[this_run]['status'].values()):
                     run_tracker[this_run]['done'] = True
                     rd_print(run.log, "Finished Encoding all sets for ", run.runid)
                     if len(smtp_config) > 0:
-                        submit_email_notification(run, smtp_config, set_flag=False, cfg_flag=False, all_flag=True)
+                        submit_email_notification(
+                            run, smtp_config, set_flag=False, cfg_flag=False, all_flag=True, fail_type='', destination='')
                     try:
                         # Use A2 set for mandatory/all CTC Class
                         if  'aomctc-mandatory' in run.info['ctcSets'] or 'aomctc-all' in run.info['ctcSets']:
