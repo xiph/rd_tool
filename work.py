@@ -121,7 +121,7 @@ class RDWork(Work):
     def __init__(self):
         super().__init__()
         self.no_delete = False
-        self.copy_back_files = ['-stdout.txt', '-enctime.out', '-dectime.out']
+        self.copy_back_files = ['-stdout.txt', '-enctime.out', '-dectime.out', '-encperf.out', '-decperf.out']
         self.ctc_class = ''
     def parse(self, stdout, stderr):
         self.raw = stdout
