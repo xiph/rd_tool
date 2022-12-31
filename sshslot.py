@@ -39,6 +39,7 @@ binaries = {
     "svt-av1-ra-cq": ['Bin/Release/SvtAv1EncApp'],
     'vvc-vtm': ['bin/EncoderAppStatic', 'bin/DecoderAppStatic', 'bin/parcatStatic'],
     'vvc-vtm-ra': ['bin/EncoderAppStatic', 'bin/DecoderAppStatic', 'bin/parcatStatic'],
+    'vvc-vtm-ra-ctc': ['bin/EncoderAppStatic', 'bin/DecoderAppStatic', 'bin/parcatStatic'],
     'vvc-vtm-ra-st': ['bin/EncoderAppStatic', 'bin/DecoderAppStatic', 'bin/parcatStatic'],
     'vvc-vtm-ld': ['bin/EncoderAppStatic', 'bin/DecoderAppStatic', 'bin/parcatStatic'],
     'vvc-vtm-ai': ['bin/EncoderAppStatic', 'bin/DecoderAppStatic', 'bin/parcatStatic']

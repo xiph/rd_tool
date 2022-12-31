@@ -333,10 +333,13 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as | av2-as-st)
       ;;
   esac
   ;;
-vvc-vtm | vvc-vtm-ra | vvc-vtm-ra-st | vvc-vtm-ld | vvc-vtm-ai)
+vvc-vtm | vvc-vtm-ra | vvc-vtm-ra-ctc | vvc-vtm-ra-st | vvc-vtm-ld | vvc-vtm-ai)
   case $CODEC in
    vvc-vtm-ra | vvc-vtm-ra-st)
      VVC_CFG=$WORK_ROOT/rd_tool/cfg/vvc-vtm/encoder_randomaccess_vtm.cfg
+     ;;
+   vvc-vtm-ra-ctc)
+     VVC_CFG=$WORK_ROOT/rd_tool/cfg/vvc-vtm/encoder_randomaccess_vtm_gop16.cfg
      ;;
    vvc-vtm-ld)
       VVC_CFG=$WORK_ROOT/rd_tool/cfg/vvc-vtm/encoder_lowdelay_vtm.cfg
@@ -386,6 +389,37 @@ vvc-vtm | vvc-vtm-ra | vvc-vtm-ra-st | vvc-vtm-ld | vvc-vtm-ai)
       TIME1=$(cat enctime$$-FramesToBeEncoded.out | grep User | cut -d\  -f4)
       TIME2=$(cat enctime$$-FrameSkip.out | grep User | cut -d\  -f4)
       ENCTIME=$(awk "BEGIN {print $TIME1+$TIME2; exit}")
+      rm -f /tmp/enc$$.sh enctime$$-FramesToBeEncoded.out enctime$$-FrameSkip.out $BASENAME-FramesToBeEncoded.bin $BASENAME-FrameSkip.bin
+      ;;
+    vvc-vtm-ra-ctc)
+      # this is intentionally not a separate script as only metrics_gather.sh is
+      # sent to workers
+      echo "#!/bin/bash" > /tmp/enc$$.sh
+      echo "PERF_ENC_OUT='${BASENAME}'-encperf-\$1.out" >> /tmp/enc$$.sh
+      echo "PERF_ENC_STAT='perf stat -o '\${PERF_ENC_OUT}''" >> /tmp/enc$$.sh
+      echo "TIMER=''\${PERF_ENC_STAT}' time -v --output='enctime$$-\$1.out" >> /tmp/enc$$.sh
+      echo "case \$1 in FramesToBeEncoded) GOP_PARAMS=\"--\$1=65\";; FrameSkip) GOP_PARAMS=\" --FramesToBeEncoded=65 --\$1=65 \" ;; esac" >> /tmp/enc$$.sh
+      echo "RUN='$VVCENC -i ${BASENAME}_src.yuv -c $VVC_CFG --SourceWidth=$WIDTH --SourceHeight=$HEIGHT --FrameRate=$FPS --InputBitDepth=$DEPTH --FramesToBeEncoded=130 --QP=$x --ReconFile=${BASENAME}-'\$1'-rec.yuv -b $BASENAME-'\$1'.bin $EXTRA_OPTIONS '" >> /tmp/enc$$.sh
+      # Force config to be Closed-GOP (IDR) with only 1 I Frame
+      CTC_PARAMS="--DecodingRefreshType=2 --IntraPeriod=-1"
+      echo "CTC_PARAMS=\" $CTC_PARAMS \" " >> /tmp/enc$$.sh
+      echo "\$(\$TIMER \$RUN \$GOP_PARAMS \$CTC_PARAMS > $BASENAME$$-\$1-stdout.txt) " >> /tmp/enc$$.sh
+      chmod +x /tmp/enc$$.sh
+      for s in {FramesToBeEncoded,FrameSkip}; do printf "$s\0"; done | xargs -0 -n1 -P2 /tmp/enc$$.sh
+      # do classic concat as it is IDR
+      $(cat $BASENAME-FramesToBeEncoded.bin $BASENAME-FrameSkip.bin > $BASENAME.bin)
+      $(cat $BASENAME$$-FramesToBeEncoded-stdout.txt $BASENAME$$-FrameSkip-stdout.txt > $BASENAME-stdout.txt)
+      $(cat enctime$$-FramesToBeEncoded.out enctime$$-FrameSkip.out > $BASENAME-enctime.out)
+      $(cat ${BASENAME}-encperf-FramesToBeEncoded.out ${BASENAME}-encperf-FrameSkip.out > $BASENAME-encperf.out)
+      TIME1=$(cat enctime$$-FramesToBeEncoded.out | grep User | cut -d\  -f4)
+      TIME2=$(cat enctime$$-FrameSkip.out | grep User | cut -d\  -f4)
+      PERF_ENC_INSTR_CNT1=$(awk '/instructions/ { s=$1 } END { gsub(",", "", s) ; print s }' ${BASENAME}-encperf-FramesToBeEncoded.out)
+      PERF_ENC_INSTR_CNT2=$(awk '/instructions/ { s=$1 } END { gsub(",", "", s) ; print s }' ${BASENAME}-encperf-FrameSkip.out)
+      PERF_ENC_CYCLE_CNT1=$(awk '/cycles/ { s=$1 } END { gsub(",", "", s) ; print s }' ${BASENAME}-encperf-FramesToBeEncoded.out)
+      PERF_ENC_CYCLE_CNT2=$(awk '/cycles/ { s=$1 } END { gsub(",", "", s) ; print s }' ${BASENAME}-encperf-FrameSkip.out)
+      ENCTIME=$(awk "BEGIN {print $TIME1+$TIME2; exit}")
+      PERF_ENC_INSTR_CNT=$(awk "BEGIN {print $PERF_ENC_INSTR_CNT1+$PERF_ENC_INSTR_CNT2; exit}")
+      PERF_ENC_CYCLE_CNT=$(awk "BEGIN {print $PERF_ENC_CYCLE_CNT1+$PERF_ENC_CYCLE_CNT2; exit}")
       rm -f /tmp/enc$$.sh enctime$$-FramesToBeEncoded.out enctime$$-FrameSkip.out $BASENAME-FramesToBeEncoded.bin $BASENAME-FrameSkip.bin
       ;;
     *)
