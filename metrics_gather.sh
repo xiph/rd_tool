@@ -293,15 +293,26 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as | av2-as-st)
     av2-ra | av2-as)
       # this is intentionally not a separate script as only metrics_gather.sh is sent to workers
       echo "#!/bin/bash" > /tmp/enc$$.sh
-      echo "TIMER='time -v --output='enctime$$-\$1.out" >> /tmp/enc$$.sh
+      echo "PERF_ENC_OUT='${BASENAME}'-encperf-\$1.out" >> /tmp/enc$$.sh
+      echo "PERF_ENC_STAT='perf stat -o '\${PERF_ENC_OUT}''" >> /tmp/enc$$.sh
+      echo "TIMER=''\${PERF_ENC_STAT}' time -v --output='enctime$$-\$1.out" >> /tmp/enc$$.sh
       echo "RUN='$AOMENC --qp=$x --test-decode=fatal $CTC_PROFILE_OPTS -o $BASENAME-'\$1'.obu --limit=130 --'\$1'=65 $EXTRA_OPTIONS $FILE'" >> /tmp/enc$$.sh
-      echo "\$(\$TIMER \$RUN > $BASENAME$$-stdout.txt)" >> /tmp/enc$$.sh
+      echo "\$(\$TIMER \$RUN > $BASENAME$$-\$1-stdout.txt)" >> /tmp/enc$$.sh
       chmod +x /tmp/enc$$.sh
       for s in {limit,skip}; do printf "$s\0"; done | xargs -0 -n1 -P2 /tmp/enc$$.sh
       $(cat $BASENAME-limit.obu $BASENAME-skip.obu > $BASENAME.obu)
+      $(cat $BASENAME$$-limit-stdout.txt $BASENAME$$-skip-stdout.txt > $BASENAME-stdout.txt)
+      $(cat enctime$$-limit.out enctime$$-skip.out > $BASENAME-enctime.out)
+      $(cat ${BASENAME}-encperf-limit.out ${BASENAME}-encperf-skip.out > $BASENAME-encperf.out)
       TIME1=$(cat enctime$$-limit.out | grep User | cut -d\  -f4)
       TIME2=$(cat enctime$$-skip.out | grep User | cut -d\  -f4)
+      PERF_ENC_INSTR_CNT1=$(awk '/instructions/ { s=$1 } END { gsub(",", "", s) ; print s }' ${BASENAME}-encperf-limit.out)
+      PERF_ENC_INSTR_CNT2=$(awk '/instructions/ { s=$1 } END { gsub(",", "", s) ; print s }' ${BASENAME}-encperf-skip.out)
+      PERF_ENC_CYCLE_CNT1=$(awk '/cycles/ { s=$1 } END { gsub(",", "", s) ; print s }' ${BASENAME}-encperf-limit.out)
+      PERF_ENC_CYCLE_CNT2=$(awk '/cycles/ { s=$1 } END { gsub(",", "", s) ; print s }' ${BASENAME}-encperf-skip.out)
       ENCTIME=$(awk "BEGIN {print $TIME1+$TIME2; exit}")
+      PERF_ENC_INSTR_CNT=$(awk "BEGIN {print $PERF_ENC_INSTR_CNT1+$PERF_ENC_INSTR_CNT2; exit}")
+      PERF_ENC_CYCLE_CNT=$(awk "BEGIN {print $PERF_ENC_CYCLE_CNT1+$PERF_ENC_CYCLE_CNT2; exit}")
       rm -f /tmp/enc$$.sh enctime$$-limit.out enctime$$-skip.out $BASENAME-limit.obu $BASENAME-skip.obu
       ;;
     *)
