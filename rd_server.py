@@ -33,7 +33,7 @@ except Exception as e:
     print("W: Email based notification system will not work!")
 
 # CTC Configs
-# LD : ctc_sets_mandatory
+# LD : ctc_sets_mandatory - A1-4K
 # RA: ctc_sets_mandatory  + ctc_sets_optional
 # AI: ctc_sets_mandatory_ai + ctc_sets_optional
 # AS: A1 with Downsampling
@@ -47,6 +47,7 @@ ctc_sets_mandatory = [
     "aomctc-b2-syn"]
 ctc_sets_mandatory_ai = ctc_sets_mandatory + \
     ["aomctc-f1-hires", "aomctc-f2-midres"]
+ctc_sets_mandatory_ld = [x for x in ctc_sets_mandatory if x != 'aomctc-a1-4k']
 ctc_sets_optional = ["aomctc-g1-hdr-4k",
                      "aomctc-g2-hdr-2k", "aomctc-e-nonpristine"]
 ctc_full_presets = ["av2-ra-st", 'av2-ld','av2-ai']
@@ -74,10 +75,12 @@ def return_set_list(info_file, codec_id):
             elif codec_id == 'av2-ra-st' or codec_id == 'av2-ra':
                 run_set_list = ctc_sets_mandatory + ctc_sets_optional
             elif codec_id == 'av2-ld':
-                run_set_list = ctc_sets_mandatory
+                run_set_list = ctc_sets_mandatory_ld
         elif 'aomctc-mandatory' in info_file['ctcSets']:
-            if codec_id == 'av2-ra-st' or codec_id == 'av2-ra' or codec_id ==   'av2-ld':
+            if codec_id == 'av2-ra-st' or codec_id == 'av2-ra':
                 run_set_list = ctc_sets_mandatory
+            elif codec_id == 'av2-ld':
+                run_set_list = ctc_sets_mandatory_ld
             elif codec_id == 'av2-ai':
                 run_set_list =  ctc_sets_mandatory_ai
         else:
