@@ -49,6 +49,7 @@ quality_presets = {
     "vvc-vtm": [22, 27, 32, 37],
     "vvc-vtm-ra": [22, 27, 32, 37],
     "vvc-vtm-ra-ctc": [22, 27, 32, 37, 42, 47],
+    "vvc-vtm-as-ctc": [22, 27, 32, 37, 42, 47],
     "vvc-vtm-ra-st": [22, 27, 32, 37],
     "vvc-vtm-ld": [22, 27, 32, 37],
     "vvc-vtm-ai": [22, 27, 32, 37],

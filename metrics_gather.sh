@@ -344,12 +344,12 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as | av2-as-st)
       ;;
   esac
   ;;
-vvc-vtm | vvc-vtm-ra | vvc-vtm-ra-ctc | vvc-vtm-ra-st | vvc-vtm-ld | vvc-vtm-ai)
+vvc-vtm | vvc-vtm-ra | vvc-vtm-ra-ctc | vvc-vtm-ra-st | vvc-vtm-as-ctc | vvc-vtm-ld | vvc-vtm-ai)
   case $CODEC in
    vvc-vtm-ra | vvc-vtm-ra-st)
      VVC_CFG=$WORK_ROOT/rd_tool/cfg/vvc-vtm/encoder_randomaccess_vtm.cfg
      ;;
-   vvc-vtm-ra-ctc)
+   vvc-vtm-ra-ctc | vvc-vtm-as-ctc)
      VVC_CFG=$WORK_ROOT/rd_tool/cfg/vvc-vtm/encoder_randomaccess_vtm_gop16.cfg
      ;;
    vvc-vtm-ld)
@@ -379,6 +379,12 @@ vvc-vtm | vvc-vtm-ra | vvc-vtm-ra-ctc | vvc-vtm-ra-st | vvc-vtm-ld | vvc-vtm-ai)
       INTRA_PERIOD=100
       ;;
   esac
+  # Enbale Tiling explictly for >=4K
+  if [ $((WIDTH)) -ge 3840 ] && [ $((HEIGHT)) -ge 2160 ]; then
+    CTC_PROFILE_OPTS+="  --EnablePicPartitioning=1 --TileColumnWidthArray=15"
+  else
+    CTC_PROFILE_OPTS+=" "
+  fi
   # Convert to YUV on-the-fly
   $Y4M2YUV $FILE -o ${BASENAME}_src.yuv
   # Encode video
@@ -391,7 +397,7 @@ vvc-vtm | vvc-vtm-ra | vvc-vtm-ra-ctc | vvc-vtm-ra-st | vvc-vtm-ld | vvc-vtm-ai)
       echo "#!/bin/bash" > /tmp/enc$$.sh
       echo "TIMER='time -v --output='enctime$$-\$1.out" >> /tmp/enc$$.sh
       echo "case \$1 in FramesToBeEncoded) GOP_PARAMS=\"--\$1=65\";; FrameSkip) GOP_PARAMS=\" --FramesToBeEncoded=65 --\$1=65 \" ;; esac" >> /tmp/enc$$.sh
-      echo "RUN='$VVCENC -i ${BASENAME}_src.yuv -c $VVC_CFG --SourceWidth=$WIDTH --SourceHeight=$HEIGHT --FrameRate=$FPS --InputBitDepth=$DEPTH --FramesToBeEncoded=130 --QP=$x --ReconFile=${BASENAME}-'\$1'-rec.yuv -b $BASENAME-'\$1'.bin $EXTRA_OPTIONS '" >> /tmp/enc$$.sh
+      echo "RUN='$VVCENC -i ${BASENAME}_src.yuv -c $VVC_CFG --SourceWidth=$WIDTH --SourceHeight=$HEIGHT --FrameRate=$FPS --InputBitDepth=$DEPTH --FramesToBeEncoded=130 --QP=$x $CTC_PROFILE_OPTS --ReconFile=${BASENAME}-'\$1'-rec.yuv -b $BASENAME-'\$1'.bin $cd '" >> /tmp/enc$$.sh
       echo "\$(\$TIMER \$RUN \$GOP_PARAMS > $BASENAME$$-stdout.txt)" >> /tmp/enc$$.sh
       chmod +x /tmp/enc$$.sh
       for s in {FramesToBeEncoded,FrameSkip}; do printf "$s\0"; done | xargs -0 -n1 -P2 /tmp/enc$$.sh
@@ -402,7 +408,7 @@ vvc-vtm | vvc-vtm-ra | vvc-vtm-ra-ctc | vvc-vtm-ra-st | vvc-vtm-ld | vvc-vtm-ai)
       ENCTIME=$(awk "BEGIN {print $TIME1+$TIME2; exit}")
       rm -f /tmp/enc$$.sh enctime$$-FramesToBeEncoded.out enctime$$-FrameSkip.out $BASENAME-FramesToBeEncoded.bin $BASENAME-FrameSkip.bin
       ;;
-    vvc-vtm-ra-ctc)
+    vvc-vtm-ra-ctc | vvc-vtm-as-ctc)
       # this is intentionally not a separate script as only metrics_gather.sh is
       # sent to workers
       echo "#!/bin/bash" > /tmp/enc$$.sh
@@ -410,7 +416,7 @@ vvc-vtm | vvc-vtm-ra | vvc-vtm-ra-ctc | vvc-vtm-ra-st | vvc-vtm-ld | vvc-vtm-ai)
       echo "PERF_ENC_STAT='perf stat -o '\${PERF_ENC_OUT}''" >> /tmp/enc$$.sh
       echo "TIMER=''\${PERF_ENC_STAT}' time -v --output='enctime$$-\$1.out" >> /tmp/enc$$.sh
       echo "case \$1 in FramesToBeEncoded) GOP_PARAMS=\"--\$1=65\";; FrameSkip) GOP_PARAMS=\" --FramesToBeEncoded=65 --\$1=65 \" ;; esac" >> /tmp/enc$$.sh
-      echo "RUN='$VVCENC -i ${BASENAME}_src.yuv -c $VVC_CFG --SourceWidth=$WIDTH --SourceHeight=$HEIGHT --FrameRate=$FPS --InputBitDepth=$DEPTH --FramesToBeEncoded=130 --QP=$x --ReconFile=${BASENAME}-'\$1'-rec.yuv -b $BASENAME-'\$1'.bin $EXTRA_OPTIONS '" >> /tmp/enc$$.sh
+      echo "RUN='$VVCENC -i ${BASENAME}_src.yuv -c $VVC_CFG --SourceWidth=$WIDTH --SourceHeight=$HEIGHT --FrameRate=$FPS --InputBitDepth=$DEPTH --FramesToBeEncoded=130 --QP=$x $CTC_PROFILE_OPTS --ReconFile=${BASENAME}-'\$1'-rec.yuv -b $BASENAME-'\$1'.bin $EXTRA_OPTIONS '" >> /tmp/enc$$.sh
       # Force config to be Closed-GOP (IDR) with only 1 I Frame
       CTC_PARAMS="--DecodingRefreshType=2 --IntraPeriod=-1"
       echo "CTC_PARAMS=\" $CTC_PARAMS \" " >> /tmp/enc$$.sh
@@ -434,7 +440,7 @@ vvc-vtm | vvc-vtm-ra | vvc-vtm-ra-ctc | vvc-vtm-ra-st | vvc-vtm-ld | vvc-vtm-ai)
       rm -f /tmp/enc$$.sh enctime$$-FramesToBeEncoded.out enctime$$-FrameSkip.out $BASENAME-FramesToBeEncoded.bin $BASENAME-FrameSkip.bin
       ;;
     *)
-      $($TIMER $VVCENC -i ${BASENAME}_src.yuv -c $VVC_CFG --SourceWidth=$WIDTH --SourceHeight=$HEIGHT --FrameRate=$FPS --InputBitDepth=$DEPTH --IntraPeriod=$INTRA_PERIOD --FramesToBeEncoded=130 --QP=$x -b $BASENAME.bin --ReconFile=${BASENAME}-rec.yuv  $EXTRA_OPTIONS > "$BASENAME-stdout.txt")
+      $($TIMER $VVCENC -i ${BASENAME}_src.yuv -c $VVC_CFG --SourceWidth=$WIDTH --SourceHeight=$HEIGHT --FrameRate=$FPS --InputBitDepth=$DEPTH --IntraPeriod=$INTRA_PERIOD --FramesToBeEncoded=130 --QP=$x $CTC_PROFILE_OPTS -b $BASENAME.bin --ReconFile=${BASENAME}-rec.yuv  $EXTRA_OPTIONS > "$BASENAME-stdout.txt")
       ;;
   esac
   # Decode the video
@@ -445,6 +451,23 @@ vvc-vtm | vvc-vtm-ra | vvc-vtm-ra-ctc | vvc-vtm-ra-st | vvc-vtm-ld | vvc-vtm-ai)
   $YUV2YUV4MPEG $BASENAME  -an1 -ad1 -w$WIDTH -h$HEIGHT -fn$FPS_NUM -fd$FPS_DEN -c$YUV_CHROMA -b$DEPTH
   SIZE=$(stat -c %s $BASENAME.bin)
   ENC_EXT='.bin'
+  case $CODEC in
+    vvc-vtm-as-ctc)
+      if [ $((WIDTH)) -ne 3840 ] && [ $((HEIGHT)) -ne 2160 ]; then
+        # change the reference to 3840x2160
+        FILE=$(sed -e 's/\(640x360\|960x540\|1280x720\|1920x1080\|2560x1440\)/3840x2160/' <<< $FILE)
+        # hack to force input Y4M file to F30:1 because HDRConvert requires specifying an output frame rate, and if they do not match it will resample temporaly
+        echo "YUV4MPEG2 W$WIDTH H$HEIGHT F30:1 $CHROMA" > $BASENAME-$$.y4m
+        $(tail -n+2 $BASENAME.y4m >> $BASENAME-$$.y4m)
+        # upsample decoded output to 3840x2160
+        $HDRCONVERT -p SourceFile=$BASENAME-$$.y4m -p OutputFile=$BASENAME-$$-out.y4m -p OutputWidth=3840 -p OutputHeight=2160 -p OutputChromaFormat=1 -p OutputBitDepthCmp0=10 -p OutputBitDepthCmp1=10 -p OutputBitDepthCmp2=10 -p OutputColorSpace=0 -p OutputColorPrimaries=0 -p OutputTransferFunction=12 -p SilentMode=1 -p ScaleOnly=1 -p ScalingMode=12 -p OutputRate=30 -p NumberOfFrames=130 1>&2
+        # replace decoded output with upsampled file using Y4M header from the reference
+        $(head -n 1 $FILE > $BASENAME.y4m)
+        $(tail -n+2 $BASENAME-$$-out.y4m >> $BASENAME.y4m)
+        rm $BASENAME-$$.y4m $BASENAME-$$-out.y4m
+      fi
+      ;;
+  esac
 ;;
 thor)
   $($TIMER $THORENC -qp $x -cf "$THORDIR/config_HDB16_high_efficiency.txt" -if $FILE -of $BASENAME.thor $EXTRA_OPTIONS > $BASENAME-enc.out)
