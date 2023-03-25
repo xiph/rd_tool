@@ -287,6 +287,14 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as | av2-as-st)
     F1 | F2)
     CTC_PROFILE_OPTS+=" --limit=1 "
     ;;
+    # CTCv4: Suggests to have multhreading with tiling for A2 and B1 in LD
+    A2 | B1)
+      case $CODEC in
+        av2-ld)
+        CTC_PROFILE_OPTS+=" --row-mt=0 --threads=2 --tile-rows=1 "
+        ;;
+      esac
+    ;;
   esac
   # threading options for the A1 test set must be overriden via EXTRA_OPTIONS at a higher level
   case $CODEC in
