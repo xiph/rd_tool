@@ -334,6 +334,25 @@ class RunStatusHandler(tornado.web.RequestHandler):
                 run_json['total'] += 1
                 if work.done:
                     run_json['completed'] += 1
+            multi_config_completed = 0
+            multi_config_total = 0
+            # Iterate through all the `run_list` to count different
+            # configurations and video-sets for reflecting true-running-count
+            for this_run in run_list:
+                if run.runid == this_run.runid:
+                    # This would be the current job, so skip that to avoid
+                    # double-counting
+                    if (run.runid == this_run.runid) and (run.set == this_run.set) and (run.codec == this_run.codec):
+                        continue
+                    else:
+                        for this_work in this_run.work_items:
+                            multi_config_total += 1
+                            if this_work.done:
+                                multi_config_completed += 1
+            # Add the new total and completed to the run_json
+            run_json['multi_completed'] = run_json['completed'] + \
+                multi_config_completed
+            run_json['multi_total'] = run_json['total'] + multi_config_total
             runs.append(run_json)
         self.write(json.dumps(runs))
 
