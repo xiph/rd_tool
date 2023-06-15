@@ -632,10 +632,20 @@ ENC_FILE=${BASENAME}${ENC_EXT}
 MD5SUM=($(md5sum $ENC_FILE))
 echo $MD5SUM
 
-# Extract Encoding Instruction count and cycles
-if [ -e "$PERF_ENC_OUT" ]; then
-  PERF_ENC_INSTR_CNT=$(awk '/instructions/ { s=$1 } END { gsub(",", "", s) ; print s }' "$PERF_ENC_OUT")
-  PERF_ENC_CYCLE_CNT=$(awk '/cycles/ { s=$1 } END { gsub(",", "", s) ; print s }' "$PERF_ENC_OUT")
+# Extract Encoding Instruction count and cycles for Parallel-GOP cases
+if ! [[ "$CODEC" =~ ^(av2-ra|av2-as|vvc-vtm-ra|vvc-vtm-as|vvc-vtm-ra-ctc| vvc-vtm-as-ctc)$ ]]; then
+  if [ -e "$PERF_ENC_OUT" ]; then
+    PERF_ENC_INSTR_CNT=$(awk '/instructions/ { s=$1 } END { gsub(",", "", s) ; print s }' "$PERF_ENC_OUT")
+    PERF_ENC_CYCLE_CNT=$(awk '/cycles/ { s=$1 } END { gsub(",", "", s) ; print s }' "$PERF_ENC_OUT")
+  else
+    if [ -z "$PERF_ENC_INSTR_CNT" ]; then
+    PERF_ENC_INSTR_CNT=0
+    fi
+    if [ -z "$PERF_ENC_CYCLE_CNT" ]; then
+      PERF_ENC_CYCLE_CNT=0
+    fi
+  fi
+# Default to 0 if instr/cycle count is not available for Parallel-GOP cases
 else
   if [ -z "$PERF_ENC_INSTR_CNT" ]; then
     PERF_ENC_INSTR_CNT=0
