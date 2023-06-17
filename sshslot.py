@@ -88,7 +88,7 @@ class SlotProcess:
         self.log = log
     def kill(self):
         # wait until there is actually a process to kill
-        success = self.can_kill.wait(20)
+        success = self.can_kill.wait(40)
         if not success:
             rd_print(self.log,"Waited too long for process to kill.")
             if self.p:
