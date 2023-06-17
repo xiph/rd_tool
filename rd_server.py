@@ -505,6 +505,34 @@ def find_image_work(items, default = None):
             return work
     return default
 
+def find_multislot_work(items, default = None):
+    for work in items:
+        # Work is of the class RDWork
+        if work.multislots:
+            return work
+    return default
+
+def check_multislot_work(work):
+    return work.multislots
+
+def check_gop_parallel_work(work):
+    if work.run.codec in ['av2-ra', 'av2-as', 'vvc-vtm-ra','vvc-vtm-ra-ctc','vvc-vtm-as-ctc']:
+        return True
+    else:
+        return False
+
+def free_a_slot(this_free_slots, current_slot_host, current_slot_id, current_work):
+    for slot_iterator in range(len(this_free_slots)-1, -1,-1):
+        target_slot = this_free_slots[slot_iterator]
+        target_slot_host = target_slot.machine.host
+        target_slot_id = target_slot.work_root
+        if current_slot_host == target_slot_host:
+            if current_slot_id != target_slot_id:
+                thread_slot = this_free_slots.pop(slot_iterator)
+                thread_slot.hold_work(current_work)
+                break
+    return this_free_slots
+
 def scheduler_tick():
     global slots
     global free_slots
@@ -524,6 +552,7 @@ def scheduler_tick():
             rd_print(None,'Task failed.')
     # look for completed work
     for slot in slots:
+        current_work = slot.work
         if slot.busy == False and slot.work != None:
             if slot.work.failed == False:
                 slot.work.done = True
@@ -545,11 +574,29 @@ def scheduler_tick():
                 rd_print(slot.work.log,slot.work.get_name(),'given up on.')
             slot.clear_work()
             free_slots.append(slot)
+            # Free the holdout slots for multislot jobs
+            if check_multislot_work(current_work) or check_gop_parallel_work(current_work):
+                for cur_slot in slots:
+                    # When the work is done for a slot, it is cleared, so we
+                    # check for None.
+                    if cur_slot.work is None:
+                        continue
+                    # Check the unique work_id among all the slots to find slots
+                    # which current encoder invocation is using to free them.
+                    elif cur_slot.work.workid == current_work.workid:
+                        cur_slot.busy = False
+                        cur_slot.clear_work()
+                        free_slots.append(cur_slot)
+
     # fill empty slots with new work
     if len(work_list) != 0:
         if len(free_slots) != 0:
             slot = free_slots.pop()
             work = work_list[0]
+            # Machine ID
+            current_slot_host = slot.machine.host
+            # Slot ID to be exlcuded
+            current_slot_id = slot.work_root
             # search for image work if there is only one slot available
             # allows prioritizing image runs without making scheduler the bottleneck
             if len(free_slots) == 0:
@@ -558,9 +605,27 @@ def scheduler_tick():
                 except Exception as e:
                     rd_print(None, e)
                     rd_print(None, 'Finding image work failed.')
-            work_list.remove(work)
-            rd_print(work.log,'Encoding',work.get_name(),'on',slot.machine.host)
-            slot.start_work(work)
+                    work = find_multislot_work(work_list, work)
+            if check_multislot_work(work):
+                # Multijob code-path
+                # Free a slot
+                free_slots = free_a_slot(free_slots, current_slot_host, current_slot_id, work)
+                # GOP-Parallel: Multislot requires 2 free slots
+                if check_gop_parallel_work(work):
+                    free_slots = free_a_slot(free_slots, current_slot_host, current_slot_id, work)
+                    free_slots = free_a_slot(free_slots, current_slot_host, current_slot_id, work)
+                # Remove from the list and start encoding
+                work_list.remove(work)
+                slot.start_work(work)
+            else:
+                # Non-multijob code-path
+                # GOP-Sequential: 1 Extra free slot for 2nd GOP
+                if check_gop_parallel_work(work):
+                    free_slots = free_a_slot(free_slots, current_slot_host, current_slot_id, work)
+                work_list.remove(work)
+                rd_print(work.log, 'Encoding', work.get_name(),
+                     'on', slot.work_root.split('/')[-1], 'of', slot.machine.host)
+                slot.start_work(work)
     # As we have Work of Works with different sets for same RunID,
     # Create a mechanism to filter and store the results for unique jobs based
     # on sets.

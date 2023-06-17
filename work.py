@@ -4,8 +4,10 @@ import subprocess
 import sys
 import xml.etree.ElementTree as ET
 import time
+import re
 
 runs_dst_dir = os.getenv("RUNS_DST_DIR", os.path.join(os.getcwd(), "../runs"))
+media_src_dir = os.getenv("MEDIAS_SRC_DIR", os.path.join(os.getcwd(), "/media"))
 
 # Finding files such as `this_(that)` requires `'` be placed on both
 # sides of the quote so the `()` are both captured. Files such as
@@ -115,6 +117,7 @@ class Work:
         self.failed = False
         self.runid = ''
         self.slot = None
+        self.workid = ''
     def cancel(self):
         self.failed = True
         self.done = True
@@ -230,6 +233,8 @@ class RDWork(Work):
             slot = self.slot
             slot.setup(self.codec,self.bindir)
             work = self
+            # Unique identifer for a given work (encoder invocation)
+            work.workid = '_'.join([str(work.filename), str(self.quality), str(self.codec), str(self.runid)])
             input_path = slot.machine.media_path+'/'+work.set+'/'+work.filename
             daalatool_dir = os.getenv("DAALATOOL_DIR", os.path.join(slot.machine.work_root, "daalatool"))
             command = 'WORK_ROOT="'+slot.work_root+'" '
@@ -310,6 +315,21 @@ def create_rdwork(run, video_filenames):
             if 'aomctc' in work.set:
                 work.ctc_class = work.set.split('-')[1].upper()
             work.filename = filename
+            video_input_path = media_src_dir + '/' + work.set + '/' + work.filename
+            v = open(video_input_path, "rb")
+            line = v.readline().decode("utf-8")
+            work.fps_n, work.fps_d = re.search(
+                r"F([0-9]*)\:([0-9]*)", line).group(1, 2)
+            work.width = int(re.search(r"W([0-9]*)", line).group(1))
+            work.height = int(re.search(r"H([0-9]*)", line).group(1))
+            # Explictly signal multislots for AV2 and VVC jobs where video is of
+            # 4K resolution and from AOM-CTC
+            if (int(work.width) >= 3840) and (int(work.height) >= 2160):
+                if 'aomctc' in work.set:
+                    if 'av2' in work.codec or 'vvc' in work.codec:
+                        work.multislots = True
+            else:
+                work.multislots = False
             work.extra_options = run.extra_options
             if run.save_encode:
                 work.no_delete = True
