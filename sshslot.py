@@ -116,6 +116,7 @@ class Slot:
         self.work = None
         self.log = log
         self.can_kill = None
+        self.thread_hold = False # Would be useful in future to distinguish between thread holding and other reasons to hold a given slot
     def gather(self):
         return self.p.communicate()
     def start_work(self, work):
@@ -126,6 +127,13 @@ class Slot:
         work_thread.daemon = True
         self.busy = True
         work_thread.start()
+    # Mark a given slot as busy and hold it for parallel processing
+    def hold_work(self, work):
+        self.work = work
+        work.slot = self
+        self.p = SlotProcess(self.log)
+        self.busy = True
+        self.thread_hold = True
     def clear_work(self):
         if self.work:
             self.work.slot = None
