@@ -682,6 +682,8 @@ def scheduler_tick():
                         # Use A2 set for mandatory/all CTC Class
                         if  'aomctc-mandatory' in run.info['ctcSets'] or 'aomctc-all' in run.info['ctcSets']:
                             run.prefix = run.rundir + '/aomctc-a2-2k'
+                        if len(run.info['ctcSets']) > 1 and len(run.info['ctcPresets']) <= 1:
+                                run.prefix = run.rundir + '/' + run.info['task']
                         if len(run.info['ctcPresets']) > 1:
                             run.prefix = run.rundir + '/' + \
                                 run.info['codec'] + '/' + sorted(run_set_list)[0]
