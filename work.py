@@ -72,6 +72,7 @@ class Run:
         self.status = 'running'
         self.work_items = []
         self.cancelled = False
+        self.nightly_run = False
     def write_status(self):
         f = open(self.rundir+'/status.txt','w')
         f.write(self.status)
@@ -118,6 +119,8 @@ class Work:
         self.runid = ''
         self.slot = None
         self.workid = ''
+        self.nightly_run = False
+        self.multislots = False
     def cancel(self):
         self.failed = True
         self.done = True
@@ -311,6 +314,7 @@ def create_rdwork(run, video_filenames):
             work.bindir = run.bindir
             work.set = run.set
             work.multicfg = run.multicfg
+            work.nightly_run = run.nightly_run
             # Parse and Store the CTC class (A1..A5, E, F1/F2, G1/G2)
             if 'aomctc' in work.set:
                 work.ctc_class = work.set.split('-')[1].upper()
@@ -324,12 +328,14 @@ def create_rdwork(run, video_filenames):
             work.height = int(re.search(r"H([0-9]*)", line).group(1))
             # Explictly signal multislots for AV2 and VVC jobs where video is of
             # 4K resolution and from AOM-CTC
-            if (int(work.width) >= 3840) and (int(work.height) >= 2160):
-                if 'aomctc' in work.set:
-                    if 'av2' in work.codec or 'vvc' in work.codec:
+            if 'aomctc' in work.set:
+                if 'av2' in work.codec or 'vvc' in work.codec:
+                    if (int(work.width) >= 3840) and (int(work.height) >= 2160):
                         work.multislots = True
-            else:
-                work.multislots = False
+                    if (int(work.width) >= 1920) and (int(work.height) >= 1080):
+                        if work.set in ['aomctc-a2-2k', 'aomctc-b1-syn']:
+                            if work.nightly_run:
+                                work.multislots = True
             work.extra_options = run.extra_options
             if run.save_encode:
                 work.no_delete = True
