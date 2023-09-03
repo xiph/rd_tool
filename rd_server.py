@@ -288,6 +288,13 @@ class SubmitTask(SchedulerTask):
                 if 'save_encode' in info:
                     if info['save_encode']:
                         run.save_encode = True
+                if 'nightly_run' in info or 'nightly' in run.runid:
+                    run.nightly_run = True
+                    # AVMNightly: 3 threads for A1, A2, B1 sets
+                    if run.set in ['aomctc-a1-4k', 'aomctc-a2-2k', 'aomctc-b1-syn']:
+                        run.extra_options += ' --tile-columns=2 --threads=3 --row-mt=0  '
+                    # AVMNightly: Due to complexity reasons we can only do 17f:)
+                    run.extra_options += ' --limit=17 '
                 # Explictly signal Limit as 1 for still-images for AV2-AI.
                 if run.set in ['aomctc-f1-hires','aomctc-f2-midres'] and 'av2-ai' in run.codec:
                     run.extra_options += ' --limit=1 '
@@ -515,6 +522,9 @@ def find_multislot_work(items, default = None):
 def check_multislot_work(work):
     return work.multislots
 
+def check_nightly_work(work):
+    return work.nightly_run
+
 def check_gop_parallel_work(work):
     if work.run.codec in ['av2-ra', 'av2-as', 'vvc-vtm-ra','vvc-vtm-ra-ctc','vvc-vtm-as-ctc']:
         return True
@@ -610,6 +620,8 @@ def scheduler_tick():
                 # Multijob code-path
                 # Free a slot
                 free_slots = free_a_slot(free_slots, current_slot_host, current_slot_id, work)
+                if check_nightly_work(work):
+                    free_slots = free_a_slot(free_slots, current_slot_host, current_slot_id, work)
                 # GOP-Parallel: Multislot requires 2 free slots
                 if check_gop_parallel_work(work):
                     free_slots = free_a_slot(free_slots, current_slot_host, current_slot_id, work)
