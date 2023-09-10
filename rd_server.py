@@ -302,6 +302,12 @@ class SubmitTask(SchedulerTask):
                 run.write_status()
                 run_list.append(run)
                 video_filenames = video_sets[run.set]['sources']
+                if 'ctcVersion' in info:
+                    run.ctc_version = float(info['ctcVersion'])
+                if run.ctc_version < 5.0:
+                    if run.set in ['aomctc-a2-2k',
+                                 'aomctc-b2-syn', 'aomctc-e-nonpristine']:
+                        video_filenames = video_sets[run.set]['CTC_4.0']
                 run.set_type = video_sets[run.set].get('type', 'undef')
                 run.work_items = create_rdwork(run, video_filenames)
                 work_list.extend(run.work_items)
@@ -525,6 +531,13 @@ def check_multislot_work(work):
 def check_nightly_work(work):
     return work.nightly_run
 
+def check_aomctc_ld(work):
+    if work.run.ctc_version >= 5.0:
+        if work.set in ['aomctc-a2-2k', 'aomctc-b1-syn']:
+            if work.codec in ['av2-ld']:
+                return True
+    return False
+
 def check_gop_parallel_work(work):
     if work.run.codec in ['av2-ra', 'av2-as', 'vvc-vtm-ra','vvc-vtm-ra-ctc','vvc-vtm-as-ctc']:
         return True
@@ -621,6 +634,10 @@ def scheduler_tick():
                 # Free a slot
                 free_slots = free_a_slot(free_slots, current_slot_host, current_slot_id, work)
                 if check_nightly_work(work):
+                    free_slots = free_a_slot(free_slots, current_slot_host, current_slot_id, work)
+                # CTCv5: Requires 4 threads for A2, B1 encodes in LD mode.
+                if check_aomctc_ld(work):
+                    free_slots = free_a_slot(free_slots, current_slot_host, current_slot_id, work)
                     free_slots = free_a_slot(free_slots, current_slot_host, current_slot_id, work)
                 # GOP-Parallel: Multislot requires 2 free slots
                 if check_gop_parallel_work(work):

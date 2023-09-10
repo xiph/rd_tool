@@ -73,6 +73,7 @@ class Run:
         self.work_items = []
         self.cancelled = False
         self.nightly_run = False
+        self.ctc_version = 5.0
     def write_status(self):
         f = open(self.rundir+'/status.txt','w')
         f.write(self.status)
@@ -131,6 +132,7 @@ class RDWork(Work):
         self.no_delete = False
         self.copy_back_files = ['-stdout.txt', '-enctime.out', '-dectime.out', '-encperf.out', '-decperf.out']
         self.ctc_class = ''
+        self.ctc_version = 5.0
     def parse(self, stdout, stderr):
         self.raw = stdout
         split = None
@@ -245,6 +247,7 @@ class RDWork(Work):
             command += ' x="'+str(work.quality) + '" '
             command += 'CODEC="'+work.codec+'" '
             command += 'CTC_CLASS="'+work.ctc_class+'" '
+            command += 'CTC_VERSION="'+str(work.ctc_version)+'" '
             command += 'EXTRA_OPTIONS="'+work.extra_options + '" '
             if self.no_delete:
                 command += 'NO_DELETE=1 '
@@ -315,6 +318,7 @@ def create_rdwork(run, video_filenames):
             work.set = run.set
             work.multicfg = run.multicfg
             work.nightly_run = run.nightly_run
+            work.ctc_version = run.ctc_version
             # Parse and Store the CTC class (A1..A5, E, F1/F2, G1/G2)
             if 'aomctc' in work.set:
                 work.ctc_class = work.set.split('-')[1].upper()
@@ -335,6 +339,8 @@ def create_rdwork(run, video_filenames):
                     if (int(work.width) >= 1920) and (int(work.height) >= 1080):
                         if work.set in ['aomctc-a2-2k', 'aomctc-b1-syn']:
                             if work.nightly_run:
+                                work.multislots = True
+                            if work.codec in ['av2-ld']:
                                 work.multislots = True
             work.extra_options = run.extra_options
             if run.save_encode:
