@@ -288,10 +288,18 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as | av2-as-st)
     CTC_PROFILE_OPTS+=" --limit=1 "
     ;;
     # CTCv4: Suggests to have multhreading with tiling for A2 and B1 in LD
+    # CTCv5: Suggests to have column tiling along with row-tiling:)
     A2 | B1)
       case $CODEC in
         av2-ld)
-        CTC_PROFILE_OPTS+=" --row-mt=0 --threads=2 --tile-rows=1 "
+          case $CTC_VERSION in
+          5.0)
+            CTC_PROFILE_OPTS+=" --row-mt=0 --threads=4 --tile-rows=1 --tile-columns=1"
+          ;;
+          4.0)
+            CTC_PROFILE_OPTS+=" --row-mt=0 --threads=2 --tile-rows=1"
+          ;;
+          esac
         ;;
       esac
     ;;
