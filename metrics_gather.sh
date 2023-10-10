@@ -575,37 +575,44 @@ esac
 #rename core dumps to prevent more than 1 per slot on disk
 mv core.* core 2>/dev/null || true
 
-"$DUMP_PSNR" -a "$FILE" "$BASENAME.y4m" > "$BASENAME-psnr.out"
+if [ -f "$VMAF" ]; then
+  "$VMAF" -r "$FILE" -d "$BASENAME.y4m" --aom_ctc v3.0 --xml -o "$BASENAME-vmaf.xml" --thread 1 | tail -n 1
+  rm -f ref dis
+  FRAMES=$(cat "$BASENAME-vmaf.xml" | grep "frame frameNum" | wc -l)
+  PSNR="Total: 0 (Y': 0 Cb: 0 Cr: 0 )"
+else
+  "$DUMP_PSNR" -a "$FILE" "$BASENAME.y4m" > "$BASENAME-psnr.out"
+  FRAMES=$(cat "$BASENAME-psnr.out" | grep ^0 | wc -l)
+  PSNR=$(cat "$BASENAME-psnr.out" | grep Total)
+fi
 
-FRAMES=$(cat "$BASENAME-psnr.out" | grep ^0 | wc -l)
 PIXELS=$(($WIDTH*$HEIGHT*$FRAMES))
 
 echo "$x" "$PIXELS" "$SIZE"
 
-PSNR=$(cat "$BASENAME-psnr.out" | grep Total)
 
 echo "$PSNR"
 
-APSNR=$(cat "$BASENAME-psnr.out" | grep Frame-averaged)
-PSNRHVS=$("$DUMP_PSNRHVS" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
+APSNR="Frame-averaged: 0 (Y': 0 Cb: 0 Cr: 0 )" #$(cat "$BASENAME-psnr.out" | grep Frame-averaged)
+PSNRHVS="Total: 0 (Y': 0 Cb: 0 Cr: 0 )" #$("$DUMP_PSNRHVS" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 
 echo "$PSNRHVS"
 
-SSIM=$("$DUMP_SSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
+SSIM="Total: 0 (Y': 0 Cb: 0 Cr: 0 )" #$("$DUMP_SSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 
 echo "$SSIM"
 
-FASTSSIM=$("$DUMP_FASTSSIM" -c "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
+FASTSSIM="Total: 0 (Y': 0 Cb: 0 Cr: 0 )" #$("$DUMP_FASTSSIM" -c "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 
 echo "$FASTSSIM"
 
-CIEDE=$("$DUMP_CIEDE" --threads 1 "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
+CIEDE="0 0" #$("$DUMP_CIEDE" --threads 1 "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 
 echo "$CIEDE"
 
 echo "$APSNR"
 
-MSSSIM=$("$DUMP_MSSSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
+MSSSIM="Total: 0 (Y': 0 Cb: 0 Cr: 0 )" #$("$DUMP_MSSSIM" "$FILE" "$BASENAME.y4m" 2> /dev/null | grep Total)
 
 echo "$MSSSIM"
 
@@ -619,13 +626,7 @@ fi
 
 echo "$ENCTIME"
 
-if [ -f "$VMAF" ]; then
-  "$VMAF" -r "$FILE" -d "$BASENAME.y4m" --aom_ctc v3.0 --xml -o "$BASENAME-vmaf.xml" --thread 1 | tail -n 1
-  rm -f ref dis
-  echo "0"
-else
-  echo "0"
-fi
+echo "0" # Dummy placeholder for vmaf_old in the output
 
 if [ -e "$TIMERDECOUT" ]; then
   DECTIME=$(awk '/User/ { s=$4 } END { printf "%.2f", s }' "$TIMERDECOUT")
