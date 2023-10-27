@@ -526,7 +526,7 @@ rav1e)
   SIZE=$(stat -c %s $BASENAME.ivf)
   ENC_EXT='.ivf'
   ;;
-svt-av1 | svt-av1-ra | svt-av1-ra-crf | svt-av1-ra-vbr | svt-av1-ra-vbr-2p | svt-av1-ld-cbr | svt-av1-ra-cq )
+svt-av1 | svt-av1-ra | svt-av1-ra-crf | svt-av1-ra-vbr | svt-av1-ra-vbr-2p | svt-av1-ld-cbr | svt-av1-ra-cq | svt-av1-as)
   case $CODEC in
     # 1-pass CQ, CTC Style Preset
     svt-av1-ra)
@@ -552,6 +552,10 @@ svt-av1 | svt-av1-ra | svt-av1-ra-crf | svt-av1-ra-vbr | svt-av1-ra-vbr-2p | svt
     svt-av1-ra-cq)
       SVT_PROFILE_OPTS="--lp 1 --passes 1 --rc 0 --aq-mode 0 --crf $x --pred-struct 2 --keyint 999"
       ;;
+     # 1-pass SIWG-CTC AS
+    svt-av1-as)
+      SVT_PROFILE_OPTS="--lp 1 --passes 1 --keyint -1 --crf $x"
+      ;;
     svt-av1)
       # Always define CRF points for the given QPs
       SVT_PROFILE_OPTS="--lp 1 --crf $x "
@@ -569,6 +573,21 @@ svt-av1 | svt-av1-ra | svt-av1-ra-crf | svt-av1-ra-vbr | svt-av1-ra-vbr-2p | svt
   fi
   SIZE=$(stat -c %s $BASENAME.ivf)
   ENC_EXT='.ivf'
+  # Upscale to 1080p and compute metrics for svt-av1-as
+  # Depends on custom-ffmpeg binary
+  case $CODEC in
+    svt-av1-as)
+      if [ $((WIDTH)) -ne 1920 ] && [ $((HEIGHT)) -ne 1080 ]; then
+      # Change source file to be 1080p
+      FILE=$(sed -e 's/\(to256x144_lanc\|to384x216_lanc\|to512x288_lanc\|to640x360_lanc\|to768x432_lanc\|to960x540_lanc\|to1280x720_lanc\)//' <<< $FILE)
+      fi
+      # Use FFmpeg to  upscale and compute reduced-libvmaf as they are fast
+      # When measured the process can be very fast, we are talking ~3fps over
+      # ~0.8fps
+      # Reduced-libvmaf: LIBVMAF - {CIEDE2000, MS-SSIM, CAMBI, PSNR_HVS}
+      ffmpeg -hide_banner -loglevel error -threads 1 -y -nostdin -r 25 -i $BASENAME.y4m  -r 25 -i $FILE -lavfi '[0:v]scale=1920x1080:flags=lanczos+accurate_rnd+full_chroma_int:sws_dither=none:param0=5[main];[main][1:v]libvmaf=aom_ctc=1:log_path='$BASENAME-vmaf.xml':log_fmt=xml' -f null -
+      ;;
+  esac
   ;;
 esac
 
@@ -576,8 +595,34 @@ esac
 mv core.* core 2>/dev/null || true
 
 if [ -f "$VMAF" ]; then
-  "$VMAF" -r "$FILE" -d "$BASENAME.y4m" --aom_ctc v3.0 --xml -o "$BASENAME-vmaf.xml" --thread 1 | tail -n 1
-  rm -f ref dis
+  case $CODEC in
+    svt-av1-as)
+    # Reduced-Libvmaf: Handle missing metrics at the computation side to make
+    # life easier.
+    line_to_append+='\    '
+    line_to_append+='<metric name="ciede2000" min="0.0" max="0.0" mean="0.0"  harmonic_mean="0.0" />'
+    line_to_append+='\n    '
+    line_to_append+='<metric name="float_ms_ssim" min="0.0" max="0.0" mean="0.0" harmonic_mean="0.0" />'
+    line_to_append+='\n    '
+    line_to_append+='<metric name="psnr_hvs_y" min="0.0" max="0.0" mean="0.0" harmonic_mean="0.0" />'
+    line_to_append+='\n    '
+    line_to_append+='<metric name="psnr_hvs_cb" min="0.0" max="0.0" mean="0.0" harmonic_mean="0.0" />'
+    line_to_append+='\n    '
+    line_to_append+='<metric name="psnr_hvs_cr" min="0.0" max="0.0" mean="0.0" harmonic_mean="0.0" />'
+    line_to_append+='\n    '
+    line_to_append+='<metric name="psnr_hvs" min="0.0" max="0.0" mean="0.0" harmonic_mean="0.0" />'
+    line_to_append+='\n    '
+    line_to_append+='<metric name="cambi" min="0.0" max="0.0" mean="0.0" harmonic_mean="0.0" />'
+
+    # Count lines and insert from 5 rows from end of the file using sed
+    total_lines=$(wc -l < "$BASENAME-vmaf.xml")
+    line_number=$((total_lines - 5))
+    sed -i "${line_number}a${line_to_append}" "$BASENAME-vmaf.xml"
+    ;;
+    *)
+    "$VMAF" -r "$FILE" -d "$BASENAME.y4m" --aom_ctc v3.0 --xml -o "$BASENAME-vmaf.xml" --thread 1 | tail -n 1
+    ;;
+    esac
   FRAMES=$(cat "$BASENAME-vmaf.xml" | grep "frame frameNum" | wc -l)
   PSNR="Total: 0 (Y': 0 Cb: 0 Cr: 0 )"
 else
