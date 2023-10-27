@@ -562,7 +562,7 @@ svt-av1 | svt-av1-ra | svt-av1-ra-crf | svt-av1-ra-vbr | svt-av1-ra-vbr-2p | svt
       ;;
   esac
   # Encode the video
-  $($TIMER $SVTAV1 -i $FILE $SVT_PROFILE_OPTS -b $BASENAME.ivf $EXTRA_OPTIONS > $BASENAME-enc.out 2>&1)
+  $($TIMER $SVTAV1 -i $FILE $SVT_PROFILE_OPTS -b $BASENAME.ivf $EXTRA_OPTIONS > $BASENAME-stdout.txt 2>&1)
   # Decode the video
   if hash dav1d 2>/dev/null; then
     $($TIMERDEC dav1d -q -i $BASENAME.ivf -o $BASENAME.y4m) || (echo "Corrupt bitstream detected!"; exit 98)
