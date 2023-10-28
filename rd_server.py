@@ -525,6 +525,24 @@ def find_multislot_work(items, default = None):
             return work
     return default
 
+def find_elfluente_work(items, default=None):
+    for work in items:
+        if work.set in ['elfluente-1080p-as', 'elfluente-1080p-as-1']:
+            return work
+    return default
+
+def find_not_elfluente_work(items, default=None):
+    for work in items:
+        if work.set in ['elfluente-1080p-as', 'elfluente-1080p-as-1']:
+            return work
+    return default
+
+def check_elfluente_work(work):
+    if work.set in ['elfluente-1080p-as', 'elfluente-1080p-as-1']:
+        return True
+    else:
+        return False
+
 def check_multislot_work(work):
     return work.multislots
 
@@ -620,6 +638,14 @@ def scheduler_tick():
             current_slot_host = slot.machine.host
             # Slot ID to be exlcuded
             current_slot_id = slot.work_root
+            # FIXME: Remove the temporory hack of machine-allocation to only
+            # vlc1-4 for elfluente-1080p-as encodes as
+            # the set is 90G and we only could use those 4 machines for now.
+            large_set_machines = [   'vlc1.xiph.osuosl.org',
+                                     'vlc2.xiph.osuosl.org',
+                                      'vlc3.xiph.osuosl.org'
+                                     'vlc4.xiph.osuosl.org']
+
             # search for image work if there is only one slot available
             # allows prioritizing image runs without making scheduler the bottleneck
             if len(free_slots) == 0:
@@ -646,6 +672,18 @@ def scheduler_tick():
                 # Remove from the list and start encoding
                 work_list.remove(work)
                 slot.start_work(work)
+            # FIXME: Not the best thing to do, but till we fix the machines, we
+            # do this to the production
+            elif check_elfluente_work(work):
+                if current_slot_host not in large_set_machines:
+                    work = find_not_elfluente_work(work_list)
+                if work is None:
+                    free_slots.insert(0, slot)
+                else:
+                    work_list.remove(work)
+                    rd_print(work.log, 'Encoding', work.get_name(),
+                     'on', slot.work_root.split('/')[-1], 'of', slot.machine.host)
+                    slot.start_work(work)
             else:
                 # Non-multijob code-path
                 # GOP-Sequential: 1 Extra free slot for 2nd GOP
