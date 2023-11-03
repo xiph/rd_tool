@@ -533,7 +533,7 @@ def find_elfluente_work(items, default=None):
 
 def find_not_elfluente_work(items, default=None):
     for work in items:
-        if work.set in ['elfluente-1080p-as', 'elfluente-1080p-as-1']:
+        if work.set not in ['elfluente-1080p-as', 'elfluente-1080p-as-1']:
             return work
     return default
 
