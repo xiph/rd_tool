@@ -645,7 +645,7 @@ def scheduler_tick():
             # the set is 90G and we only could use those 4 machines for now.
             large_set_machines = [   'vlc1.xiph.osuosl.org',
                                      'vlc2.xiph.osuosl.org',
-                                      'vlc3.xiph.osuosl.org'
+                                      'vlc3.xiph.osuosl.org',
                                      'vlc4.xiph.osuosl.org']
 
             # search for image work if there is only one slot available
