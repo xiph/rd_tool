@@ -320,6 +320,7 @@ def create_rdwork(run, video_filenames):
             work.multicfg = run.multicfg
             work.nightly_run = run.nightly_run
             work.ctc_version = run.ctc_version
+            work.arch = run.arch
             # Parse and Store the CTC class (A1..A5, E, F1/F2, G1/G2)
             if 'aomctc' in work.set:
                 work.ctc_class = work.set.split('-')[1].upper()
