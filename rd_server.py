@@ -539,13 +539,29 @@ def find_not_elfluente_work(items, default=None):
             return work
     return default
 
+def find_aarch64_work(items, default=None):
+    for work in items:
+        if work.arch in ['aarch64']:
+            return work
+    return default
+
+def find_non_aarch64_work(items, default=None):
+    for work in items:
+        if work.arch not in ['aarch64']:
+            return work
+    return default
+
 def check_elfluente_work(work):
+    if work is None:
+        return False
     if work.set in ['elfluente-1080p-as', 'elfluente-1080p-as-1']:
         return True
     else:
         return False
 
 def check_multislot_work(work):
+    if work is None:
+        return False
     return work.multislots
 
 def check_nightly_work(work):
@@ -559,10 +575,19 @@ def check_aomctc_ld(work):
     return False
 
 def check_gop_parallel_work(work):
+    if work is None:
+        return False
     if work.run.codec in ['av2-ra', 'av2-as', 'vvc-vtm-ra','vvc-vtm-ra-ctc','vvc-vtm-as-ctc']:
         return True
     else:
         return False
+
+def check_aarch64_work(work):
+    if work is None:
+        return False
+    if work.arch in ['aarch64']:
+        return True
+    return False
 
 def free_a_slot(this_free_slots, current_slot_host, current_slot_id, current_work):
     for slot_iterator in range(len(this_free_slots)-1, -1,-1):
@@ -647,6 +672,8 @@ def scheduler_tick():
                                      'vlc2.xiph.osuosl.org',
                                       'vlc3.xiph.osuosl.org',
                                      'vlc4.xiph.osuosl.org']
+            # ARM Runners List
+            arm_machines = ['arm1.xiph.osuosl.org']
 
             # search for image work if there is only one slot available
             # allows prioritizing image runs without making scheduler the bottleneck
@@ -657,7 +684,17 @@ def scheduler_tick():
                     rd_print(None, e)
                     rd_print(None, 'Finding image work failed.')
                     work = find_multislot_work(work_list, work)
-            if check_multislot_work(work):
+            if check_aarch64_work(work):
+                if current_slot_host not in arm_machines:
+                    work = find_non_aarch64_work(work_list)
+                if work is None:
+                    free_slots.insert(0, slot)
+                else:
+                    work_list.remove(work)
+                    rd_print(work.log, 'Encoding', work.get_name(),
+                     'on', slot.work_root.split('/')[-1], 'of', slot.machine.host)
+                    slot.start_work(work)
+            elif check_multislot_work(work):
                 # Multijob code-path
                 # Free a slot
                 free_slots = free_a_slot(free_slots, current_slot_host, current_slot_id, work)
@@ -691,10 +728,11 @@ def scheduler_tick():
                 # GOP-Sequential: 1 Extra free slot for 2nd GOP
                 if check_gop_parallel_work(work):
                     free_slots = free_a_slot(free_slots, current_slot_host, current_slot_id, work)
-                work_list.remove(work)
-                rd_print(work.log, 'Encoding', work.get_name(),
+                if work is not None:
+                    work_list.remove(work)
+                    rd_print(work.log, 'Encoding', work.get_name(),
                      'on', slot.work_root.split('/')[-1], 'of', slot.machine.host)
-                slot.start_work(work)
+                    slot.start_work(work)
     # As we have Work of Works with different sets for same RunID,
     # Create a mechanism to filter and store the results for unique jobs based
     # on sets.
