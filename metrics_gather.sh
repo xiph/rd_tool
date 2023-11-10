@@ -506,7 +506,7 @@ thor-rt)
   ENC_EXT='.thor'
   ;;
 rav1e)
-  $($TIMER $RAV1E $FILE --quantizer $x -o $BASENAME.ivf -r $BASENAME-rec.y4m --threads 1 $EXTRA_OPTIONS > $BASENAME-enc.out)
+  $($TIMER $RAV1E $FILE --quantizer $x -o $BASENAME.ivf -r $BASENAME-rec.y4m --threads 1 $EXTRA_OPTIONS > $BASENAME-stdout.txt)
   if hash dav1d 2>/dev/null; then
     $($TIMERDEC dav1d -q -i $BASENAME.ivf -o $BASENAME.y4m) || (echo "Corrupt bitstream detected!"; exit 98)
   elif hash aomdec 2>/dev/null; then
