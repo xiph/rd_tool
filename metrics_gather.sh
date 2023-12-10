@@ -526,7 +526,7 @@ rav1e)
   SIZE=$(stat -c %s $BASENAME.ivf)
   ENC_EXT='.ivf'
   ;;
-svt-av1 | svt-av1-ra | svt-av1-ra-crf | svt-av1-ra-vbr | svt-av1-ra-vbr-2p | svt-av1-ld-cbr | svt-av1-ra-cq | svt-av1-as)
+svt-av1 | svt-av1-ra | svt-av1-ra-crf | svt-av1-ra-vbr | svt-av1-ra-vbr-2p | svt-av1-ld-cbr | svt-av1-ra-cq | svt-av1-as | svt-av1-as-ctc)
   case $CODEC in
     # 1-pass CQ, CTC Style Preset
     svt-av1-ra)
@@ -553,7 +553,7 @@ svt-av1 | svt-av1-ra | svt-av1-ra-crf | svt-av1-ra-vbr | svt-av1-ra-vbr-2p | svt
       SVT_PROFILE_OPTS="--lp 1 --passes 1 --rc 0 --aq-mode 0 --crf $x --pred-struct 2 --keyint 999"
       ;;
      # 1-pass SIWG-CTC AS
-    svt-av1-as)
+    svt-av1-as || svt-av1-as-ctc)
       SVT_PROFILE_OPTS="--lp 1 --passes 1 --keyint -1 --crf $x"
       ;;
     svt-av1)
@@ -576,7 +576,7 @@ svt-av1 | svt-av1-ra | svt-av1-ra-crf | svt-av1-ra-vbr | svt-av1-ra-vbr-2p | svt
   # Upscale to 1080p and compute metrics for svt-av1-as
   # Depends on custom-ffmpeg binary
   case $CODEC in
-    svt-av1-as)
+    svt-av1-as | svt-av1-as-ctc)
       if [ $((WIDTH)) -ne 1920 ] && [ $((HEIGHT)) -ne 1080 ]; then
       # Change source file to be 1080p
       FILE=$(sed -e 's/\(to256x144_lanc\|to384x216_lanc\|to512x288_lanc\|to640x360_lanc\|to768x432_lanc\|to960x540_lanc\|to1280x720_lanc\)//' <<< $FILE)
