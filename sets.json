@@ -277,7 +277,7 @@
       "Neon1224_640x360_2997fps.y4m"
     ]
   },
-  "elfluente-1080p-as":{
+  "elfuente-1080p-as":{
     "type": "video",
     "sources":[
     "NETFLIX_ElFuente_1920x1080_14296frames_2997fps_000000_000089_crf_0.y4m",
@@ -1402,7 +1402,7 @@
     "NETFLIX_ElFuente_1920x1080to960x540_lanc_14296frames_2997fps_014171_014295_crf_0.y4m"
   ]
   },
-  "elfluente-1080p-as-1":{
+  "elfuente-1080p-as-1":{
     "type": "video",
     "sources":[
         "NETFLIX_ElFuente_1920x1080_14296frames_2997fps_012234_012315_crf_0.y4m",
