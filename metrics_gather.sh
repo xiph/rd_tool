@@ -553,7 +553,7 @@ svt-av1 | svt-av1-ra | svt-av1-ra-crf | svt-av1-ra-vbr | svt-av1-ra-vbr-2p | svt
       SVT_PROFILE_OPTS="--lp 1 --passes 1 --rc 0 --aq-mode 0 --crf $x --pred-struct 2 --keyint 999"
       ;;
      # 1-pass SIWG-CTC AS
-    svt-av1-as || svt-av1-as-ctc)
+    svt-av1-as | svt-av1-as-ctc)
       SVT_PROFILE_OPTS="--lp 1 --passes 1 --keyint -1 --crf $x"
       ;;
     svt-av1)
