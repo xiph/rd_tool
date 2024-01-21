@@ -627,7 +627,7 @@ mv core.* core 2>/dev/null || true
 
 if [ -f "$VMAF" ]; then
   case $CODEC in
-    svt-av1-as)
+    svt-av1-as | svt-av1-as-ctc)
     # Reduced-Libvmaf: Handle missing metrics at the computation side to make
     # life easier.
     line_to_append+='\    '
