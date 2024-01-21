@@ -280,6 +280,37 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as | av2-as-st)
   else
     CTC_PROFILE_OPTS+=" --tile-columns=0 --threads=1"
   fi
+ # CTCv6:  1. 2x2 tiling for E/G1 in RA
+ #         2. 10bit for A2/A4/B1
+ #         3. SCC tune for B2; SC detector on for others
+  case $CTC_VERSION in
+    6.0)
+    case $CTC_CLASS in
+      E | G1)
+      case $CODEC in
+        av2-ra | av2-ra-st)
+          CTC_PROFILE_OPTS+=" --row-mt=0 --threads=4 --tile-rows=1 --tile-columns=1"
+        ;;
+      esac
+      ;;
+      A2 | A4 | B1)
+        CTC_PROFILE_OPTS+=" --bit-depth=10"
+      ;;
+    esac
+    ;;
+  esac
+  case $CTC_VERSION in
+    6.0)
+    case $CTC_CLASS in
+      B2)
+        CTC_PROFILE_OPTS+=" --tune-content=screen --enable-intrabc-ext=1"
+      ;;
+      *)
+        CTC_PROFILE_OPTS+=" --enable-intrabc-ext=2"
+      ;;
+    esac
+    ;;
+  esac
   case $CTC_CLASS in
     G1 | G2)
     CTC_PROFILE_OPTS+=" --color-primaries=bt2020 --transfer-characteristics=smpte2084 --matrix-coefficients=bt2020ncl --chroma-sample-position=colocated"
@@ -293,7 +324,7 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as | av2-as-st)
       case $CODEC in
         av2-ld)
           case $CTC_VERSION in
-          5.0)
+          5.0 | 6.0)
             CTC_PROFILE_OPTS+=" --row-mt=0 --threads=4 --tile-rows=1 --tile-columns=1"
           ;;
           4.0)
@@ -620,7 +651,7 @@ if [ -f "$VMAF" ]; then
     sed -i "${line_number}a${line_to_append}" "$BASENAME-vmaf.xml"
     ;;
     *)
-    "$VMAF" -r "$FILE" -d "$BASENAME.y4m" --aom_ctc v3.0 --xml -o "$BASENAME-vmaf.xml" --thread 1 | tail -n 1
+    "$VMAF" -r "$FILE" -d "$BASENAME.y4m" --aom_ctc v6.0 --xml -o "$BASENAME-vmaf.xml" --thread 1 | tail -n 1
     ;;
     esac
   FRAMES=$(cat "$BASENAME-vmaf.xml" | grep "frame frameNum" | wc -l)

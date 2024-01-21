@@ -560,6 +560,13 @@ def check_aomctc_ld(work):
                 return True
     return False
 
+def check_aomctc_ra(work):
+    if work.run.ctc_version >= 6.0:
+        if work.set in ["aomctc-g1-hdr-4k", "aomctc-e-nonpristine"]:
+            if work.codec in ['av2-ra', 'av2-ra-st']:
+                return True
+    return False
+
 def check_gop_parallel_work(work):
     if work.run.codec in ['av2-ra', 'av2-as', 'vvc-vtm-ra','vvc-vtm-ra-ctc','vvc-vtm-as-ctc']:
         return True
@@ -659,7 +666,8 @@ def scheduler_tick():
                 if check_nightly_work(work):
                     free_slots = free_a_slot(free_slots, current_slot_host, current_slot_id, work)
                 # CTCv5: Requires 4 threads for A2, B1 encodes in LD mode.
-                if check_aomctc_ld(work):
+                # CTCv6: Requires 4 thresads for E, G1 encodes in RA mode.
+                if check_aomctc_ld(work) or check_aomctc_ra(work):
                     free_slots = free_a_slot(free_slots, current_slot_host, current_slot_id, work)
                     free_slots = free_a_slot(free_slots, current_slot_host, current_slot_id, work)
                 # GOP-Parallel: Multislot requires 2 free slots
