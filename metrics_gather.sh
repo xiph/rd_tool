@@ -394,7 +394,21 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as | av2-as-st)
 vvc-vtm | vvc-vtm-ra | vvc-vtm-ra-ctc | vvc-vtm-ra-st | vvc-vtm-as-ctc | vvc-vtm-ld | vvc-vtm-ai)
   case $CODEC in
    vvc-vtm-ra | vvc-vtm-ra-st)
+     # VVC_CTC says IntraPeriod should be different for different FPS, *shrug*
      VVC_CFG=$WORK_ROOT/rd_tool/cfg/vvc-vtm/encoder_randomaccess_vtm.cfg
+     INTRA_PERIOD=32
+     case $FPS in
+      20 | 24 | 30)
+        INTRA_PERIOD=32
+      ;;
+      50 | 60)
+        INTRA_PERIOD=64
+      ;;
+      100)
+        INTRA_PERIOD=100
+      ;;
+      esac
+      CTC_PROFILE_OPTS+=" --IntraPeriod=$INTRA_PERIOD "
      ;;
    vvc-vtm-ra-ctc | vvc-vtm-as-ctc)
      VVC_CFG=$WORK_ROOT/rd_tool/cfg/vvc-vtm/encoder_randomaccess_vtm_gop16.cfg
@@ -412,20 +426,6 @@ vvc-vtm | vvc-vtm-ra | vvc-vtm-ra-ctc | vvc-vtm-ra-st | vvc-vtm-as-ctc | vvc-vtm
   FPS_NUM=$(grep -o -a -m 1 -P "(?<=F)([0-9]+)(?=:[0-9]+)" "$FILE")
   FPS_DEN=$(grep -o -a -m 1 -P "(?<=F$FPS_NUM:)([0-9]+)" "$FILE")
   FPS=$(bc <<< 'scale=3; '$FPS_NUM' / '$FPS_DEN'')
-  # VVC_CTC says IntraPeriod should be different for different FPS, *shrug*
-  # TODO: For comparision with AVM, we will require to change this
-  INTRA_PERIOD=32
-  case $FPS in
-    20 | 24 | 30)
-      INTRA_PERIOD=32
-      ;;
-    50 | 60)
-      INTRA_PERIOD=64
-      ;;
-    100)
-      INTRA_PERIOD=100
-      ;;
-  esac
   # Enbale Tiling explictly for >=4K
   if [ $((WIDTH)) -ge 3840 ] && [ $((HEIGHT)) -ge 2160 ]; then
     CTC_PROFILE_OPTS+="  --EnablePicPartitioning=1 --TileColumnWidthArray=15"
@@ -494,7 +494,7 @@ vvc-vtm | vvc-vtm-ra | vvc-vtm-ra-ctc | vvc-vtm-ra-st | vvc-vtm-as-ctc | vvc-vtm
       rm -f /tmp/enc$$.sh enctime$$-FramesToBeEncoded.out enctime$$-FrameSkip.out $BASENAME-FramesToBeEncoded.bin $BASENAME-FrameSkip.bin
       ;;
     *)
-      $($TIMER $VVCENC -i $INPUT_SRC_VID -c $VVC_CFG --SourceWidth=$WIDTH --SourceHeight=$HEIGHT --FrameRate=$FPS --InputBitDepth=$DEPTH --IntraPeriod=$INTRA_PERIOD --FramesToBeEncoded=130 --QP=$x $CTC_PROFILE_OPTS -b $BASENAME.bin --ReconFile=${BASENAME}-rec.yuv  $EXTRA_OPTIONS > "$BASENAME-stdout.txt")
+      $($TIMER $VVCENC -i $INPUT_SRC_VID -c $VVC_CFG --SourceWidth=$WIDTH --SourceHeight=$HEIGHT --FrameRate=$FPS --InputBitDepth=$DEPTH --FramesToBeEncoded=130 --QP=$x $CTC_PROFILE_OPTS -b $BASENAME.bin --ReconFile=${BASENAME}-rec.yuv  $EXTRA_OPTIONS > "$BASENAME-stdout.txt")
       ;;
   esac
   # Decode the video
