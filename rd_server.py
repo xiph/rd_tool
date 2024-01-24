@@ -70,18 +70,18 @@ config = {
 def return_set_list(info_file, codec_id):
     if len(info_file['ctcSets']) > 0:
         if 'aomctc-all' in info_file['ctcSets']:
-            if codec_id == 'av2-ai':
+            if codec_id in ['av2-ai', 'vvc-vtm-ai']:
                 run_set_list = ctc_sets_mandatory_ai + ctc_sets_optional
-            elif codec_id == 'av2-ra-st' or codec_id == 'av2-ra':
+            elif codec_id in ['av2-ra-st', 'av2-ra', 'vvc-vtm-ra', 'vvc-vtm-ra-st', 'vvc-vtm-ra-ctc']:
                 run_set_list = ctc_sets_mandatory + ctc_sets_optional
-            elif codec_id == 'av2-ld':
+            elif codec_id in ['av2-ld', 'vvc-vtm-ld']:
                 run_set_list = ctc_sets_mandatory_ld
         elif 'aomctc-mandatory' in info_file['ctcSets']:
-            if codec_id == 'av2-ra-st' or codec_id == 'av2-ra':
+            if codec_id in ['av2-ra-st', 'av2-ra', 'vvc-vtm-ra', 'vvc-vtm-ra-st', 'vvc-vtm-ra-ctc']:
                 run_set_list = ctc_sets_mandatory
-            elif codec_id == 'av2-ld':
+            elif codec_id in ['av2-ld', 'vvc-vtm-ld']:
                 run_set_list = ctc_sets_mandatory_ld
-            elif codec_id == 'av2-ai':
+            elif codec_id in ['av2-ai', 'vvc-vtm-ai']:
                 run_set_list =  ctc_sets_mandatory_ai
         else:
             run_set_list = info_file['ctcSets']
