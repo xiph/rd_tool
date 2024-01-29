@@ -1450,6 +1450,39 @@
       "Shaky_Walk_1920x1080_25fps.y4m"
     ]
   },
+  "aomctc-subjective-long":{
+    "type": "video",
+    "sources":[
+      "BarScene_1920x1080_60fps_10bit_420-6s.y4m",
+      "ConferenceBrickWall_1_1920x1080_10bit.y4m",
+      "DrivingPOV3_3840x2160_60fps_10bit_420pf.y4m",
+      "GregoryCactus_fr216_515_1080x1920_30p_420_10b_SDR.y4m",
+      "Marathon2_3840x2160_30fps_10bit_420pf.y4m",
+      "meridian_aom_sdr_11872-12263_3840x2160_5994fps.y4m",
+      "Metro_1920x1080_60fps_10bit_420.y4m",
+      "MountainBay2_3840x2160_30fps_420_10bit.y4m",
+      "Netflix_Meridian2_1920x1080_60fps_10bit_420.y4m",
+      "TallBuildings2_3840x2160_30fps_10bit_420pf.y4m",
+      "YonseiS01_R_00_00_3840x2160p_30fps_10bit.y4m"
+    ],
+    "categories":{
+      "1080p": [
+        "BarScene_1920x1080_60fps_10bit_420-6s.y4m",
+        "ConferenceBrickWall_1_1920x1080_10bit.y4m",
+        "GregoryCactus_fr216_515_1080x1920_30p_420_10b_SDR.y4m",
+        "Metro_1920x1080_60fps_10bit_420.y4m",
+        "Netflix_Meridian2_1920x1080_60fps_10bit_420.y4m"
+      ],
+      "2160p": [
+      "DrivingPOV3_3840x2160_60fps_10bit_420pf.y4m",
+      "Marathon2_3840x2160_30fps_10bit_420pf.y4m",
+      "meridian_aom_sdr_11872-12263_3840x2160_5994fps.y4m",
+      "MountainBay2_3840x2160_30fps_420_10bit.y4m",
+      "TallBuildings2_3840x2160_30fps_10bit_420pf.y4m",
+      "YonseiS01_R_00_00_3840x2160p_30fps_10bit.y4m"
+      ]
+    }
+  },
   "objective-1-fast": {
     "type": "video",
     "categories": {
