@@ -442,8 +442,8 @@ vvc-vtm | vvc-vtm-ra | vvc-vtm-ra-ctc | vvc-vtm-ra-st | vvc-vtm-as-ctc | vvc-vtm
         vvc-vtm-ra | vvc-vtm-ra-st | vvc-vtm-ra-ctc)
           # Manually count the tiles based on MAX_CTU which is currently 128 as
           # there are vertical videos
-          TILES_W_CNT=$(echo $WIDTH/128 | bc)
-          TILES_H_CNT=$(echo $HEIGHT/128 | bc)
+          TILES_W_CNT=$(awk -v num=$(echo "scale=2; $WIDTH/128/2" | bc) 'BEGIN { print int(num+(num>int(num))) }')
+          TILES_H_CNT=$(awk -v num=$(echo "scale=2; $HEIGHT/128/2" | bc) 'BEGIN { print int(num+(num>int(num))) }')
           CTC_PROFILE_OPTS+=" --EnablePicPartitioning=1 --TileRowHeightArray=${TILES_H_CNT} --TileColumnWidthArray=${TILES_W_CNT}"
         ;;
       esac
@@ -460,8 +460,8 @@ vvc-vtm | vvc-vtm-ra | vvc-vtm-ra-ctc | vvc-vtm-ra-st | vvc-vtm-as-ctc | vvc-vtm
        vvc-vtm-ld)
          case $CTC_VERSION in
           5.0 | 6.0)
-            TILES_W_CNT=$(echo $WIDTH/128 | bc)
-            TILES_H_CNT=$(echo $HEIGHT/128 | bc)
+            TILES_W_CNT=$(awk -v num=$(echo "scale=2; $WIDTH/128/2" | bc) 'BEGIN { print int(num+(num>int(num))) }')
+            TILES_H_CNT=$(awk -v num=$(echo "scale=2; $HEIGHT/128/2" | bc) 'BEGIN { print int(num+(num>int(num))) }')
             CTC_PROFILE_OPTS+=" --EnablePicPartitioning=1 --TileRowHeightArray=${TILES_H_CNT} --TileColumnWidthArray=${TILES_W_CNT}"
           ;;
           esac
@@ -489,7 +489,7 @@ vvc-vtm | vvc-vtm-ra | vvc-vtm-ra-ctc | vvc-vtm-ra-st | vvc-vtm-as-ctc | vvc-vtm
       echo "#!/bin/bash" > /tmp/enc$$.sh
       echo "TIMER='time -v --output='enctime$$-\$1.out" >> /tmp/enc$$.sh
       echo "case \$1 in FramesToBeEncoded) GOP_PARAMS=\"--\$1=65\";; FrameSkip) GOP_PARAMS=\" --FramesToBeEncoded=65 --\$1=65 \" ;; esac" >> /tmp/enc$$.sh
-      echo "RUN='$VVCENC -i $INPUT_SRC_VID -c $VVC_CFG --SourceWidth=$WIDTH --SourceHeight=$HEIGHT --FrameRate=$FPS --InputBitDepth=$DEPTH --FramesToBeEncoded=130 --QP=$x $CTC_PROFILE_OPTS --ReconFile=${BASENAME}-'\$1'-rec.yuv -b $BASENAME-'\$1'.bin $cd '" >> /tmp/enc$$.sh
+      echo "RUN='$VVCENC -i $INPUT_SRC_VID -c $VVC_CFG --SourceWidth=$WIDTH --SourceHeight=$HEIGHT --FrameRate=$FPS --InputBitDepth=$DEPTH --InternalBitDepth=$DEPTH --FramesToBeEncoded=130 --QP=$x $CTC_PROFILE_OPTS --ReconFile=${BASENAME}-'\$1'-rec.yuv -b $BASENAME-'\$1'.bin $cd '" >> /tmp/enc$$.sh
       echo "\$(\$TIMER \$RUN \$GOP_PARAMS > $BASENAME$$-stdout.txt)" >> /tmp/enc$$.sh
       chmod +x /tmp/enc$$.sh
       for s in {FramesToBeEncoded,FrameSkip}; do printf "$s\0"; done | xargs -0 -n1 -P2 /tmp/enc$$.sh
@@ -508,7 +508,7 @@ vvc-vtm | vvc-vtm-ra | vvc-vtm-ra-ctc | vvc-vtm-ra-st | vvc-vtm-as-ctc | vvc-vtm
       echo "PERF_ENC_STAT='perf stat -o '\${PERF_ENC_OUT}''" >> /tmp/enc$$.sh
       echo "TIMER=''\${PERF_ENC_STAT}' time -v --output='enctime$$-\$1.out" >> /tmp/enc$$.sh
       echo "case \$1 in FramesToBeEncoded) GOP_PARAMS=\"--\$1=65\";; FrameSkip) GOP_PARAMS=\" --FramesToBeEncoded=65 --\$1=65 \" ;; esac" >> /tmp/enc$$.sh
-      echo "RUN='$VVCENC -i $INPUT_SRC_VID -c $VVC_CFG --SourceWidth=$WIDTH --SourceHeight=$HEIGHT --FrameRate=$FPS --InputBitDepth=$DEPTH --FramesToBeEncoded=130 --QP=$x $CTC_PROFILE_OPTS --ReconFile=${BASENAME}-'\$1'-rec.yuv -b $BASENAME-'\$1'.bin $EXTRA_OPTIONS '" >> /tmp/enc$$.sh
+      echo "RUN='$VVCENC -i $INPUT_SRC_VID -c $VVC_CFG --SourceWidth=$WIDTH --SourceHeight=$HEIGHT --FrameRate=$FPS --InputBitDepth=$DEPTH --InternalBitDepth=$DEPTH --FramesToBeEncoded=130 --QP=$x $CTC_PROFILE_OPTS --ReconFile=${BASENAME}-'\$1'-rec.yuv -b $BASENAME-'\$1'.bin $EXTRA_OPTIONS '" >> /tmp/enc$$.sh
       # Force config to be Closed-GOP (IDR) with only 1 I Frame
       CTC_PARAMS="--DecodingRefreshType=2 --IntraPeriod=-1"
       echo "CTC_PARAMS=\" $CTC_PARAMS \" " >> /tmp/enc$$.sh
@@ -532,7 +532,7 @@ vvc-vtm | vvc-vtm-ra | vvc-vtm-ra-ctc | vvc-vtm-ra-st | vvc-vtm-as-ctc | vvc-vtm
       rm -f /tmp/enc$$.sh enctime$$-FramesToBeEncoded.out enctime$$-FrameSkip.out $BASENAME-FramesToBeEncoded.bin $BASENAME-FrameSkip.bin
       ;;
     *)
-      $($TIMER $VVCENC -i $INPUT_SRC_VID -c $VVC_CFG --SourceWidth=$WIDTH --SourceHeight=$HEIGHT --FrameRate=$FPS --InputBitDepth=$DEPTH --FramesToBeEncoded=130 --QP=$x $CTC_PROFILE_OPTS -b $BASENAME.bin --ReconFile=${BASENAME}-rec.yuv  $EXTRA_OPTIONS > "$BASENAME-stdout.txt")
+      $($TIMER $VVCENC -i $INPUT_SRC_VID -c $VVC_CFG --SourceWidth=$WIDTH --SourceHeight=$HEIGHT --FrameRate=$FPS --InputBitDepth=$DEPTH --InternalBitDepth=$DEPTH --FramesToBeEncoded=130 --QP=$x $CTC_PROFILE_OPTS -b $BASENAME.bin --ReconFile=${BASENAME}-rec.yuv  $EXTRA_OPTIONS > "$BASENAME-stdout.txt")
       ;;
   esac
   # Decode the video
