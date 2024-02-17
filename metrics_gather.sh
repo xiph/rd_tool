@@ -432,6 +432,44 @@ vvc-vtm | vvc-vtm-ra | vvc-vtm-ra-ctc | vvc-vtm-ra-st | vvc-vtm-as-ctc | vvc-vtm
   else
     CTC_PROFILE_OPTS+=" "
   fi
+  # CTCv6:  1. 2x2 tiling for E/G1 in RA
+  #         2. 10bit for A2/A4/B1
+  case $CTC_VERSION in
+    6.0)
+    case $CTC_CLASS in
+      E | G1)
+      case $CODEC in
+        vvc-vtm-ra | vvc-vtm-ra-st | vvc-vtm-ra-ctc)
+          # Manually count the tiles based on MAX_CTU which is currently 128 as
+          # there are vertical videos
+          TILES_W_CNT=$(echo $WIDTH/128 | bc)
+          TILES_H_CNT=$(echo $HEIGHT/128 | bc)
+          CTC_PROFILE_OPTS+=" --EnablePicPartitioning=1 --TileRowHeightArray=${TILES_H_CNT} --TileColumnWidthArray=${TILES_W_CNT}"
+        ;;
+      esac
+      ;;
+      A2 | A4 | B1)
+        CTC_PROFILE_OPTS+="  --InternalBitDepth=10 --InputBitDepth=10"
+      ;;
+      esac
+      ;;
+  esac
+  case $CTC_CLASS in
+    A2 | B1)
+    case $CODEC in
+       vvc-vtm-ld)
+         case $CTC_VERSION in
+          5.0 | 6.0)
+            TILES_W_CNT=$(echo $WIDTH/128 | bc)
+            TILES_H_CNT=$(echo $HEIGHT/128 | bc)
+            CTC_PROFILE_OPTS+=" --EnablePicPartitioning=1 --TileRowHeightArray=${TILES_H_CNT} --TileColumnWidthArray=${TILES_W_CNT}"
+          ;;
+          esac
+    ;;
+    esac
+  ;;
+  esac
+
   # TODO: Remove this hack if the upstream fixes 420mpeg2 handling
   # Reference: https://jvet.hhi.fraunhofer.de/trac/vvc/ticket/1598
   # Convert Y4M to YUV for certain 420mpeg2 videos in VVC
