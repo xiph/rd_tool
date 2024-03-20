@@ -306,6 +306,8 @@ class SubmitTask(SchedulerTask):
                 run.status = 'running'
                 run.write_status()
                 run_list.append(run)
+                video_sets_f = codecs.open(os.path.join(config_dir, 'sets.json'),'r',encoding='utf-8')
+                video_sets = json.load(video_sets_f)
                 video_filenames = video_sets[run.set]['sources']
                 if 'ctcVersion' in info:
                     run.ctc_version = float(info['ctcVersion'])
