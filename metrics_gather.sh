@@ -470,15 +470,8 @@ vvc-vtm | vvc-vtm-ra | vvc-vtm-ra-ctc | vvc-vtm-ra-st | vvc-vtm-as-ctc | vvc-vtm
   ;;
   esac
 
-  # TODO: Remove this hack if the upstream fixes 420mpeg2 handling
-  # Reference: https://jvet.hhi.fraunhofer.de/trac/vvc/ticket/1598
-  # Convert Y4M to YUV for certain 420mpeg2 videos in VVC
-  if [[ $CHROMA == "C420mpeg2" ]]; then
-    $Y4M2YUV $FILE -o ${BASENAME}_src.yuv
-    INPUT_SRC_VID=${BASENAME}_src.yuv
-  else
-    INPUT_SRC_VID=$FILE
-  fi
+  INPUT_SRC_VID=$FILE
+
   # Encode video
   case $CODEC in
     vvc-vtm-ra)
