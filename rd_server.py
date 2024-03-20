@@ -83,6 +83,9 @@ def return_set_list(info_file, codec_id):
                 run_set_list = ctc_sets_mandatory_ld
             elif codec_id in ['av2-ai', 'vvc-vtm-ai']:
                 run_set_list =  ctc_sets_mandatory_ai
+            # By default feed AOM-CTC Mandatory sets
+            else:
+                run_set_list = ctc_sets_mandatory
         else:
             run_set_list = info_file['ctcSets']
     else:
