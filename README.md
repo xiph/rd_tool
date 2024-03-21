@@ -21,10 +21,10 @@ Node dependencies
 Individual build machines do not need Python, but do need bash. Each machine
 should be configured with a user and work_root (such as that user's home
 directory). This work directory must be populated with folders called
-daalatool, dump\_ciede2000, and, optionally, dav1d and vmaf, which need to
+daalatool, dump\_ciede2000, VMAF, and, optionally, dav1d, which need to
 contain checkouts of their respective git repositories, each with tools built.
 
-To compile Daala tools:
+#### Compiling Daala tools
 
 ```
 sudo apt install build-essential autoconf libogg-dev libjpeg-dev libpng-dev check python3-numpy python3-scipy libtool pkg-config
@@ -38,7 +38,7 @@ cd daalatool
 make tools -j4
 ```
 
-For dump\_ciede2000:
+#### Compiling dump\_ciede2000:
 
 Install rust if you haven't already. You only need rust to compile the binary
 and don't need it on the individual machines.
@@ -61,7 +61,17 @@ Exit that directory
 cd ../
 ```
 
-For dav1d (optional):
+#### Compiling VMAF:
+
+```
+git clone https://github.com/Netflix/vmaf.git
+cd vmaf/libvmaf
+```
+
+Then follow the instructions in
+https://github.com/Netflix/vmaf/tree/master/libvmaf.
+
+#### Compiling dav1d (Optional)
 
 ```
 sudo apt install meson
@@ -73,14 +83,6 @@ cd dav1d
 mkdir build && cd build
 meson ..
 ninja
-```
-
-For vmaf (optional):
-
-```
-git clone https://github.com/Netflix/vmaf.git
-cd vmaf
-cd ptools; make; cd ../wrapper; make; cd ..;
 ```
 
 rd_tool will automatically create one slot directory per core, and upload
