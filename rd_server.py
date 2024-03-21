@@ -58,7 +58,6 @@ work_list = []
 run_list = []
 run_set_list = []
 run_preset_list = []
-work_done = []
 args = {}
 scheduler_tasks = queue.Queue()
 
@@ -190,7 +189,6 @@ class CancelTask(SchedulerTask):
         self.run_id = None
     def run(self):
         global work_list
-        global work_done
         run_id = self.run_id
         rd_print(None,'Cancelling '+run_id)
         run = lookup_run_by_id(run_id)
@@ -207,7 +205,6 @@ class CancelTask(SchedulerTask):
         for work in work_list[:]:
             if work.runid == run_id:
                 work_list.remove(work)
-                work_done.append(work)
             else:
                 rd_print(None, work.runid)
         rd_print(None, len(work_list))
@@ -596,7 +593,6 @@ def scheduler_tick():
     global work_list
     global run_list
     global run_set_list
-    global work_done
     global scheduler_tasks
     max_retries = 5
     # run queued up tasks
@@ -618,7 +614,6 @@ def scheduler_tick():
                 except Exception as e:
                     rd_print(None, e)
                     rd_print('Failed to write results for work item',slot.work.get_name())
-                work_done.append(slot.work)
                 rd_print(slot.work.log,slot.work.get_name(),'finished.')
             elif slot.work.retries < max_retries and not slot.work.run.cancelled and (slot.p.p is None or not slot.p.p.returncode == 98):
                 slot.work.retries += 1
@@ -627,7 +622,6 @@ def scheduler_tick():
                 work_list.insert(0, slot.work)
             else:
                 slot.work.done = True
-                work_done.append(slot.work)
                 rd_print(slot.work.log,slot.work.get_name(),'given up on.')
             slot.clear_work()
             free_slots.append(slot)
