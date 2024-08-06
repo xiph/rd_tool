@@ -2587,6 +2587,101 @@
       "Shaky_Walk_1920x1080_25fps.y4m"
     ]
   },
+
+  "aomctc-subjective-long-split":{
+    "type": "video",
+    "sources": [
+"BarScene_1920x1080_60fps_10bit_420-6s-0_130_part0.y4m",
+"BarScene_1920x1080_60fps_10bit_420-6s-130_260_part1.y4m",
+"BarScene_1920x1080_60fps_10bit_420-6s-260_360_part2.y4m",
+"ConferenceBrickWall_1_1920x1080_10bit-0_130_part0.y4m",
+"ConferenceBrickWall_1_1920x1080_10bit-130_260_part1.y4m",
+"ConferenceBrickWall_1_1920x1080_10bit-260_390_part2.y4m",
+"ConferenceBrickWall_1_1920x1080_10bit-390_520_part3.y4m",
+"ConferenceBrickWall_1_1920x1080_10bit-520_600_part4.y4m",
+"DrivingPOV3_3840x2160_60fps_10bit_420pf-0_130_part0.y4m",
+"DrivingPOV3_3840x2160_60fps_10bit_420pf-130_260_part1.y4m",
+"DrivingPOV3_3840x2160_60fps_10bit_420pf-260_390_part2.y4m",
+"DrivingPOV3_3840x2160_60fps_10bit_420pf-390_520_part3.y4m",
+"DrivingPOV3_3840x2160_60fps_10bit_420pf-520_600_part4.y4m",
+"GregoryCactus_fr216_515_1080x1920_30p_420_10b_SDR-0_130_part0.y4m",
+"GregoryCactus_fr216_515_1080x1920_30p_420_10b_SDR-130_260_part1.y4m",
+"GregoryCactus_fr216_515_1080x1920_30p_420_10b_SDR-260_300_part2.y4m",
+"Marathon2_3840x2160_30fps_10bit_420pf-0_130_part0.y4m",
+"Marathon2_3840x2160_30fps_10bit_420pf-130_260_part1.y4m",
+"Marathon2_3840x2160_30fps_10bit_420pf-260_300_part2.y4m",
+"meridian_aom_sdr_11872-12263_3840x2160_5994fps-0_130_part0.y4m",
+"meridian_aom_sdr_11872-12263_3840x2160_5994fps-130_260_part1.y4m",
+"meridian_aom_sdr_11872-12263_3840x2160_5994fps-260_390_part2.y4m",
+"meridian_aom_sdr_11872-12263_3840x2160_5994fps-390_392_part3.y4m",
+"Metro_1920x1080_60fps_10bit_420-0_130_part0.y4m",
+"Metro_1920x1080_60fps_10bit_420-130_260_part1.y4m",
+"Metro_1920x1080_60fps_10bit_420-260_390_part2.y4m",
+"Metro_1920x1080_60fps_10bit_420-390_520_part3.y4m",
+"Metro_1920x1080_60fps_10bit_420-520_600_part4.y4m",
+"MountainBay2_3840x2160_30fps_420_10bit-0_130_part0.y4m",
+"MountainBay2_3840x2160_30fps_420_10bit-130_260_part1.y4m",
+"MountainBay2_3840x2160_30fps_420_10bit-260_300_part2.y4m",
+"Netflix_Meridian2_1920x1080_60fps_10bit_420-0_130_part0.y4m",
+"Netflix_Meridian2_1920x1080_60fps_10bit_420-130_260_part1.y4m",
+"Netflix_Meridian2_1920x1080_60fps_10bit_420-260_390_part2.y4m",
+"Netflix_Meridian2_1920x1080_60fps_10bit_420-390_520_part3.y4m",
+"Netflix_Meridian2_1920x1080_60fps_10bit_420-520_600_part4.y4m",
+"TallBuildings2_3840x2160_30fps_10bit_420pf-0_130_part0.y4m",
+"TallBuildings2_3840x2160_30fps_10bit_420pf-130_260_part1.y4m",
+"TallBuildings2_3840x2160_30fps_10bit_420pf-260_300_part2.y4m",
+"YonseiS01_R_00_00_3840x2160p_30fps_10bit-0_130_part0.y4m",
+"YonseiS01_R_00_00_3840x2160p_30fps_10bit-130_260_part1.y4m",
+"YonseiS01_R_00_00_3840x2160p_30fps_10bit-260_300_part2.y4m",
+"YonseiS01_R_00_00_3840x2160p_30fps_8bit-0_130_part0.y4m",
+"YonseiS01_R_00_00_3840x2160p_30fps_8bit-130_260_part1.y4m",
+"YonseiS01_R_00_00_3840x2160p_30fps_8bit-260_300_part2.y4m"
+    ]
+  },
+
+  "aomctc-subjective-long-split-vtm":{
+    "type": "video",
+    "sources": [
+"BarScene_1920x1080_60fps_10bit_420-6s-0_130_part0.y4m",
+"BarScene_1920x1080_60fps_10bit_420-6s-130_260_part1.y4m",
+"GregoryCactus_fr216_515_1080x1920_30p_420_10b_SDR-0_130_part0.y4m",
+"GregoryCactus_fr216_515_1080x1920_30p_420_10b_SDR-130_260_part1.y4m",
+"GregoryCactus_fr216_515_1080x1920_30p_420_10b_SDR-260_300_part2.y4m",
+"Marathon2_3840x2160_30fps_10bit_420pf-0_130_part0.y4m",
+"Marathon2_3840x2160_30fps_10bit_420pf-130_260_part1.y4m",
+"Marathon2_3840x2160_30fps_10bit_420pf-260_300_part2.y4m",
+"meridian_aom_sdr_11872-12263_3840x2160_5994fps-0_130_part0.y4m",
+"meridian_aom_sdr_11872-12263_3840x2160_5994fps-130_260_part1.y4m",
+"Metro_1920x1080_60fps_10bit_420-0_130_part0.y4m",
+"Metro_1920x1080_60fps_10bit_420-130_260_part1.y4m",
+"MountainBay2_3840x2160_30fps_420_10bit-0_130_part0.y4m",
+"MountainBay2_3840x2160_30fps_420_10bit-130_260_part1.y4m",
+"MountainBay2_3840x2160_30fps_420_10bit-260_300_part2.y4m",
+"TallBuildings2_3840x2160_30fps_10bit_420pf-0_130_part0.y4m",
+"TallBuildings2_3840x2160_30fps_10bit_420pf-130_260_part1.y4m",
+"TallBuildings2_3840x2160_30fps_10bit_420pf-260_300_part2.y4m",
+"YonseiS01_R_00_00_3840x2160p_30fps_8bit-0_130_part0.y4m",
+"YonseiS01_R_00_00_3840x2160p_30fps_8bit-130_260_part1.y4m",
+"YonseiS01_R_00_00_3840x2160p_30fps_8bit-260_300_part2.y4m"
+    ]
+  },
+
+  "aomctc-subjective-long-split-bit":{
+    "type": "video",
+    "sources":[
+      "BarScene_1920x1080_60fps_10bit_420-6s-260_360_part2.y4m",
+      "ConferenceBrickWall_1_1920x1080_10bit-520_600_part4.y4m",
+      "DrivingPOV3_3840x2160_60fps_10bit_420pf-520_600_part4.y4m",
+      "GregoryCactus_fr216_515_1080x1920_30p_420_10b_SDR-260_300_part2.y4m",
+      "Marathon2_3840x2160_30fps_10bit_420pf-260_300_part2.y4m",
+      "meridian_aom_sdr_11872-12263_3840x2160_5994fps-390_392_part3.y4m",
+      "Metro_1920x1080_60fps_10bit_420-522_600_part4.y4m",
+      "MountainBay2_3840x2160_30fps_420_10bit-260_300_part2.y4m",
+      "Netflix_Meridian2_1920x1080_60fps_10bit_420-520_600_part4.y4m",
+      "TallBuildings2_3840x2160_30fps_10bit_420pf-260_300_part2.y4m",
+      "YonseiS01_R_00_00_3840x2160p_30fps_10bit-260_300_part2.y4m"
+    ]
+    },
   "aomctc-subjective-long":{
     "type": "video",
     "sources":[
