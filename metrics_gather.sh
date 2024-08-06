@@ -283,7 +283,53 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as | av2-as-st)
  # CTCv6:  1. 2x2 tiling for E/G1 in RA
  #         2. 10bit for A2/A4/B1
  #         3. SCC tune for B2; SC detector on for others
+ # CTCv7:  1. 4 Column tiles for A1, E, G1 in RA
+ #         2. 2 Column tiles for A2, B1 in RA
+ #         3. 2 Column, 1 Row tiles (8) for A2, B1 in LD
+ #         4. 2 Column tiles for A3 in LD
+ #         5. 15 Frames in AI
+ #         6. AS is Optional
+ #            6.1 4 tiles for 2K, 4K (3840x2160, 2560x1440)
+ #            6.2 2 tiles for 1080p (1920x1080)
+ #            6.3 1 tiles for 720p and below (1280x720, 960x540, 640x360)
   case $CTC_VERSION in
+    7.0)
+    case $CODEC in
+      av2-ra | av2-ra-st)
+        case $CTC_CLASS in
+          A1 | E | G1)
+            CTC_PROFILE_OPTS+=" --row-mt=0 --threads=4 --tile-rows=0 --tile-columns=2"
+          ;;
+          A2 | B1)
+            CTC_PROFILE_OPTS+=" --row-mt=0 --threads=2 --tile-rows=0 --tile-columns=1"
+          esac
+          ;;
+      av2-ld)
+        case $CTC_CLASS in
+          A2 | B1)
+            CTC_PROFILE_OPTS+=" --row-mt=0 --threads=8 --tile-rows=1 --tile-columns=2"
+          ;;
+          A3)
+            CTC_PROFILE_OPTS+=" --row-mt=0 --threads=2 --tile-rows=0 --tile-columns=1"
+          esac
+          ;;
+      av2-ai)
+            CTC_PROFILE_OPTS+=" --limit-=15"
+        ;;
+      av2-as | av2-as-st)
+        case "$width"x"$height" in
+          3840x2160|2560x1440)
+            CTC_PROFILE_OPTS+=" --row-mt=0 --threads=4 --tile-rows=0 --tile-columns=2"
+          ;;
+          1920x1080)
+            CTC_PROFILE_OPTS+=" --row-mt=0 --threads=2 --tile-rows=0 --tile-columns=1"
+          ;;
+          1280x720|960x540|640x360)
+            CTC_PROFILE_OPTS+=" --row-mt=0 --threads=1 --tile-rows=0 --tile-columns=0"
+          ;;
+          esac
+      esac
+    ;;
     6.0)
     case $CTC_CLASS in
       E | G1)
@@ -292,15 +338,21 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as | av2-as-st)
           CTC_PROFILE_OPTS+=" --row-mt=0 --threads=4 --tile-rows=1 --tile-columns=1"
         ;;
       esac
-      ;;
-      A2 | A4 | B1)
-        CTC_PROFILE_OPTS+=" --bit-depth=10"
-      ;;
     esac
     ;;
   esac
+
   case $CTC_VERSION in
-    6.0)
+    6.0 | 7.0)
+    case $CTC_CLASS in
+      A2 | A4 | B1)
+        CTC_PROFILE_OPTS+=" --bit-depth=10"
+      ;;
+      esac
+    esac
+
+  case $CTC_VERSION in
+    6.0 | 7.0)
     case $CTC_CLASS in
       B2)
         CTC_PROFILE_OPTS+=" --tune-content=screen --enable-intrabc-ext=1"
@@ -319,7 +371,7 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as | av2-as-st)
     CTC_PROFILE_OPTS+=" --limit=1 "
     ;;
     # CTCv4: Suggests to have multhreading with tiling for A2 and B1 in LD
-    # CTCv5: Suggests to have column tiling along with row-tiling:)
+    # CTCv5/v6: Suggests to have column tiling along with row-tiling:)
     A2 | B1)
       case $CODEC in
         av2-ld)

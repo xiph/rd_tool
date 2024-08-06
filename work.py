@@ -75,7 +75,7 @@ class Run:
         self.work_items = []
         self.cancelled = False
         self.nightly_run = False
-        self.ctc_version = 6.0
+        self.ctc_version = 7.0
     def write_status(self):
         f = open(self.rundir+'/status.txt','w')
         f.write(self.status)
@@ -124,6 +124,7 @@ class Work:
         self.workid = ''
         self.nightly_run = False
         self.multislots = False
+        self.thread_count = 1
     def cancel(self):
         self.failed = True
         self.done = True
@@ -134,7 +135,7 @@ class RDWork(Work):
         self.no_delete = False
         self.copy_back_files = ['-stdout.txt', '-enctime.out', '-dectime.out', '-encperf.out', '-decperf.out']
         self.ctc_class = ''
-        self.ctc_version = 6.0
+        self.ctc_version = 7.0
     def parse(self, stdout, stderr):
         self.raw = stdout
         split = None
@@ -306,6 +307,38 @@ class RDWork(Work):
             self.failed = True
             self.done = True
 
+def get_thread_count(work):
+    thread_count = 1
+    if work.run.ctc_version >= 7.0:
+        if work.codec in ['av2-ra', 'av2-ra-st']:
+            if work.set in ["aomctc-a1-4k", "aomctc-e-nonpristine", "aomctc-g1-hdr-4k" ]:
+                thread_count = 4
+            elif work.set in ['aomctc-a2-2k', 'aomctc-b1-syn']:
+                thread_count = 2
+        if work.codec in ['av2-ld']:
+            if work.set in ['aomctc-a2-2k', 'aomctc-b1-syn']:
+                thread_count = 8
+            elif work.set in ['aomctc-a3-720p']:
+                thread_count = 2
+        if work.codec in ['av2-as', 'av2-as-st']:
+            target_resolution  = str(work.width) + 'x' + str(work.height)
+            if target_resolution in ['3840x2160', '2560x1440']:
+                thread_count = 4
+            elif target_resolution in ['1920x1080']:
+                thread_count = 2
+    if work.run.ctc_version == 6.0:
+        if work.codec in ['av2-ra', 'av2-ra-st']:
+            if work.set in ["aomctc-e-nonpristine", "aomctc-g1-hdr-4k"]:
+                thread_count = 4
+        if work.codec in ['av2-ld']:
+            if work.set in ['aomctc-a2-2k', 'aomctc-b1-syn']:
+                thread_count = 4
+    if work.run.ctc_version == 5.0:
+        if work.codec in ['av2-ld']:
+            if work.set in ['aomctc-a2-2k', 'aomctc-b1-syn']:
+                thread_count = 4
+    return thread_count
+
 def create_rdwork(run, video_filenames):
     work_items = []
     for filename in video_filenames:
@@ -344,6 +377,10 @@ def create_rdwork(run, video_filenames):
                                 work.multislots = True
                             if work.codec in ['av2-ld']:
                                 work.multislots = True
+                work.thread_count = get_thread_count(work)
+                # Signal multislots for jobs which need more than 1 thread
+                if work.thread_count > 1:
+                    work.multislots = True
             work.extra_options = run.extra_options
             if run.save_encode:
                 work.no_delete = True

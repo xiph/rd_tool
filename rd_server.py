@@ -669,12 +669,20 @@ def scheduler_tick():
                 if check_aomctc_ld(work) or check_aomctc_ra(work):
                     free_slots = free_a_slot(free_slots, current_slot_host, current_slot_id, work)
                     free_slots = free_a_slot(free_slots, current_slot_host, current_slot_id, work)
+                # At this point we freed 2 threads, check the thread count based
+                # on the CTC version, and free additional slots if we want
+                if work.thread_count > 2:
+                    thread_count = work.thread_count - 2
+                    for thread_idx in range(thread_count):
+                        free_slots = free_a_slot(free_slots, current_slot_host, current_slot_id, work)
                 # GOP-Parallel: Multislot requires 2 free slots
                 if check_gop_parallel_work(work):
                     free_slots = free_a_slot(free_slots, current_slot_host, current_slot_id, work)
                     free_slots = free_a_slot(free_slots, current_slot_host, current_slot_id, work)
                 # Remove from the list and start encoding
                 work_list.remove(work)
+                rd_print(work.log, 'Encoding', work.get_name(),
+                     'on', slot.work_root.split('/')[-1], 'of', slot.machine.host)
                 slot.start_work(work)
             else:
                 # Non-multijob code-path
