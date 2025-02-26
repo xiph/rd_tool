@@ -2715,6 +2715,71 @@
       ]
     }
   },
+  "derf-422p": {
+    "type": "video",
+    "sources": [
+      "aspen_1080p.y4m",
+      "Chimera-ep01_3840x2160_2997fps_10bit_422.y4m",
+      "Chimera-ep08_3840x2160_2997fps_10bit_422.y4m",
+      "controlled_burn_1080p.y4m",
+      "ducks_take_off_422_720p50.y4m",
+      "ducks_take_off_444_720p50.y4m",
+      "football_422_4sif.y4m",
+      "galleon_422_ntsc.y4m",
+      "in_to_tree_422_720p50.y4m",
+      "in_to_tree_444_720p50.y4m",
+      "intros_422_qcif.y4m",
+      "MissionControlClip3_1920x1080_60_444.y4m",
+      "mobile_calendar_422_cif.y4m",
+      "old_town_cross_422_720p50.y4m",
+      "old_town_cross_444_720p50.y4m",
+      "park_joy_422_720p50.y4m",
+      "park_joy_444_720p50.y4m",
+      "red_kayak_1080p.y4m",
+      "rush_field_cuts_1080p.y4m",
+      "SmoothSkaterP5_3840x2160_30fps.y4m",
+      "snow_mnt_1080p.y4m",
+      "speed_bag_1080p.y4m",
+      "touchdown_pass_1080p.y4m",
+      "washdc_422_ntsc.y4m",
+      "Water1394_3840x2160.y4m",
+      "west_wind_easy_1080p.y4m"
+    ],
+    "categories":{
+      "422p":[
+        "aspen_1080p.y4m",
+        "controlled_burn_1080p.y4m",
+        "ducks_take_off_422_720p50.y4m",
+        "football_422_4sif.y4m",
+        "galleon_422_ntsc.y4m",
+        "in_to_tree_422_720p50.y4m",
+        "intros_422_qcif.y4m",
+        "mobile_calendar_422_cif.y4m",
+        "old_town_cross_422_720p50.y4m",
+        "park_joy_422_720p50.y4m",
+        "red_kayak_1080p.y4m",
+        "rush_field_cuts_1080p.y4m",
+        "snow_mnt_1080p.y4m",
+        "speed_bag_1080p.y4m",
+        "touchdown_pass_1080p.y4m",
+        "washdc_422_ntsc.y4m",
+        "west_wind_easy_1080p.y4m"
+      ],
+      "444p":[
+        "ducks_take_off_444_720p50.y4m",
+        "MissionControlClip3_1920x1080_60_444.y4m",
+        "in_to_tree_444_720p50.y4m",
+        "old_town_cross_444_720p50.y4m",
+        "park_joy_444_720p50.y4m"
+      ],
+      "422p10":[
+        "Chimera-ep01_3840x2160_2997fps_10bit_422.y4m",
+        "Chimera-ep08_3840x2160_2997fps_10bit_422.y4m",
+        "SmoothSkaterP5_3840x2160_30fps.y4m",
+        "Water1394_3840x2160.y4m"
+      ]
+    }
+},
   "objective-1-fast": {
     "type": "video",
     "categories": {
