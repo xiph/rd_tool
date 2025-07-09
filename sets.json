@@ -2587,6 +2587,101 @@
       "Shaky_Walk_1920x1080_25fps.y4m"
     ]
   },
+
+  "aomctc-subjective-long-split":{
+    "type": "video",
+    "sources": [
+"BarScene_1920x1080_60fps_10bit_420-6s-0_130_part0.y4m",
+"BarScene_1920x1080_60fps_10bit_420-6s-130_260_part1.y4m",
+"BarScene_1920x1080_60fps_10bit_420-6s-260_360_part2.y4m",
+"ConferenceBrickWall_1_1920x1080_10bit-0_130_part0.y4m",
+"ConferenceBrickWall_1_1920x1080_10bit-130_260_part1.y4m",
+"ConferenceBrickWall_1_1920x1080_10bit-260_390_part2.y4m",
+"ConferenceBrickWall_1_1920x1080_10bit-390_520_part3.y4m",
+"ConferenceBrickWall_1_1920x1080_10bit-520_600_part4.y4m",
+"DrivingPOV3_3840x2160_60fps_10bit_420pf-0_130_part0.y4m",
+"DrivingPOV3_3840x2160_60fps_10bit_420pf-130_260_part1.y4m",
+"DrivingPOV3_3840x2160_60fps_10bit_420pf-260_390_part2.y4m",
+"DrivingPOV3_3840x2160_60fps_10bit_420pf-390_520_part3.y4m",
+"DrivingPOV3_3840x2160_60fps_10bit_420pf-520_600_part4.y4m",
+"GregoryCactus_fr216_515_1080x1920_30p_420_10b_SDR-0_130_part0.y4m",
+"GregoryCactus_fr216_515_1080x1920_30p_420_10b_SDR-130_260_part1.y4m",
+"GregoryCactus_fr216_515_1080x1920_30p_420_10b_SDR-260_300_part2.y4m",
+"Marathon2_3840x2160_30fps_10bit_420pf-0_130_part0.y4m",
+"Marathon2_3840x2160_30fps_10bit_420pf-130_260_part1.y4m",
+"Marathon2_3840x2160_30fps_10bit_420pf-260_300_part2.y4m",
+"meridian_aom_sdr_11872-12263_3840x2160_5994fps-0_130_part0.y4m",
+"meridian_aom_sdr_11872-12263_3840x2160_5994fps-130_260_part1.y4m",
+"meridian_aom_sdr_11872-12263_3840x2160_5994fps-260_390_part2.y4m",
+"meridian_aom_sdr_11872-12263_3840x2160_5994fps-390_392_part3.y4m",
+"Metro_1920x1080_60fps_10bit_420-0_130_part0.y4m",
+"Metro_1920x1080_60fps_10bit_420-130_260_part1.y4m",
+"Metro_1920x1080_60fps_10bit_420-260_390_part2.y4m",
+"Metro_1920x1080_60fps_10bit_420-390_520_part3.y4m",
+"Metro_1920x1080_60fps_10bit_420-520_600_part4.y4m",
+"MountainBay2_3840x2160_30fps_420_10bit-0_130_part0.y4m",
+"MountainBay2_3840x2160_30fps_420_10bit-130_260_part1.y4m",
+"MountainBay2_3840x2160_30fps_420_10bit-260_300_part2.y4m",
+"Netflix_Meridian2_1920x1080_60fps_10bit_420-0_130_part0.y4m",
+"Netflix_Meridian2_1920x1080_60fps_10bit_420-130_260_part1.y4m",
+"Netflix_Meridian2_1920x1080_60fps_10bit_420-260_390_part2.y4m",
+"Netflix_Meridian2_1920x1080_60fps_10bit_420-390_520_part3.y4m",
+"Netflix_Meridian2_1920x1080_60fps_10bit_420-520_600_part4.y4m",
+"TallBuildings2_3840x2160_30fps_10bit_420pf-0_130_part0.y4m",
+"TallBuildings2_3840x2160_30fps_10bit_420pf-130_260_part1.y4m",
+"TallBuildings2_3840x2160_30fps_10bit_420pf-260_300_part2.y4m",
+"YonseiS01_R_00_00_3840x2160p_30fps_10bit-0_130_part0.y4m",
+"YonseiS01_R_00_00_3840x2160p_30fps_10bit-130_260_part1.y4m",
+"YonseiS01_R_00_00_3840x2160p_30fps_10bit-260_300_part2.y4m",
+"YonseiS01_R_00_00_3840x2160p_30fps_8bit-0_130_part0.y4m",
+"YonseiS01_R_00_00_3840x2160p_30fps_8bit-130_260_part1.y4m",
+"YonseiS01_R_00_00_3840x2160p_30fps_8bit-260_300_part2.y4m"
+    ]
+  },
+
+  "aomctc-subjective-long-split-vtm":{
+    "type": "video",
+    "sources": [
+"BarScene_1920x1080_60fps_10bit_420-6s-0_130_part0.y4m",
+"BarScene_1920x1080_60fps_10bit_420-6s-130_260_part1.y4m",
+"GregoryCactus_fr216_515_1080x1920_30p_420_10b_SDR-0_130_part0.y4m",
+"GregoryCactus_fr216_515_1080x1920_30p_420_10b_SDR-130_260_part1.y4m",
+"GregoryCactus_fr216_515_1080x1920_30p_420_10b_SDR-260_300_part2.y4m",
+"Marathon2_3840x2160_30fps_10bit_420pf-0_130_part0.y4m",
+"Marathon2_3840x2160_30fps_10bit_420pf-130_260_part1.y4m",
+"Marathon2_3840x2160_30fps_10bit_420pf-260_300_part2.y4m",
+"meridian_aom_sdr_11872-12263_3840x2160_5994fps-0_130_part0.y4m",
+"meridian_aom_sdr_11872-12263_3840x2160_5994fps-130_260_part1.y4m",
+"Metro_1920x1080_60fps_10bit_420-0_130_part0.y4m",
+"Metro_1920x1080_60fps_10bit_420-130_260_part1.y4m",
+"MountainBay2_3840x2160_30fps_420_10bit-0_130_part0.y4m",
+"MountainBay2_3840x2160_30fps_420_10bit-130_260_part1.y4m",
+"MountainBay2_3840x2160_30fps_420_10bit-260_300_part2.y4m",
+"TallBuildings2_3840x2160_30fps_10bit_420pf-0_130_part0.y4m",
+"TallBuildings2_3840x2160_30fps_10bit_420pf-130_260_part1.y4m",
+"TallBuildings2_3840x2160_30fps_10bit_420pf-260_300_part2.y4m",
+"YonseiS01_R_00_00_3840x2160p_30fps_8bit-0_130_part0.y4m",
+"YonseiS01_R_00_00_3840x2160p_30fps_8bit-130_260_part1.y4m",
+"YonseiS01_R_00_00_3840x2160p_30fps_8bit-260_300_part2.y4m"
+    ]
+  },
+
+  "aomctc-subjective-long-split-bit":{
+    "type": "video",
+    "sources":[
+      "BarScene_1920x1080_60fps_10bit_420-6s-260_360_part2.y4m",
+      "ConferenceBrickWall_1_1920x1080_10bit-520_600_part4.y4m",
+      "DrivingPOV3_3840x2160_60fps_10bit_420pf-520_600_part4.y4m",
+      "GregoryCactus_fr216_515_1080x1920_30p_420_10b_SDR-260_300_part2.y4m",
+      "Marathon2_3840x2160_30fps_10bit_420pf-260_300_part2.y4m",
+      "meridian_aom_sdr_11872-12263_3840x2160_5994fps-390_392_part3.y4m",
+      "Metro_1920x1080_60fps_10bit_420-522_600_part4.y4m",
+      "MountainBay2_3840x2160_30fps_420_10bit-260_300_part2.y4m",
+      "Netflix_Meridian2_1920x1080_60fps_10bit_420-520_600_part4.y4m",
+      "TallBuildings2_3840x2160_30fps_10bit_420pf-260_300_part2.y4m",
+      "YonseiS01_R_00_00_3840x2160p_30fps_10bit-260_300_part2.y4m"
+    ]
+    },
   "aomctc-subjective-long":{
     "type": "video",
     "sources":[
@@ -2620,6 +2715,71 @@
       ]
     }
   },
+  "derf-422p": {
+    "type": "video",
+    "sources": [
+      "aspen_1080p.y4m",
+      "Chimera-ep01_3840x2160_2997fps_10bit_422.y4m",
+      "Chimera-ep08_3840x2160_2997fps_10bit_422.y4m",
+      "controlled_burn_1080p.y4m",
+      "ducks_take_off_422_720p50.y4m",
+      "ducks_take_off_444_720p50.y4m",
+      "football_422_4sif.y4m",
+      "galleon_422_ntsc.y4m",
+      "in_to_tree_422_720p50.y4m",
+      "in_to_tree_444_720p50.y4m",
+      "intros_422_qcif.y4m",
+      "MissionControlClip3_1920x1080_60_444.y4m",
+      "mobile_calendar_422_cif.y4m",
+      "old_town_cross_422_720p50.y4m",
+      "old_town_cross_444_720p50.y4m",
+      "park_joy_422_720p50.y4m",
+      "park_joy_444_720p50.y4m",
+      "red_kayak_1080p.y4m",
+      "rush_field_cuts_1080p.y4m",
+      "SmoothSkaterP5_3840x2160_30fps.y4m",
+      "snow_mnt_1080p.y4m",
+      "speed_bag_1080p.y4m",
+      "touchdown_pass_1080p.y4m",
+      "washdc_422_ntsc.y4m",
+      "Water1394_3840x2160.y4m",
+      "west_wind_easy_1080p.y4m"
+    ],
+    "categories":{
+      "422p":[
+        "aspen_1080p.y4m",
+        "controlled_burn_1080p.y4m",
+        "ducks_take_off_422_720p50.y4m",
+        "football_422_4sif.y4m",
+        "galleon_422_ntsc.y4m",
+        "in_to_tree_422_720p50.y4m",
+        "intros_422_qcif.y4m",
+        "mobile_calendar_422_cif.y4m",
+        "old_town_cross_422_720p50.y4m",
+        "park_joy_422_720p50.y4m",
+        "red_kayak_1080p.y4m",
+        "rush_field_cuts_1080p.y4m",
+        "snow_mnt_1080p.y4m",
+        "speed_bag_1080p.y4m",
+        "touchdown_pass_1080p.y4m",
+        "washdc_422_ntsc.y4m",
+        "west_wind_easy_1080p.y4m"
+      ],
+      "444p":[
+        "ducks_take_off_444_720p50.y4m",
+        "MissionControlClip3_1920x1080_60_444.y4m",
+        "in_to_tree_444_720p50.y4m",
+        "old_town_cross_444_720p50.y4m",
+        "park_joy_444_720p50.y4m"
+      ],
+      "422p10":[
+        "Chimera-ep01_3840x2160_2997fps_10bit_422.y4m",
+        "Chimera-ep08_3840x2160_2997fps_10bit_422.y4m",
+        "SmoothSkaterP5_3840x2160_30fps.y4m",
+        "Water1394_3840x2160.y4m"
+      ]
+    }
+},
   "objective-1-fast": {
     "type": "video",
     "categories": {
