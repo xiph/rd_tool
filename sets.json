@@ -2644,7 +2644,7 @@
         "wikipedia_420.y4m"
       ],
       "720p": [
-        "dark70p_60f.y4m",
+        "dark720p_60f.y4m",
         "gipsrestat720p_60f.y4m",
         "vidyo1_720p_60fps_60f.y4m",
         "vidyo4_720p_60fps_60f.y4m",
@@ -2666,7 +2666,7 @@
     "sources": [
       "aspen_1080p_60f.y4m",
       "blue_sky_360p_60f.y4m",
-      "dark70p_60f.y4m",
+      "dark720p_60f.y4m",
       "DOTA2_60f_420.y4m",
       "ducks_take_off_1080p50_60f.y4m",
       "gipsrestat720p_60f.y4m",
