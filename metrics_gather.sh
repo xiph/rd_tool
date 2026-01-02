@@ -33,6 +33,12 @@ fi
 if [ -z "$AOMDEC" ]; then
   export AOMDEC="$WORK_ROOT/$CODEC/aomdec"
 fi
+if [ -z "$AVMENC" ]; then
+  export AVMENC="$WORK_ROOT/$CODEC/avmenc"
+fi
+if [ -z "$AVMDEC" ]; then
+  export AVMDEC="$WORK_ROOT/$CODEC/avmdec"
+fi
 if [ -z "$THORENC" ]; then
   export THORENC="$WORK_ROOT/$CODEC/build/Thorenc"
 fi
@@ -395,7 +401,7 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as | av2-as-st)
       echo "PERF_ENC_OUT='${BASENAME}'-encperf-\$1.out" >> /tmp/enc$$.sh
       echo "PERF_ENC_STAT='perf stat -o '\${PERF_ENC_OUT}''" >> /tmp/enc$$.sh
       echo "TIMER=''\${PERF_ENC_STAT}' time -v --output='enctime$$-\$1.out" >> /tmp/enc$$.sh
-      echo "RUN='$AOMENC --qp=$x --test-decode=fatal $CTC_PROFILE_OPTS -o $BASENAME-'\$1'.obu --limit=130 --'\$1'=65 $EXTRA_OPTIONS $FILE'" >> /tmp/enc$$.sh
+      echo "RUN='$AVMENC --qp=$x --test-decode=fatal $CTC_PROFILE_OPTS -o $BASENAME-'\$1'.obu --limit=130 --'\$1'=65 $EXTRA_OPTIONS $FILE'" >> /tmp/enc$$.sh
       echo "\$(\$TIMER \$RUN > $BASENAME$$-\$1-stdout.txt)" >> /tmp/enc$$.sh
       chmod +x /tmp/enc$$.sh
       for s in {limit,skip}; do printf "$s\0"; done | xargs -0 -n1 -P2 /tmp/enc$$.sh
@@ -415,14 +421,14 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as | av2-as-st)
       rm -f /tmp/enc$$.sh enctime$$-limit.out enctime$$-skip.out $BASENAME-limit.obu $BASENAME-skip.obu
       ;;
     *)
-      $($TIMER $AOMENC --qp=$x --test-decode=fatal $CTC_PROFILE_OPTS -o $BASENAME.obu $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
+      $($TIMER $AVMENC --qp=$x --test-decode=fatal $CTC_PROFILE_OPTS -o $BASENAME.obu $EXTRA_OPTIONS $FILE  > "$BASENAME-stdout.txt")
       ;;
   esac
   # decode the OBU to Y4M
-  if $AOMDEC --help 2>&1 | grep output-bit-depth > /dev/null; then
-    AOMDEC_OPTS+=" --output-bit-depth=$DEPTH"
+  if $AVMDEC --help 2>&1 | grep output-bit-depth > /dev/null; then
+    AVMDEC_OPTS+=" --output-bit-depth=$DEPTH"
   fi
-  $($TIMERDEC $AOMDEC $AOMDEC_OPTS -o $BASENAME.y4m $BASENAME.obu)
+  $($TIMERDEC $AVMDEC $AVMDEC_OPTS -o $BASENAME.y4m $BASENAME.obu)
   SIZE=$(stat -c %s $BASENAME.obu)
   ENC_EXT='.obu'
   case $CODEC in
