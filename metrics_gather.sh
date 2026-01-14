@@ -512,6 +512,32 @@ vvc-vtm | vvc-vtm-ra | vvc-vtm-ra-ctc | vvc-vtm-ra-st | vvc-vtm-as-ctc | vvc-vtm
       esac
       ;;
   esac
+  # Add SCC and HDR related options for B2 class and G1 and G2 class for CTCv6 r ctcv7
+  # for vvc-vtm-ra-ctc and vvc-vtm-as-ctc
+  case $CODEC in
+    vvc-vtm-ra-ctc | vvc-vtm-as-ctc)
+      case $CTC_CLASS in
+        B1)
+        # ClassF Config in VTM (Gaming mostly, corresponding to B1 in AOM-CTC):
+        # Optins: {IBC : 1 HashME : 1 BDPCM: 1 TemporalFilter : 0}
+          CTC_PROFILE_OPTS+=" --IBC=1 --HashME=1 --BDPCM=1 --TemporalFilter=0 "
+        ;;
+        B2)
+        # Class SCC Config in VTM: {IBC : 1 HashME : 1 BDPCM: 1 PLT: 1 DualITree: 0}
+          CTC_PROFILE_OPTS+=" --IBC=1 --HashME=1 --BDPCM=1 --PLT=1 --DualITree=0 "
+        ;;
+        G1 | G2)
+        # HDR PQ Settings via config file H1 (classH1.cfg), (H2 is for HLG,
+        # which is not tested in AOM CTC), we disable HDR Metrics calculation as
+        # it requires building VTM with HDRTools (cross-linking in AWCY frontend
+        # in this-case) which is not done in AOM CTC.
+          VTM_HDR_CFG_FILE=$WORK_ROOT/rd_tool/cfg/vvc-vtm/classH1.cfg
+          CTC_PROFILE_OPTS+=" -c $VTM_HDR_CFG_FILE --CalculateHdrMetrics=0 --PrintWPSNR=0 "
+        ;;
+      esac
+    ;;
+  esac
+
   case $CTC_CLASS in
     A2 | B1)
     case $CODEC in
