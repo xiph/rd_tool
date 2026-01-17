@@ -75,7 +75,7 @@ class Run:
         self.work_items = []
         self.cancelled = False
         self.nightly_run = False
-        self.ctc_version = 7.0
+        self.ctc_version = 8.0
     def write_status(self):
         f = open(self.rundir+'/status.txt','w')
         f.write(self.status)
@@ -135,7 +135,7 @@ class RDWork(Work):
         self.no_delete = False
         self.copy_back_files = ['-stdout.txt', '-enctime.out', '-dectime.out', '-encperf.out', '-decperf.out']
         self.ctc_class = ''
-        self.ctc_version = 7.0
+        self.ctc_version = 8.0
     def parse(self, stdout, stderr):
         self.raw = stdout
         split = None

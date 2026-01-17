@@ -299,7 +299,7 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as | av2-as-st)
  #            6.2 2 tiles for 1080p (1920x1080)
  #            6.3 1 tiles for 720p and below (1280x720, 960x540, 640x360)
   case $CTC_VERSION in
-    7.0)
+    7.0 | 8.0)
     case $CODEC in
       av2-ra | av2-ra-st)
         case $CTC_CLASS in
@@ -349,15 +349,28 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as | av2-as-st)
   esac
 
   case $CTC_VERSION in
-    6.0 | 7.0)
+    6.0 | 7.0 | 8.0)
     case $CTC_CLASS in
       A2 | A4 | B1)
         CTC_PROFILE_OPTS+=" --bit-depth=10"
       ;;
       esac
     esac
-
+  # CTC v8.0: IBC settings for B2, Intrabc ext for others based on CWG-F222
   case $CTC_VERSION in
+    8.0)
+    case $CTC_CLASS in
+      B2)
+        CTC_PROFILE_OPTS+=" --tune-content=screen --enable-intrabc-ext=1"
+      ;;
+      A4 | A5)
+        CTC_PROFILE_OPTS+=" --enable-intrabc-ext=2"
+      ;;
+      *)
+        CTC_PROFILE_OPTS+=" --enable-intrabc-ext=1"
+      ;;
+    esac
+    ;;
     6.0 | 7.0)
     case $CTC_CLASS in
       B2)
@@ -371,7 +384,12 @@ av2 | av2-ai | av2-ra | av2-ra-st | av2-ld | av2-as | av2-as-st)
   esac
   case $CTC_CLASS in
     G1 | G2)
-    CTC_PROFILE_OPTS+=" --color-primaries=bt2020 --transfer-characteristics=smpte2084 --matrix-coefficients=bt2020ncl --chroma-sample-position=colocated"
+    # Set chroma sample position based on CTC version
+    CHROMA_SAMPLE_POSITION="colocated"
+    if [ "$CTC_VERSION" = "8.0" ]; then
+      CHROMA_SAMPLE_POSITION="topleft"
+    fi
+    CTC_PROFILE_OPTS+=" --color-primaries=bt2020 --transfer-characteristics=smpte2084 --matrix-coefficients=bt2020ncl --chroma-sample-position=$CHROMA_SAMPLE_POSITION"
     ;;
     F1 | F2)
     CTC_PROFILE_OPTS+=" --limit=1 "
