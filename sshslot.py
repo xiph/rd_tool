@@ -72,6 +72,13 @@ class Machine:
         return subprocess.check_output(['ssh','-i',ssh_privkey_file,'-p',self.port,'-o',' StrictHostKeyChecking=no',
            self.user+'@'+self.host,
            command.encode("utf-8")])
+    def test_ssh(self):
+        try:
+            self.check_shell('echo "SSH connection successful"')
+        except subprocess.CalledProcessError as e:
+            rd_print(self.log,e.output)
+            rd_print(self.log,'SSH connection test failed for machine '+self.host)
+            raise RuntimeError('SSH connection test failed for machine '+self.host)
     def get_slots(self):
         slots = []
         #by doing the machines in the inner loop,

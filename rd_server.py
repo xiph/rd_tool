@@ -438,13 +438,27 @@ def main():
     parser.add_argument('-awsgroup', default='nonexistent_group')
     parser.add_argument('-max-machines', default=3, type=int)
     args = parser.parse_args()
+    print("Parsed arguments:", args)
     if args.machineconf:
         machineconf = json.load(open(args.machineconf, 'r'))
         for m in machineconf:
             machines.append(sshslot.Machine(m['host'],m['user'],m['cores'],m['work_root'],str(m['port']),m['media_path']))
-        for machine in machines:
+    print("Testing SSH connectivity for each machine...")
+    # Dynamically allocate machines based on connectivity
+    machine_success_count = 0
+    for machine in machines:
+        try:
+            machine.test_ssh()
+            print("Successfully connected to machine:", machine.get_name())
+            machine_success_count += 1
             slots.extend(machine.get_slots())
-        free_slots.extend(reversed(slots))
+        except Exception as e:
+            print("Failed to connect to machine:", machine.get_name(), "Error:", e)
+            # Remove the machine from the list if SSH test fails
+            machines.remove(machine)
+    free_slots.extend(reversed(slots))
+    print("Initialised machines and slots. Machines:", len(machines), "Slots:", len(slots), "Free Slots:", len(free_slots))
+
     app = tornado.web.Application(
         [
             (r"/work_list.json", WorkListHandler),
