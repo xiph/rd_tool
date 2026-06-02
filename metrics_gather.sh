@@ -511,7 +511,7 @@ vvc-vtm | vvc-vtm-ra | vvc-vtm-ra-ctc | vvc-vtm-ra-st | vvc-vtm-as-ctc | vvc-vtm
   # CTCv6:  1. 2x2 tiling for E/G1 in RA
   #         2. 10bit for A2/A4/B1
   case $CTC_VERSION in
-    6.0)
+    6.0 | 7.0 | 8.0)
     case $CTC_CLASS in
       E | G1)
       case $CODEC in
