@@ -89,6 +89,9 @@ class Run:
     def finish(self):
         if self.log:
             self.log.close()
+        # ensure status.txt is never left empty/stale
+        if self.status == 'running':
+            self.write_status()
 
 class RDRun(Run):
     def reduce(self):
@@ -100,7 +103,7 @@ class RDRun(Run):
                 pass
             else:
                 any_work_failed = True
-        subprocess.call('OUTPUT="'+self.prefix+'/'+'total" "'+sys.path[0]+'/rd_average.sh" "'+self.prefix+'/*-daala.out"',
+        subprocess.call('OUTPUT="'+self.prefix+'/'+'total" "'+sys.path[0]+'/rd_average.sh" '+self.prefix+'/*-daala.out',
           shell=True)
         if any_work_failed:
             self.status = 'failed'
